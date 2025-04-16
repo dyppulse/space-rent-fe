@@ -39,7 +39,7 @@ function Header() {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        SpaceRent
+        SpaceHire
       </Typography>
       <Divider />
       <List>
@@ -102,7 +102,7 @@ function Header() {
                 color: "primary.main",
               }}
             >
-              SpaceRent
+              SpaceHire
             </Typography>
             <Typography
               variant="h6"
@@ -115,7 +115,7 @@ function Header() {
                 color: "primary.main",
               }}
             >
-              SpaceRent
+              SpaceHire
             </Typography>
 
             <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>

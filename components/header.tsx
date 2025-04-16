@@ -30,7 +30,7 @@ export default function Header() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-teal-600">SpaceRent</span>
+              <span className="text-2xl font-bold text-teal-600">SpaceHire</span>
             </Link>
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
               {navLinks.map((link) => (

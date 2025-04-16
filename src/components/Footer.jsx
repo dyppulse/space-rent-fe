@@ -10,7 +10,7 @@ function Footer() {
         <Grid container spacing={4}>
           <Grid item xs={12} md={3}>
             <Typography variant="h6" gutterBottom fontWeight="bold">
-              SpaceRent
+              SpaceHire
             </Typography>
             <Typography variant="body2" color="grey.400" paragraph>
               Find and book unique venues for your next event.
@@ -114,7 +114,7 @@ function Footer() {
 
         <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: "grey.800", textAlign: "center" }}>
           <Typography variant="body2" color="grey.400">
-            &copy; {currentYear} SpaceRent. All rights reserved.
+            &copy; {currentYear} SpaceHire. All rights reserved.
           </Typography>
         </Box>
       </Container>

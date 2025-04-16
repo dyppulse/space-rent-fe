@@ -13,7 +13,7 @@ function HowItWorksPage() {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ textAlign: "center", mb: 8 }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-          How SpaceRent Works
+          How SpaceHire Works
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 800, mx: "auto" }}>
           We make it easy to find and book the perfect space for your next event, meeting, or creative project.

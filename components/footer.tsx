@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-xl font-bold">SpaceRent</h3>
+            <h3 className="text-xl font-bold">SpaceHire</h3>
             <p className="text-gray-300">Find and book unique venues for your next event.</p>
           </div>
 
@@ -85,7 +85,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-700">
-          <p className="text-gray-300 text-center">&copy; {new Date().getFullYear()} SpaceRent. All rights reserved.</p>
+          <p className="text-gray-300 text-center">&copy; {new Date().getFullYear()} SpaceHire. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SpaceRent - Find and Book Unique Venues",
+  title: "SpaceHire - Find and Book Unique Venues",
   description: "Discover and book unique venues, studios, and meeting spaces for your next event.",
     generator: 'v0.dev'
 }
