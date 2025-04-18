@@ -1,5 +1,5 @@
 import { SWRConfig } from 'swr';
-import { fetcher } from './fetcher';
+import { fetcher } from '../fetcher';
 
 const SwrProvider = ({ children }) => (
   <SWRConfig

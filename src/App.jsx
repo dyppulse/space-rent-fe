@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 
 // Context
+import SwrProvider from './api/context/swrConfig'
 import { UserProvider } from './api/context/UserContext';
 
 // Pages
@@ -80,29 +81,31 @@ const theme = createTheme({
 
 function App() {
   return (
-    <UserProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <div className="app">
-            <Header />
-            <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/spaces" element={<SpacesPage />} />
-                <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-                <Route path="/how-it-works" element={<HowItWorksPage />} />
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/signup" element={<SignupPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </ThemeProvider>
-    </UserProvider>
+    <SwrProvider>
+      <UserProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <div className="app">
+              <Header />
+              <main>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/spaces" element={<SpacesPage />} />
+                  <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+                  <Route path="/how-it-works" element={<HowItWorksPage />} />
+                  <Route path="/auth/login" element={<LoginPage />} />
+                  <Route path="/auth/signup" element={<SignupPage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </ThemeProvider>
+      </UserProvider>
+    </SwrProvider>
   )
 }
 
