@@ -27,7 +27,7 @@ function HowItWorksPage() {
         </Typography>
 
         <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4}>
+          <Grid item size={{xs: 6, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
@@ -54,7 +54,7 @@ function HowItWorksPage() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} size={{xs:12, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
@@ -81,7 +81,7 @@ function HowItWorksPage() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item size={{xs:12, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
@@ -130,7 +130,7 @@ function HowItWorksPage() {
         </Typography>
 
         <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4}>
+          <Grid item size={{xs:12, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
@@ -157,7 +157,7 @@ function HowItWorksPage() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item size={{xs:12, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
@@ -184,7 +184,7 @@ function HowItWorksPage() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item size={{xs:12, md: 4}}>
             <Paper elevation={1} sx={{ height: "100%", p: 4, textAlign: "center", borderRadius: 3 }}>
               <Box
                 sx={{
