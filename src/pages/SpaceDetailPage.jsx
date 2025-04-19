@@ -48,7 +48,7 @@ function SpaceDetailPage() {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Grid container spacing={4}>
         {/* Left column - Space details */}
-        <Grid item xs={12} md={8}>
+        <Grid item size={{xs: 12, md: 8}}>
           <Typography variant="h4" component="h1" gutterBottom>
             {space.name}
           </Typography>
@@ -62,7 +62,7 @@ function SpaceDetailPage() {
           {/* Image gallery */}
           <Box sx={{ mb: 4 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item size={{xs: 12}}>
                 <Box
                   sx={{
                     height: 400,
@@ -79,7 +79,7 @@ function SpaceDetailPage() {
                 </Box>
               </Grid>
               {space.images.slice(1, 5).map((image, index) => (
-                <Grid item xs={6} sm={3} key={index}>
+                <Grid item key={index} size={{xs: 6, sm: 3}}>
                   <Box
                     sx={{
                       height: 120,
@@ -159,7 +159,7 @@ function SpaceDetailPage() {
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={2}>
                 {space.amenities.map((amenity) => (
-                  <Grid item xs={12} sm={6} key={amenity}>
+                  <Grid item key={amenity} size={{xs: 12, sm: 6}}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       <CheckCircleIcon color="primary" sx={{ mr: 1 }} />
                       <Typography>{amenity}</Typography>
@@ -206,7 +206,7 @@ function SpaceDetailPage() {
         </Grid>
 
         {/* Right column - Booking form */}
-        <Grid item xs={12} md={4}>
+        <Grid item size={{xs: 12, md: 4}}>
           <Box sx={{ position: { md: "sticky" }, top: 24 }}>
             <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
               <Typography variant="h5" gutterBottom>

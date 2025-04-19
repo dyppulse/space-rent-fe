@@ -41,7 +41,7 @@ function SpacesList({ spaces }) {
         <Card key={space.id} variant="outlined" sx={{ overflow: "hidden" }}>
           <CardContent sx={{ p: 0 }}>
             <Grid container>
-              <Grid item xs={12} sm={4} md={3}>
+              <Grid item size={{xs:12, sm: 4, md: 3}}>
                 <Box
                   sx={{
                     position: "relative",
@@ -70,7 +70,7 @@ function SpacesList({ spaces }) {
                   )}
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={8} md={9}>
+              <Grid item size={{xs: 12, sm: 8, md: 9}}>
                 <Box sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <Box>

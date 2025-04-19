@@ -1,38 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import { ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
 
 // Pages
 import HomePage from "./pages/HomePage"
 import SpacesPage from "./pages/SpacesPage"
 import SpaceDetailPage from "./pages/SpaceDetailPage"
+import HowItWorksPage from "./pages/HowItWorksPage"
 import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import DashboardPage from "./pages/DashboardPage"
 import NewSpacePage from "./pages/NewSpacePage"
-import HowItWorksPage from "./pages/HowItWorksPage"
 
-// Layout
-// import Layout from "./components/Layout"
+// Components
+import Header from "./components/Header"
+import Footer from "./components/Footer"
 
-// Create a theme instance
+// Create a theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#14b8a6", // teal-500
+      main: "#0d9488", // teal-600
+      light: "#14b8a6", // teal-500
       dark: "#0f766e", // teal-700
-      light: "#5eead4", // teal-300
-      contrastText: "#fff",
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: "#f5f5f5", // gray-100
-      dark: "#e5e5e5", // gray-200
-      contrastText: "#111827", // gray-900
-    },
-    error: {
-      main: "#ef4444", // red-500
+      main: "#f5f5f5", // light gray
+      contrastText: "#0d9488",
     },
     background: {
       default: "#ffffff",
@@ -53,19 +48,19 @@ const theme = createTheme({
     h4: {
       fontWeight: 600,
     },
-    h5: {
-      fontWeight: 600,
+    button: {
+      textTransform: "none",
     },
-    h6: {
-      fontWeight: 600,
-    },
+  },
+  shape: {
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: "none",
           borderRadius: 8,
+          padding: "8px 16px",
         },
       },
     },
@@ -73,7 +68,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
         },
       },
     },
@@ -85,20 +80,23 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        {/* <Layout> */}
-          <Routes>
-          <Route path="/" element={<HomePage />} />
-            <Route path="/spaces" element={<SpacesPage />} />
-            <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-            <Route path="/auth/login" element={<LoginPage />} />
-            <Route path="/auth/signup" element={<SignupPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-          </Routes>
-        {/* </Layout> */}
+        <div className="app">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/spaces" element={<SpacesPage />} />
+              <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/signup" element={<SignupPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
       </Router>
-      <ToastContainer position="bottom-right" />
     </ThemeProvider>
   )
 }

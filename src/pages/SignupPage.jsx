@@ -22,7 +22,7 @@ function SignupPage() {
   
   const validationSchema = yup.object({
     fullName: yup.string().required("Required").min(5, "At least 5 characters"),
-    email: yup.email("Invalid Email").required("Required"),
+    email: yup.string().email("Invalid Email").required("Required"),
     password: yup.string().required("required"),
     confirmPassword: yup.string().required("required"),
     phoneNumber: yup.string().required("Required").matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
@@ -53,7 +53,7 @@ function SignupPage() {
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Box sx={{ mb: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Create an accountffff
+            Create an account
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Sign up as a space owner to list your venue on our platform
@@ -63,8 +63,8 @@ function SignupPage() {
         <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
           <TextField
             margin="normal"
-            required
             fullWidth
+            size="small"
             id="name"
             label="Full Name"
             name="name"
@@ -72,12 +72,12 @@ function SignupPage() {
             autoFocus
             value={formik.values.fullName}
             onChange={(e) => formik.setFieldValue("fullName", e.target.value)}
-            helperText={formik.values.fullName}
-            error={formik.values.fullName}
+            helperText={formik.errors.fullName}
+            error={formik.errors.fullName}
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             id="email"
             label="Email Address"
@@ -85,37 +85,37 @@ function SignupPage() {
             autoComplete="email"
             value={formik.values.email}
             onChange={(e) => formik.setFieldValue("email", e.target.value)}
-            helperText={formik.values.email}
-            error={formik.values.email}
+            helperText={formik.errors.email}
+            error={formik.errors.email}
 
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             name="password"
             label="Password"
             type="password"
             id="password"
             autoComplete="new-password"
-            helperText={formik.values.password}
-            error={formik.values.password}
+            helperText={formik.errors.password}
+            error={formik.errors.password}
             value={formik.values.password}
             onChange={(e) => formik.setFieldValue("password", e.target.value)}
 
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             name="confirmPassword"
             label="Confirm Password"
             type="password"
             id="confirmPassword"
             autoComplete="new-password"
-            helperText={formik.values.confirmPassword}
+            helperText={formik.errors.confirmPassword}
             error={formik.values.confirmPassword}
-            value={formik.values.confirmPassword}
+            value={formik.errors.confirmPassword}
             onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
           />
 
