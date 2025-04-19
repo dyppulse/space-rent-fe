@@ -98,11 +98,11 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid item size={{xs: 12}}>
               <TextField label="Space Name" fullWidth required placeholder="e.g. Modern Downtown Loft" />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <FormControl fullWidth required>
                 <InputLabel id="space-type-label">Space Type</InputLabel>
                 <Select labelId="space-type-label" id="space-type" label="Space Type" defaultValue="">
@@ -115,11 +115,11 @@ function NewSpacePage() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <TextField label="Capacity" type="number" fullWidth required placeholder="Max number of people" />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item size={{xs:12}}>
               <TextField
                 label="Description"
                 multiline
@@ -142,19 +142,19 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid item size={{xs:12}}>
               <TextField label="Address" fullWidth required placeholder="Street address" />
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item size={{xs:12, sm:4}}>
               <TextField label="City" fullWidth required />
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item size={{xs:12, sm:4}}>
               <TextField label="State/Province" fullWidth required />
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item size={{xs:12, sm:4}}>
               <TextField label="Zip/Postal Code" fullWidth required />
             </Grid>
           </Grid>
@@ -171,7 +171,7 @@ function NewSpacePage() {
 
           <Grid container spacing={2}>
             {[1, 2, 3, 4, 5, 6].map((index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Grid item key={index} size={{xs:12, sm: 6, md: 4}}>
                 <Box
                   sx={{
                     border: "2px dashed",
@@ -211,7 +211,7 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <TextField
                 label="Price"
                 type="number"
@@ -224,7 +224,7 @@ function NewSpacePage() {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <FormControl fullWidth required>
                 <InputLabel id="price-unit-label">Per</InputLabel>
                 <Select labelId="price-unit-label" id="price-unit" label="Per" defaultValue="">
@@ -235,11 +235,11 @@ function NewSpacePage() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <TextField label="Minimum Booking Duration" type="number" fullWidth placeholder="Minimum hours/days" />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={{xs:12, sm: 6}}>
               <FormControl fullWidth>
                 <InputLabel id="duration-unit-label">Unit</InputLabel>
                 <Select labelId="duration-unit-label" id="duration-unit" label="Unit" defaultValue="hours">
@@ -262,7 +262,7 @@ function NewSpacePage() {
 
           <Grid container spacing={1}>
             {amenities.map((amenity) => (
-              <Grid item xs={12} sm={6} md={4} key={amenity}>
+              <Grid item size={{xs:12, sm: 6, md: 4}} key={amenity}>
                 <FormControlLabel control={<Checkbox />} label={amenity} />
               </Grid>
             ))}
