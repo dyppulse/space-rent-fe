@@ -11,6 +11,7 @@ import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import DashboardPage from "./pages/DashboardPage"
 import NewSpacePage from "./pages/NewSpacePage"
+import NotFound from "./pages/NotFound";
 
 // Components
 import Header from "./components/Header"
@@ -92,6 +93,7 @@ function App() {
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
+              <Route path="*" element={<NotFound/>}/>
             </Routes>
           </main>
           <Footer />

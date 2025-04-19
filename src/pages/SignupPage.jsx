@@ -19,12 +19,17 @@ import * as yup from 'yup'
 import { useEffect } from "react"
 
 function SignupPage() {
-  
+
   const validationSchema = yup.object({
     fullName: yup.string().required("Required").min(5, "At least 5 characters"),
     email: yup.string().email("Invalid Email").required("Required"),
-    password: yup.string().required("required"),
-    confirmPassword: yup.string().required("required"),
+    password: yup.string().required("required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(
+        /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
+        "Password must contain at least one number and one special character"
+      ),
+    confirmPassword: yup.string().required("required").oneOf([yup.ref("password"), null], "Passwords must match"),
     phoneNumber: yup.string().required("Required").matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
   })
 
@@ -115,7 +120,7 @@ function SignupPage() {
             autoComplete="new-password"
             helperText={formik.errors.confirmPassword}
             error={formik.values.confirmPassword}
-            value={formik.errors.confirmPassword}
+            value={formik.values.confirmPassword}
             onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
           />
 
