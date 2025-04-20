@@ -48,8 +48,8 @@ function SignupPage() {
     validationSchema,
     onSubmit: async (values, { setSubmitting, setErrors, }) => {
       try {
-        const loginResponse = await register(values.email, values.password);
-        localStorage.setItem('token', loginResponse.token)
+        await register(values.fullName, values.email, values.password, values.phoneNumber);
+
         navigate('/auth/login');
       } catch (err) {
         console.error(err);
@@ -60,7 +60,7 @@ function SignupPage() {
     }
   })
 
-
+  console.log(formik.values, 'values')
 
 
   return (
@@ -90,7 +90,16 @@ function SignupPage() {
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
-          <PhoneInputFormik formik={formik} formikValue={"phoneNumber"} />
+          <TextField
+            fullWidth
+            label="Phone number"
+            variant="outlined"
+            name="phoneNumber"
+            value={formik.values.phoneNumber}
+            size='small'
+            error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+            onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
+          />
           <TextField
             margin="normal"
             size="small"
@@ -130,7 +139,7 @@ function SignupPage() {
             id="confirmPassword"
             autoComplete="new-password"
             helperText={formik.errors.confirmPassword}
-            error={formik.values.confirmPassword}
+            error={formik.errors.confirmPassword}
             value={formik.values.confirmPassword}
             onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
           />
