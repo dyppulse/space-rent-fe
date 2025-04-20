@@ -36,12 +36,12 @@ function HomePage() {
                 placeholder="Search by location or venue type"
                 variant="outlined"
                 fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">
                       <SearchIcon />
-                    </InputAdornment>
-                  ),
+                    </InputAdornment>,
+                  },
                 }}
                 size="medium"
               />
