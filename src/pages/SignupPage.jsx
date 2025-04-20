@@ -14,12 +14,44 @@ import {
 } from "@mui/material"
 import GoogleIcon from "@mui/icons-material/Google"
 import FacebookIcon from "@mui/icons-material/Facebook"
+import { useFormik } from "formik"
+import * as yup from 'yup'
+import { useEffect } from "react"
 
 function SignupPage() {
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle signup logic here
-  }
+
+  const validationSchema = yup.object({
+    fullName: yup.string().required("Required").min(5, "At least 5 characters"),
+    email: yup.string().email("Invalid Email").required("Required"),
+    password: yup.string().required("required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(
+        /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
+        "Password must contain at least one number and one special character"
+      ),
+    confirmPassword: yup.string().required("required").oneOf([yup.ref("password"), null], "Passwords must match"),
+    phoneNumber: yup.string().required("Required").matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
+  })
+
+  const formik = useFormik({
+    initialValues: {
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phoneNumber: ""
+    },
+    validationSchema,
+    onSubmit: (values) => {
+
+    }
+  })
+
+  useEffect(() => {
+    formik.validateForm()
+  }, [formik.values])
+
+  console.log(formik.errors, "sghdgdhgdhgdhgdhdg")
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -33,45 +65,63 @@ function SignupPage() {
           </Typography>
         </Box>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
           <TextField
             margin="normal"
-            required
             fullWidth
+            size="small"
             id="name"
             label="Full Name"
             name="name"
             autoComplete="name"
             autoFocus
+            value={formik.values.fullName}
+            onChange={(e) => formik.setFieldValue("fullName", e.target.value)}
+            helperText={formik.errors.fullName}
+            error={formik.errors.fullName}
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             id="email"
             label="Email Address"
             name="email"
             autoComplete="email"
+            value={formik.values.email}
+            onChange={(e) => formik.setFieldValue("email", e.target.value)}
+            helperText={formik.errors.email}
+            error={formik.errors.email}
+
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             name="password"
             label="Password"
             type="password"
             id="password"
             autoComplete="new-password"
+            helperText={formik.errors.password}
+            error={formik.errors.password}
+            value={formik.values.password}
+            onChange={(e) => formik.setFieldValue("password", e.target.value)}
+
           />
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             name="confirmPassword"
             label="Confirm Password"
             type="password"
             id="confirmPassword"
             autoComplete="new-password"
+            helperText={formik.errors.confirmPassword}
+            error={formik.values.confirmPassword}
+            value={formik.values.confirmPassword}
+            onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
           />
 
           <FormControlLabel
@@ -96,7 +146,7 @@ function SignupPage() {
           />
 
           <Button type="submit" fullWidth variant="contained" color="primary" size="large" sx={{ mt: 3, mb: 2 }}>
-            Create account
+            Create accountd
           </Button>
 
           <Box sx={{ position: "relative", my: 3 }}>

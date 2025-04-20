@@ -8,7 +8,7 @@ function Footer() {
     <Box sx={{ bgcolor: "grey.900", color: "white", py: 6 }}>
       <Container maxWidth="lg">
         <Grid container spacing={4}>
-          <Grid item xs={12} md={3}>
+          <Grid item size={{xs:12, md: 3}}>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               SpaceHire
             </Typography>
@@ -17,7 +17,7 @@ function Footer() {
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs: 12, sm: 6, md:3}}>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Explore
             </Typography>
@@ -60,7 +60,7 @@ function Footer() {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs:12, sm: 6, md: 3}}>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Host
             </Typography>
@@ -83,7 +83,7 @@ function Footer() {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs: 12, sm: 6, md: 3}}>
             <Typography variant="h6" gutterBottom fontWeight="bold">
               Company
             </Typography>

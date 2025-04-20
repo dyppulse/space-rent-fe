@@ -15,7 +15,7 @@ function LoginPage() {
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Box sx={{ mb: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Log in to your account
+            Log in to your accountddd
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your email and password to access your space owner dashboard

@@ -82,7 +82,7 @@ function SpacesPage() {
         </Box>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs:12, sm: 6, md: 3}}>
             <FormControl fullWidth>
               <InputLabel id="space-type-label">Space Type</InputLabel>
               <Select labelId="space-type-label" id="space-type" value="all" label="Space Type">
@@ -95,7 +95,7 @@ function SpacesPage() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs:12, sm: 6, md: 3}}>
             <FormControl fullWidth>
               <InputLabel id="capacity-label">Capacity</InputLabel>
               <Select labelId="capacity-label" id="capacity" value="any" label="Capacity">
@@ -108,7 +108,7 @@ function SpacesPage() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs:12, sm: 6, md: 3}}>
             <Typography id="price-range-slider" gutterBottom>
               Price Range
             </Typography>
@@ -133,7 +133,7 @@ function SpacesPage() {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item size={{xs:12, sm: 6, md: 3}}>
             <FormControl fullWidth>
               <InputLabel id="sort-by-label">Sort By</InputLabel>
               <Select labelId="sort-by-label" id="sort-by" value="recommended" label="Sort By">

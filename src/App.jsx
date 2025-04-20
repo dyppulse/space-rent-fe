@@ -2,10 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 
-// Context
-import SwrProvider from './api/context/swrConfig'
-import { UserProvider } from './api/context/UserContext';
-
 // Pages
 import HomePage from "./pages/HomePage"
 import SpacesPage from "./pages/SpacesPage"
@@ -15,6 +11,7 @@ import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import DashboardPage from "./pages/DashboardPage"
 import NewSpacePage from "./pages/NewSpacePage"
+import NotFound from "./pages/NotFound";
 
 // Components
 import Header from "./components/Header"
@@ -81,31 +78,28 @@ const theme = createTheme({
 
 function App() {
   return (
-    <SwrProvider>
-      <UserProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Router>
-            <div className="app">
-              <Header />
-              <main>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/spaces" element={<SpacesPage />} />
-                  <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-                  <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/auth/login" element={<LoginPage />} />
-                  <Route path="/auth/signup" element={<SignupPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </Router>
-        </ThemeProvider>
-      </UserProvider>
-    </SwrProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <div className="app">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/spaces" element={<SpacesPage />} />
+              <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/signup" element={<SignupPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/spaces/new" element={<NewSpacePage />} />
+              <Route path="*" element={<NotFound/>}/>
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </ThemeProvider>
   )
 }
 

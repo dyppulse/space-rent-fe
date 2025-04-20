@@ -73,10 +73,14 @@ function DashboardPage() {
           Add New Space
         </Button>
       </Box>
-
+      {/* <Grid
+-  xs={12}
+-  sm={6}
++  size={{ xs: 12, sm: 6 }}
+ > */}
       {/* Dashboard Overview Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
+      <Grid container spacing={3} sx={{ mb: 4 }} >
+        <Grid item size={{xs: 12, md: 4}}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
@@ -92,7 +96,7 @@ function DashboardPage() {
             </CardContent>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item size={{xs: 12, md: 4}}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
@@ -108,7 +112,7 @@ function DashboardPage() {
             </CardContent>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item size={{xs:12, md: 4}}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
@@ -129,7 +133,7 @@ function DashboardPage() {
       </Grid>
 
       {/* Main Dashboard Content */}
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%" }} >
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
             value={tabValue}
