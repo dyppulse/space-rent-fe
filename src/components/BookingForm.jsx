@@ -37,9 +37,9 @@ function BookingForm({ spaceId, price, priceUnit }) {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
         <Box sx={{ mb: 3 }}>
-          <TextField label="Full Name" fullWidth margin="normal" required placeholder="Your name" />
-          <TextField label="Email" type="email" fullWidth margin="normal" required placeholder="your@email.com" />
-          <TextField label="Phone Number" fullWidth margin="normal" required placeholder="(123) 456-7890" />
+          <TextField size="small" label="Full Name" fullWidth margin="normal" required placeholder="Your name" />
+          <TextField size="small" label="Email" type="email" fullWidth margin="normal" required placeholder="your@email.com" />
+          <TextField  size="small" label="Phone Number" fullWidth margin="normal" required placeholder="(123) 456-7890" />
         </Box>
 
         <Box sx={{ mb: 3 }}>
@@ -47,7 +47,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
             label="Event Date"
             value={date}
             onChange={(newDate) => setDate(newDate)}
-            renderInput={(params) => <TextField {...params} fullWidth margin="normal" required />}
+            renderInput={(params) => <TextField {...params} fullWidth margin="normal" required  size="small"/>}
             disablePast
           />
 
@@ -61,6 +61,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
                   {...params}
                   fullWidth
                   required
+                  size="small"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">

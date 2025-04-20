@@ -15,7 +15,7 @@ function LoginPage() {
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Box sx={{ mb: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Log in to your accountddd
+            Log in to your account
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your email and password to access your space owner dashboard
@@ -25,8 +25,8 @@ function LoginPage() {
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <TextField
             margin="normal"
-            required
             fullWidth
+            size="small"
             id="email"
             label="Email Address"
             name="email"
@@ -52,7 +52,7 @@ function LoginPage() {
           </Box>
           <TextField
             margin="normal"
-            required
+            size="small"
             fullWidth
             name="password"
             label="Password"
@@ -83,12 +83,12 @@ function LoginPage() {
           </Box>
 
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item size={{xs: 6}}>
               <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                 Google
               </Button>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item size={{xs: 6}}>
               <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
                 Facebook
               </Button>

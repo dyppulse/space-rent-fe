@@ -17,6 +17,7 @@ import FacebookIcon from "@mui/icons-material/Facebook"
 import { useFormik } from "formik"
 import * as yup from 'yup'
 import { useEffect } from "react"
+import PhoneInputFormik from "../components/PhoneInput"
 
 function SignupPage() {
 
@@ -51,7 +52,6 @@ function SignupPage() {
     formik.validateForm()
   }, [formik.values])
 
-  console.log(formik.errors, "sghdgdhgdhgdhgdhdg")
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -80,6 +80,7 @@ function SignupPage() {
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
+          <PhoneInputFormik formik={formik} formikValue={"phoneNumber"}/>
           <TextField
             margin="normal"
             size="small"
@@ -168,12 +169,12 @@ function SignupPage() {
           </Box>
 
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item size={{xs: 6}}>
               <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                 Google
               </Button>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item size={{xs: 6}}>
               <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
                 Facebook
               </Button>
