@@ -123,7 +123,7 @@ function SpacesList({ spaces }) {
                       alignItems: "center",
                       borderTop: 1,
                       borderColor: "divider",
-                      mt: 2,
+                      // mt: 2,
                     }}
                   >
                     <Box>

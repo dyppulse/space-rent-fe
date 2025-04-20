@@ -1,5 +1,4 @@
-"use client"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   Box,
   Container,
@@ -16,10 +15,12 @@ import GoogleIcon from "@mui/icons-material/Google"
 import FacebookIcon from "@mui/icons-material/Facebook"
 import { useFormik } from "formik"
 import * as yup from 'yup'
-import { useEffect } from "react"
+import { useAuth } from "../hooks/useAuth";
 import PhoneInputFormik from "../components/PhoneInput"
 
 function SignupPage() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
 
   const validationSchema = yup.object({
     fullName: yup.string().required("Required").min(5, "At least 5 characters"),
@@ -35,6 +36,8 @@ function SignupPage() {
   })
 
   const formik = useFormik({
+    validateOnChange: true,
+    validateOnMount: true,
     initialValues: {
       fullName: "",
       email: "",
@@ -43,14 +46,21 @@ function SignupPage() {
       phoneNumber: ""
     },
     validationSchema,
-    onSubmit: (values) => {
-
+    onSubmit: async (values, { setSubmitting, setErrors, }) => {
+      try {
+        const loginResponse = await register(values.email, values.password);
+        localStorage.setItem('token', loginResponse.token)
+        navigate('/auth/login');
+      } catch (err) {
+        console.error(err);
+        setErrors({ email: "Invalid email or password" });
+      } finally {
+        setSubmitting(false);
+      }
     }
   })
 
-  useEffect(() => {
-    formik.validateForm()
-  }, [formik.values])
+
 
 
   return (
@@ -80,7 +90,7 @@ function SignupPage() {
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
-          <PhoneInputFormik formik={formik} formikValue={"phoneNumber"}/>
+          <PhoneInputFormik formik={formik} formikValue={"phoneNumber"} />
           <TextField
             margin="normal"
             size="small"
@@ -147,7 +157,7 @@ function SignupPage() {
           />
 
           <Button type="submit" fullWidth variant="contained" color="primary" size="large" sx={{ mt: 3, mb: 2 }}>
-            Create accountd
+            Create account
           </Button>
 
           <Box sx={{ position: "relative", my: 3 }}>
@@ -169,12 +179,12 @@ function SignupPage() {
           </Box>
 
           <Grid container spacing={2}>
-            <Grid item size={{xs: 6}}>
+            <Grid item size={{ xs: 6 }}>
               <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                 Google
               </Button>
             </Grid>
-            <Grid item size={{xs: 6}}>
+            <Grid item size={{ xs: 6 }}>
               <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
                 Facebook
               </Button>
