@@ -1,14 +1,48 @@
-"use client"
-import { Link } from "react-router-dom"
-import { Box, Container, Typography, TextField, Button, Paper, Divider, Grid } from "@mui/material"
-import GoogleIcon from "@mui/icons-material/Google"
-import FacebookIcon from "@mui/icons-material/Facebook"
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Divider,
+  Grid,
+} from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import { useAuth } from "../hooks/useAuth";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 function LoginPage() {
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle login logic here
-  }
+  const { login, isLoading, error } = useAuth();
+  
+  const navigate = useNavigate()
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      password: Yup.string().required("Password is required"),
+    }),
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
+      try {
+        const loginResponse = await login(values.email, values.password);
+        localStorage.setItem('token', loginResponse.token)
+        // Redirect to dashboard or show toast
+        navigate('/dashboard');
+      } catch (err) {
+        console.error(err);
+        setErrors({ email: "Invalid email or password" });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -16,23 +50,31 @@ function LoginPage() {
         <Box sx={{ mb: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Log in to your account
+            Log in to your account
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your email and password to access your space owner dashboard
           </Typography>
         </Box>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
           <TextField
-            margin="normal"
             fullWidth
+            margin="normal"
             size="small"
             id="email"
-            label="Email Address"
             name="email"
+            label="Email Address"
+            type="email"
             autoComplete="email"
             autoFocus
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
           />
+
           <Box
             sx={{
               display: "flex",
@@ -50,19 +92,39 @@ function LoginPage() {
               </Typography>
             </Link>
           </Box>
+
           <TextField
+            fullWidth
             margin="normal"
             size="small"
-            fullWidth
             name="password"
             label="Password"
             type="password"
-            id="password"
             autoComplete="current-password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
           />
-          <Button type="submit" fullWidth variant="contained" color="primary" size="large" sx={{ mt: 3, mb: 2 }}>
-            Log in
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={formik.isSubmitting || isLoading}
+          >
+            {formik.isSubmitting || isLoading ? "Logging in..." : "Log in"}
           </Button>
+
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+              {error.message || "Login failed. Please try again."}
+            </Typography>
+          )}
 
           <Box sx={{ position: "relative", my: 3 }}>
             <Divider />
@@ -108,7 +170,7 @@ function LoginPage() {
         </Box>
       </Paper>
     </Container>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;
