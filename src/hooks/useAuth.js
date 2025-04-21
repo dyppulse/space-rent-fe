@@ -2,13 +2,13 @@ import useSWR from "swr";
 import axiosInstance from "../api/axiosInstance";
 
 export const useAuth = () => {
-  const token = localStorage.getItem('token')
-  const { data, error, mutate, isLoading } = useSWR(token ? "/auth/me" : null);
+
+  const { data, error, mutate, isLoading } = useSWR("/auth/me");
 
   const login = async (email, password) => {
     const response = await axiosInstance.post("/auth/login", { email, password });
-    await mutate(); // Revalidate session after login
-    return response.data;
+    localStorage.setItem('token', response.data.token)
+    // await mutate(); // Revalidate session after login
 
   };
 
@@ -18,17 +18,18 @@ export const useAuth = () => {
 
   const logout = async () => {
     await axiosInstance.post("/auth/logout");
-    await mutate(null); // Clear session
+    // await mutate(null); // Clear session
     localStorage.removeItem('token')
   };
 
   return {
     user: data,
     isLoading,
-    isAuthenticated: !!token,
+    isAuthenticated: !!data,
     error,
     login,
     register,
     logout,
+    mutate
   };
 };
