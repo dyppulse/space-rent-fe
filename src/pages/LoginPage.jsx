@@ -17,7 +17,7 @@ import * as Yup from "yup";
 
 function LoginPage() {
   const { login, isLoading, error } = useAuth();
-  
+
   const navigate = useNavigate()
 
   const formik = useFormik({
@@ -31,8 +31,7 @@ function LoginPage() {
     }),
     onSubmit: async (values, { setSubmitting, setErrors }) => {
       try {
-        const loginResponse = await login(values.email, values.password);
-        localStorage.setItem('token', loginResponse.token)
+        await login(values.email, values.password);
         // Redirect to dashboard or show toast
         navigate('/dashboard');
       } catch (err) {
@@ -145,12 +144,12 @@ function LoginPage() {
           </Box>
 
           <Grid container spacing={2}>
-            <Grid item size={{xs: 6}}>
+            <Grid item size={{ xs: 6 }}>
               <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
                 Google
               </Button>
             </Grid>
-            <Grid item size={{xs: 6}}>
+            <Grid item size={{ xs: 6 }}>
               <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
                 Facebook
               </Button>
