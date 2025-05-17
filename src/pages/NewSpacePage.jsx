@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -20,61 +20,66 @@ import {
   Divider,
   Snackbar,
   Alert,
-} from "@mui/material"
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"
-import AddIcon from "@mui/icons-material/Add"
-import CloudUploadIcon from "@mui/icons-material/CloudUpload"
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 function NewSpacePage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false)
-      setSnackbarOpen(true)
-    }, 1500)
-  }
+      setIsSubmitting(false);
+      setSnackbarOpen(true);
+    }, 1500);
+  };
 
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return
+    if (reason === 'clickaway') {
+      return;
     }
-    setSnackbarOpen(false)
-  }
+    setSnackbarOpen(false);
+  };
 
   const amenities = [
-    "WiFi",
-    "Sound System",
-    "Projector",
-    "Kitchen",
-    "Restrooms",
-    "Heating/AC",
-    "Furniture",
-    "Parking",
-    "Wheelchair Accessible",
-    "Catering",
-    "Lighting Equipment",
-    "Stage",
-    "Tables/Chairs",
-    "Dressing Room",
-    "Outdoor Space",
-  ]
+    'WiFi',
+    'Sound System',
+    'Projector',
+    'Kitchen',
+    'Restrooms',
+    'Heating/AC',
+    'Furniture',
+    'Parking',
+    'Wheelchair Accessible',
+    'Catering',
+    'Lighting Equipment',
+    'Stage',
+    'Tables/Chairs',
+    'Dressing Room',
+    'Outdoor Space',
+  ];
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           mb: 4,
         }}
       >
-        <Button component={Link} to="/dashboard" startIcon={<ArrowBackIcon />} sx={{ mr: 2 }}>
+        <Button
+          component={Link}
+          to="/dashboard"
+          startIcon={<ArrowBackIcon />}
+          sx={{ mr: 2 }}
+        >
           Back
         </Button>
         <Box>
@@ -98,14 +103,24 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item size={{xs: 12}}>
-              <TextField label="Space Name" fullWidth required placeholder="e.g. Modern Downtown Loft" />
+            <Grid item size={{ xs: 12 }}>
+              <TextField
+                label="Space Name"
+                fullWidth
+                required
+                placeholder="e.g. Modern Downtown Loft"
+              />
             </Grid>
 
-            <Grid item size={{xs:12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth required>
                 <InputLabel id="space-type-label">Space Type</InputLabel>
-                <Select labelId="space-type-label" id="space-type" label="Space Type" defaultValue="">
+                <Select
+                  labelId="space-type-label"
+                  id="space-type"
+                  label="Space Type"
+                  defaultValue=""
+                >
                   <MenuItem value="event-venue">Event Venue</MenuItem>
                   <MenuItem value="wedding-venue">Wedding Venue</MenuItem>
                   <MenuItem value="conference-room">Conference Room</MenuItem>
@@ -115,11 +130,17 @@ function NewSpacePage() {
               </FormControl>
             </Grid>
 
-            <Grid item size={{xs:12, sm: 6}}>
-              <TextField label="Capacity" type="number" fullWidth required placeholder="Max number of people" />
+            <Grid item size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="Capacity"
+                type="number"
+                fullWidth
+                required
+                placeholder="Max number of people"
+              />
             </Grid>
 
-            <Grid item size={{xs:12}}>
+            <Grid item size={{ xs: 12 }}>
               <TextField
                 label="Description"
                 multiline
@@ -142,19 +163,24 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item size={{xs:12}}>
-              <TextField label="Address" fullWidth required placeholder="Street address" />
+            <Grid item size={{ xs: 12 }}>
+              <TextField
+                label="Address"
+                fullWidth
+                required
+                placeholder="Street address"
+              />
             </Grid>
 
-            <Grid item size={{xs:12, sm:4}}>
+            <Grid item size={{ xs: 12, sm: 4 }}>
               <TextField label="City" fullWidth required />
             </Grid>
 
-            <Grid item size={{xs:12, sm:4}}>
+            <Grid item size={{ xs: 12, sm: 4 }}>
               <TextField label="State/Province" fullWidth required />
             </Grid>
 
-            <Grid item size={{xs:12, sm:4}}>
+            <Grid item size={{ xs: 12, sm: 4 }}>
               <TextField label="Zip/Postal Code" fullWidth required />
             </Grid>
           </Grid>
@@ -171,27 +197,29 @@ function NewSpacePage() {
 
           <Grid container spacing={2}>
             {[1, 2, 3, 4, 5, 6].map((index) => (
-              <Grid item key={index} size={{xs:12, sm: 6, md: 4}}>
+              <Grid item key={index} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Box
                   sx={{
-                    border: "2px dashed",
-                    borderColor: "divider",
+                    border: '2px dashed',
+                    borderColor: 'divider',
                     borderRadius: 2,
                     p: 2,
                     height: 140,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      bgcolor: "action.hover",
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
                     },
                   }}
                 >
-                  <CloudUploadIcon sx={{ fontSize: 40, color: "text.secondary", mb: 1 }} />
+                  <CloudUploadIcon
+                    sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
+                  />
                   <Typography variant="body2" color="text.secondary">
                     Upload photo {index}
                   </Typography>
@@ -211,23 +239,30 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={3}>
-            <Grid item size={{xs:12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="Price"
                 type="number"
                 fullWidth
                 required
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
                 }}
                 placeholder="0.00"
               />
             </Grid>
 
-            <Grid item size={{xs:12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth required>
                 <InputLabel id="price-unit-label">Per</InputLabel>
-                <Select labelId="price-unit-label" id="price-unit" label="Per" defaultValue="">
+                <Select
+                  labelId="price-unit-label"
+                  id="price-unit"
+                  label="Per"
+                  defaultValue=""
+                >
                   <MenuItem value="hour">Hour</MenuItem>
                   <MenuItem value="day">Day</MenuItem>
                   <MenuItem value="event">Event</MenuItem>
@@ -235,14 +270,24 @@ function NewSpacePage() {
               </FormControl>
             </Grid>
 
-            <Grid item size={{xs:12, sm: 6}}>
-              <TextField label="Minimum Booking Duration" type="number" fullWidth placeholder="Minimum hours/days" />
+            <Grid item size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="Minimum Booking Duration"
+                type="number"
+                fullWidth
+                placeholder="Minimum hours/days"
+              />
             </Grid>
 
-            <Grid item size={{xs:12, sm: 6}}>
+            <Grid item size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel id="duration-unit-label">Unit</InputLabel>
-                <Select labelId="duration-unit-label" id="duration-unit" label="Unit" defaultValue="hours">
+                <Select
+                  labelId="duration-unit-label"
+                  id="duration-unit"
+                  label="Unit"
+                  defaultValue="hours"
+                >
                   <MenuItem value="hours">Hours</MenuItem>
                   <MenuItem value="days">Days</MenuItem>
                 </Select>
@@ -262,7 +307,7 @@ function NewSpacePage() {
 
           <Grid container spacing={1}>
             {amenities.map((amenity) => (
-              <Grid item size={{xs:12, sm: 6, md: 4}} key={amenity}>
+              <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={amenity}>
                 <FormControlLabel control={<Checkbox />} label={amenity} />
               </Grid>
             ))}
@@ -281,27 +326,42 @@ function NewSpacePage() {
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              flexDirection: { xs: "column", sm: "row" },
+              display: 'flex',
+              justifyContent: 'space-between',
+              flexDirection: { xs: 'column', sm: 'row' },
               gap: 2,
             }}
           >
             <Button variant="outlined">Save as Draft</Button>
-            <Button type="submit" variant="contained" color="primary" size="large" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Listing"}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="large"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Listing'}
             </Button>
           </Box>
         </Paper>
       </Box>
 
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: "100%" }}>
-          Space created successfully! Your new space has been added to your listings.
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          Space created successfully! Your new space has been added to your
+          listings.
         </Alert>
       </Snackbar>
     </Container>
-  )
+  );
 }
 
-export default NewSpacePage
+export default NewSpacePage;

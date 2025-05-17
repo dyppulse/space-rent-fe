@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -16,29 +16,29 @@ import {
   Slider,
   ToggleButtonGroup,
   ToggleButton,
-} from "@mui/material"
-import SearchIcon from "@mui/icons-material/Search"
-import LocationOnIcon from "@mui/icons-material/LocationOn"
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday"
-import FilterListIcon from "@mui/icons-material/FilterList"
-import GridViewIcon from "@mui/icons-material/GridView"
-import ViewListIcon from "@mui/icons-material/ViewList"
-import SpaceGrid from "../components/SpaceGrid"
-import { mockSpaces } from "../data/mockData"
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import GridViewIcon from '@mui/icons-material/GridView';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import SpaceGrid from '../components/SpaceGrid';
+import { mockSpaces } from '../data/mockData';
 
 function SpacesPage() {
-  const [viewMode, setViewMode] = useState("grid")
-  const [priceRange, setPriceRange] = useState([0, 1000])
+  const [viewMode, setViewMode] = useState('grid');
+  const [priceRange, setPriceRange] = useState([0, 1000]);
 
   const handleViewModeChange = (event, newMode) => {
     if (newMode !== null) {
-      setViewMode(newMode)
+      setViewMode(newMode);
     }
-  }
+  };
 
   const handlePriceRangeChange = (event, newValue) => {
-    setPriceRange(newValue)
-  }
+    setPriceRange(newValue);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -50,8 +50,8 @@ function SpacesPage() {
       <Box sx={{ mb: 6 }}>
         <Box
           sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
             gap: 2,
             mb: 3,
           }}
@@ -68,24 +68,41 @@ function SpacesPage() {
               ),
             }}
           />
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            <Button variant="outlined" startIcon={<LocationOnIcon />} sx={{ minWidth: { xs: "100%", sm: "auto" } }}>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              startIcon={<LocationOnIcon />}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            >
               Location
             </Button>
-            <Button variant="outlined" startIcon={<CalendarTodayIcon />} sx={{ minWidth: { xs: "100%", sm: "auto" } }}>
+            <Button
+              variant="outlined"
+              startIcon={<CalendarTodayIcon />}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            >
               Date
             </Button>
-            <Button variant="outlined" startIcon={<FilterListIcon />} sx={{ minWidth: { xs: "100%", sm: "auto" } }}>
+            <Button
+              variant="outlined"
+              startIcon={<FilterListIcon />}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            >
               Filters
             </Button>
           </Box>
         </Box>
 
         <Grid container spacing={3}>
-          <Grid item size={{xs:12, sm: 6, md: 3}}>
+          <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth>
               <InputLabel id="space-type-label">Space Type</InputLabel>
-              <Select labelId="space-type-label" id="space-type" value="all" label="Space Type">
+              <Select
+                labelId="space-type-label"
+                id="space-type"
+                value="all"
+                label="Space Type"
+              >
                 <MenuItem value="all">All Types</MenuItem>
                 <MenuItem value="event-venue">Event Venue</MenuItem>
                 <MenuItem value="wedding-venue">Wedding Venue</MenuItem>
@@ -95,10 +112,15 @@ function SpacesPage() {
             </FormControl>
           </Grid>
 
-          <Grid item size={{xs:12, sm: 6, md: 3}}>
+          <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth>
               <InputLabel id="capacity-label">Capacity</InputLabel>
-              <Select labelId="capacity-label" id="capacity" value="any" label="Capacity">
+              <Select
+                labelId="capacity-label"
+                id="capacity"
+                value="any"
+                label="Capacity"
+              >
                 <MenuItem value="any">Any Size</MenuItem>
                 <MenuItem value="small">Small (1-20)</MenuItem>
                 <MenuItem value="medium">Medium (21-50)</MenuItem>
@@ -108,7 +130,7 @@ function SpacesPage() {
             </FormControl>
           </Grid>
 
-          <Grid item size={{xs:12, sm: 6, md: 3}}>
+          <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography id="price-range-slider" gutterBottom>
               Price Range
             </Typography>
@@ -122,7 +144,7 @@ function SpacesPage() {
                 step={50}
                 aria-labelledby="price-range-slider"
               />
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" color="text.secondary">
                   $0
                 </Typography>
@@ -133,10 +155,15 @@ function SpacesPage() {
             </Box>
           </Grid>
 
-          <Grid item size={{xs:12, sm: 6, md: 3}}>
+          <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth>
               <InputLabel id="sort-by-label">Sort By</InputLabel>
-              <Select labelId="sort-by-label" id="sort-by" value="recommended" label="Sort By">
+              <Select
+                labelId="sort-by-label"
+                id="sort-by"
+                value="recommended"
+                label="Sort By"
+              >
                 <MenuItem value="recommended">Recommended</MenuItem>
                 <MenuItem value="price-low">Price: Low to High</MenuItem>
                 <MenuItem value="price-high">Price: High to Low</MenuItem>
@@ -151,14 +178,16 @@ function SpacesPage() {
       {/* Results */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           mb: 3,
         }}
       >
-        <Typography variant="h6">{mockSpaces.length} spaces available</Typography>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography variant="h6">
+          {mockSpaces.length} spaces available
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
             View:
           </Typography>
@@ -181,7 +210,7 @@ function SpacesPage() {
 
       <SpaceGrid spaces={mockSpaces} />
     </Container>
-  )
+  );
 }
 
-export default SpacesPage
+export default SpacesPage;

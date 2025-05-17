@@ -1,42 +1,42 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { ThemeProvider, createTheme } from "@mui/material/styles"
-import CssBaseline from "@mui/material/CssBaseline"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
-import { SWRConfig } from "swr";
-import { swrConfig } from "./api/swrConfig";
+import { SWRConfig } from 'swr';
+import { swrConfig } from './api/swrConfig';
 
 // Pages
-import HomePage from "./pages/HomePage"
-import SpacesPage from "./pages/SpacesPage"
-import SpaceDetailPage from "./pages/SpaceDetailPage"
-import HowItWorksPage from "./pages/HowItWorksPage"
-import LoginPage from "./pages/LoginPage"
-import SignupPage from "./pages/SignupPage"
-import DashboardPage from "./pages/DashboardPage"
-import NewSpacePage from "./pages/NewSpacePage"
-import NotFound from "./pages/NotFound";
+import HomePage from './pages/HomePage';
+import SpacesPage from './pages/SpacesPage';
+import SpaceDetailPage from './pages/SpaceDetailPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import DashboardPage from './pages/DashboardPage';
+import NewSpacePage from './pages/NewSpacePage';
+import NotFound from './pages/NotFound';
 
 // Components
-import PrivateRoute from "./components/PrivateRoute"
-import Header from "./components/Header"
-import Footer from "./components/Footer"
+import PrivateRoute from './components/PrivateRoute';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 // Create a theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#0d9488", // teal-600
-      light: "#14b8a6", // teal-500
-      dark: "#0f766e", // teal-700
-      contrastText: "#ffffff",
+      main: '#0d9488', // teal-600
+      light: '#14b8a6', // teal-500
+      dark: '#0f766e', // teal-700
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: "#f5f5f5", // light gray
-      contrastText: "#0d9488",
+      main: '#f5f5f5', // light gray
+      contrastText: '#0d9488',
     },
     background: {
-      default: "#ffffff",
-      paper: "#ffffff",
+      default: '#ffffff',
+      paper: '#ffffff',
     },
   },
   typography: {
@@ -54,7 +54,7 @@ const theme = createTheme({
       fontWeight: 600,
     },
     button: {
-      textTransform: "none",
+      textTransform: 'none',
     },
   },
   shape: {
@@ -65,7 +65,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 8,
-          padding: "8px 16px",
+          padding: '8px 16px',
         },
       },
     },
@@ -73,17 +73,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
         },
       },
     },
   },
-})
+});
 
 function App() {
   return (
     <SWRConfig value={swrConfig}>
-
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
@@ -127,7 +126,7 @@ function App() {
         </Router>
       </ThemeProvider>
     </SWRConfig>
-  )
+  );
 }
 
-export default App
+export default App;

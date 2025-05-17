@@ -1,6 +1,6 @@
 // components/WorkInProgress.js
-import { Box, Typography } from "@mui/material";
-import ConstructionIcon from "@mui/icons-material/Construction";
+import { Box, Typography } from '@mui/material';
+import ConstructionIcon from '@mui/icons-material/Construction';
 
 const WorkInProgress = () => {
   return (

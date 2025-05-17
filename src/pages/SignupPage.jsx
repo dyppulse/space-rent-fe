@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -10,63 +10,75 @@ import {
   Grid,
   Checkbox,
   FormControlLabel,
-} from "@mui/material"
-import GoogleIcon from "@mui/icons-material/Google"
-import FacebookIcon from "@mui/icons-material/Facebook"
-import { useFormik } from "formik"
-import * as yup from 'yup'
-import { useAuth } from "../hooks/useAuth";
-import PhoneInputFormik from "../components/PhoneInput"
+} from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+import { useAuth } from '../hooks/useAuth';
+import PhoneInputFormik from '../components/PhoneInput';
 
 function SignupPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
   const validationSchema = yup.object({
-    fullName: yup.string().required("Required").min(5, "At least 5 characters"),
-    email: yup.string().email("Invalid Email").required("Required"),
-    password: yup.string().required("required")
-      .min(8, "Password must be at least 8 characters")
+    fullName: yup.string().required('Required').min(5, 'At least 5 characters'),
+    email: yup.string().email('Invalid Email').required('Required'),
+    password: yup
+      .string()
+      .required('required')
+      .min(8, 'Password must be at least 8 characters')
       .matches(
         /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-        "Password must contain at least one number and one special character"
+        'Password must contain at least one number and one special character'
       ),
-    confirmPassword: yup.string().required("required").oneOf([yup.ref("password"), null], "Passwords must match"),
-    phoneNumber: yup.string().required("Required").matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
-  })
+    confirmPassword: yup
+      .string()
+      .required('required')
+      .oneOf([yup.ref('password'), null], 'Passwords must match'),
+    phoneNumber: yup
+      .string()
+      .required('Required')
+      .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits'),
+  });
 
   const formik = useFormik({
     validateOnChange: true,
     validateOnMount: true,
     initialValues: {
-      fullName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      phoneNumber: ""
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phoneNumber: '',
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting, setErrors, }) => {
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
       try {
-        await register(values.fullName, values.email, values.password, values.phoneNumber);
+        await register(
+          values.fullName,
+          values.email,
+          values.password,
+          values.phoneNumber
+        );
 
         navigate('/auth/login');
       } catch (err) {
         console.error(err);
-        setErrors({ email: "Invalid email or password" });
+        setErrors({ email: 'Invalid email or password' });
       } finally {
         setSubmitting(false);
       }
-    }
-  })
+    },
+  });
 
-  console.log(formik.values, 'values')
-
+  console.log(formik.values, 'values');
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Box sx={{ mb: 3, textAlign: "center" }}>
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Create an account
           </Typography>
@@ -86,7 +98,7 @@ function SignupPage() {
             autoComplete="name"
             autoFocus
             value={formik.values.fullName}
-            onChange={(e) => formik.setFieldValue("fullName", e.target.value)}
+            onChange={(e) => formik.setFieldValue('fullName', e.target.value)}
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
@@ -96,9 +108,13 @@ function SignupPage() {
             variant="outlined"
             name="phoneNumber"
             value={formik.values.phoneNumber}
-            size='small'
-            error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
-            onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
+            size="small"
+            error={
+              formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)
+            }
+            onChange={(e) =>
+              formik.setFieldValue('phoneNumber', e.target.value)
+            }
           />
           <TextField
             margin="normal"
@@ -109,10 +125,9 @@ function SignupPage() {
             name="email"
             autoComplete="email"
             value={formik.values.email}
-            onChange={(e) => formik.setFieldValue("email", e.target.value)}
+            onChange={(e) => formik.setFieldValue('email', e.target.value)}
             helperText={formik.errors.email}
             error={formik.errors.email}
-
           />
           <TextField
             margin="normal"
@@ -126,8 +141,7 @@ function SignupPage() {
             helperText={formik.errors.password}
             error={formik.errors.password}
             value={formik.values.password}
-            onChange={(e) => formik.setFieldValue("password", e.target.value)}
-
+            onChange={(e) => formik.setFieldValue('password', e.target.value)}
           />
           <TextField
             margin="normal"
@@ -141,20 +155,22 @@ function SignupPage() {
             helperText={formik.errors.confirmPassword}
             error={formik.errors.confirmPassword}
             value={formik.values.confirmPassword}
-            onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
+            onChange={(e) =>
+              formik.setFieldValue('confirmPassword', e.target.value)
+            }
           />
 
           <FormControlLabel
             control={<Checkbox value="terms" color="primary" />}
             label={
               <Typography variant="body2">
-                I agree to the{" "}
+                I agree to the{' '}
                 <Link to="/terms">
                   <Typography component="span" variant="body2" color="primary">
                     terms of service
                   </Typography>
-                </Link>{" "}
-                and{" "}
+                </Link>{' '}
+                and{' '}
                 <Link to="/privacy">
                   <Typography component="span" variant="body2" color="primary">
                     privacy policy
@@ -165,21 +181,28 @@ function SignupPage() {
             sx={{ mt: 2 }}
           />
 
-          <Button type="submit" fullWidth variant="contained" color="primary" size="large" sx={{ mt: 3, mb: 2 }}>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ mt: 3, mb: 2 }}
+          >
             Create account
           </Button>
 
-          <Box sx={{ position: "relative", my: 3 }}>
+          <Box sx={{ position: 'relative', my: 3 }}>
             <Divider />
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: -10,
-                left: "50%",
-                transform: "translateX(-50%)",
-                bgcolor: "background.paper",
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bgcolor: 'background.paper',
                 px: 2,
               }}
             >
@@ -200,11 +223,16 @@ function SignupPage() {
             </Grid>
           </Grid>
 
-          <Box sx={{ mt: 3, textAlign: "center" }}>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link to="/auth/login">
-                <Typography component="span" variant="body2" color="primary" fontWeight="medium">
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="primary"
+                  fontWeight="medium"
+                >
                   Log in
                 </Typography>
               </Link>
@@ -213,7 +241,7 @@ function SignupPage() {
         </Box>
       </Paper>
     </Container>
-  )
+  );
 }
 
-export default SignupPage
+export default SignupPage;

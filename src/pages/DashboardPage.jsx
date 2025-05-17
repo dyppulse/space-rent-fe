@@ -1,20 +1,31 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Box, Container, Typography, Button, Grid, Paper, CardContent, Tabs, Tab, Divider } from "@mui/material"
-import AddCircleIcon from "@mui/icons-material/AddCircle"
-import HomeIcon from "@mui/icons-material/Home"
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday"
-import SettingsIcon from "@mui/icons-material/Settings"
-import PeopleIcon from "@mui/icons-material/People"
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
-import SpacesList from "../components/SpacesList"
-import BookingsList from "../components/BookingsList"
-import { mockSpaces, mockBookings } from "../data/mockData"
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Paper,
+  CardContent,
+  Tabs,
+  Tab,
+  Divider,
+} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import HomeIcon from '@mui/icons-material/Home';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PeopleIcon from '@mui/icons-material/People';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import SpacesList from '../components/SpacesList';
+import BookingsList from '../components/BookingsList';
+import { mockSpaces, mockBookings } from '../data/mockData';
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -26,31 +37,33 @@ function TabPanel(props) {
     >
       {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
-  )
+  );
 }
 
 function DashboardPage() {
-  const [tabValue, setTabValue] = useState(0)
+  const [tabValue, setTabValue] = useState(0);
 
   // Filter spaces for the current user (in a real app, this would be based on the authenticated user)
-  const userSpaces = mockSpaces.filter((space) => space.ownerId === "user-1")
+  const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1');
 
   // Filter bookings for the user's spaces
-  const userSpaceIds = userSpaces.map((space) => space.id)
-  const userBookings = mockBookings.filter((booking) => userSpaceIds.includes(booking.spaceId))
+  const userSpaceIds = userSpaces.map((space) => space.id);
+  const userBookings = mockBookings.filter((booking) =>
+    userSpaceIds.includes(booking.spaceId)
+  );
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue)
-  }
+    setTabValue(newValue);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "flex-start", md: "center" },
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
           mb: 4,
           gap: 2,
         }}
@@ -79,11 +92,18 @@ function DashboardPage() {
 +  size={{ xs: 12, sm: 6 }}
  > */}
       {/* Dashboard Overview Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }} >
-        <Grid item size={{xs: 12, md: 4}}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item size={{ xs: 12, md: 4 }}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 <Typography variant="subtitle2" color="text.secondary">
                   Total Spaces
                 </Typography>
@@ -91,38 +111,61 @@ function DashboardPage() {
               </Box>
               <Typography variant="h4">{userSpaces.length}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {userSpaces.length > 0 ? "+1 space this month" : "Add your first space"}
+                {userSpaces.length > 0
+                  ? '+1 space this month'
+                  : 'Add your first space'}
               </Typography>
             </CardContent>
           </Paper>
         </Grid>
-        <Grid item size={{xs: 12, md: 4}}>
+        <Grid item size={{ xs: 12, md: 4 }}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 <Typography variant="subtitle2" color="text.secondary">
                   Upcoming Bookings
                 </Typography>
                 <CalendarTodayIcon color="action" fontSize="small" />
               </Box>
-              <Typography variant="h4">{userBookings.filter((b) => b.status === "confirmed").length}</Typography>
+              <Typography variant="h4">
+                {userBookings.filter((b) => b.status === 'confirmed').length}
+              </Typography>
               <Typography variant="caption" color="text.secondary">
-                {userBookings.filter((b) => b.status === "pending").length} pending requests
+                {userBookings.filter((b) => b.status === 'pending').length}{' '}
+                pending requests
               </Typography>
             </CardContent>
           </Paper>
         </Grid>
-        <Grid item size={{xs:12, md: 4}}>
+        <Grid item size={{ xs: 12, md: 4 }}>
           <Paper elevation={1} sx={{ borderRadius: 2 }}>
             <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 <Typography variant="subtitle2" color="text.secondary">
                   Total Revenue
                 </Typography>
                 <AttachMoneyIcon color="action" fontSize="small" />
               </Box>
               <Typography variant="h4">
-                ${userBookings.reduce((sum, booking) => sum + booking.totalPrice, 0)}
+                $
+                {userBookings.reduce(
+                  (sum, booking) => sum + booking.totalPrice,
+                  0
+                )}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 +$1,200 from last month
@@ -133,8 +176,8 @@ function DashboardPage() {
       </Grid>
 
       {/* Main Dashboard Content */}
-      <Box sx={{ width: "100%" }} >
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -142,10 +185,30 @@ function DashboardPage() {
             textColor="primary"
             indicatorColor="primary"
           >
-            <Tab icon={<HomeIcon />} iconPosition="start" label="My Spaces" id="dashboard-tab-0" />
-            <Tab icon={<CalendarTodayIcon />} iconPosition="start" label="Bookings" id="dashboard-tab-1" />
-            <Tab icon={<PeopleIcon />} iconPosition="start" label="Clients" id="dashboard-tab-2" />
-            <Tab icon={<SettingsIcon />} iconPosition="start" label="Settings" id="dashboard-tab-3" />
+            <Tab
+              icon={<HomeIcon />}
+              iconPosition="start"
+              label="My Spaces"
+              id="dashboard-tab-0"
+            />
+            <Tab
+              icon={<CalendarTodayIcon />}
+              iconPosition="start"
+              label="Bookings"
+              id="dashboard-tab-1"
+            />
+            <Tab
+              icon={<PeopleIcon />}
+              iconPosition="start"
+              label="Clients"
+              id="dashboard-tab-2"
+            />
+            <Tab
+              icon={<SettingsIcon />}
+              iconPosition="start"
+              label="Settings"
+              id="dashboard-tab-3"
+            />
           </Tabs>
         </Box>
 
@@ -153,12 +216,13 @@ function DashboardPage() {
           {userSpaces.length > 0 ? (
             <SpacesList spaces={userSpaces} />
           ) : (
-            <Paper sx={{ p: 3, textAlign: "center" }}>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>
                 No spaces yet
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                You haven't added any spaces to your account yet. Get started by adding your first space.
+                You haven't added any spaces to your account yet. Get started by
+                adding your first space.
               </Typography>
               <Button
                 component={Link}
@@ -177,7 +241,7 @@ function DashboardPage() {
           {userBookings.length > 0 ? (
             <BookingsList bookings={userBookings} spaces={userSpaces} />
           ) : (
-            <Paper sx={{ p: 3, textAlign: "center" }}>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>
                 No bookings yet
               </Typography>
@@ -197,7 +261,9 @@ function DashboardPage() {
               View and manage your clients.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <Typography variant="body1">Client management features will be available in the next update.</Typography>
+            <Typography variant="body1">
+              Client management features will be available in the next update.
+            </Typography>
           </Paper>
         </TabPanel>
 
@@ -210,12 +276,14 @@ function DashboardPage() {
               Manage your account settings and preferences.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <Typography variant="body1">Account settings will be available in the next update.</Typography>
+            <Typography variant="body1">
+              Account settings will be available in the next update.
+            </Typography>
           </Paper>
         </TabPanel>
       </Box>
     </Container>
-  )
+  );
 }
 
-export default DashboardPage
+export default DashboardPage;
