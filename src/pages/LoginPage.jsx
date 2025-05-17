@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -8,26 +8,26 @@ import {
   Paper,
   Divider,
   Grid,
-} from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import { useAuth } from "../hooks/useAuth";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+} from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import { useAuth } from '../hooks/useAuth';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 function LoginPage() {
   const { login, isLoading, error } = useAuth();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
     validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email").required("Email is required"),
-      password: Yup.string().required("Password is required"),
+      email: Yup.string().email('Invalid email').required('Email is required'),
+      password: Yup.string().required('Password is required'),
     }),
     onSubmit: async (values, { setSubmitting, setErrors }) => {
       try {
@@ -36,7 +36,7 @@ function LoginPage() {
         navigate('/dashboard');
       } catch (err) {
         console.error(err);
-        setErrors({ email: "Invalid email or password" });
+        setErrors({ email: 'Invalid email or password' });
       } finally {
         setSubmitting(false);
       }
@@ -46,10 +46,9 @@ function LoginPage() {
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Box sx={{ mb: 3, textAlign: "center" }}>
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Log in to your account
-            Log in to your account
+            Log in to your account Log in to your account
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Enter your email and password to access your space owner dashboard
@@ -76,9 +75,9 @@ function LoginPage() {
 
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               mb: 1,
             }}
           >
@@ -116,26 +115,26 @@ function LoginPage() {
             sx={{ mt: 3, mb: 2 }}
             disabled={formik.isSubmitting || isLoading}
           >
-            {formik.isSubmitting || isLoading ? "Logging in..." : "Log in"}
+            {formik.isSubmitting || isLoading ? 'Logging in...' : 'Log in'}
           </Button>
 
           {error && (
             <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-              {error.message || "Login failed. Please try again."}
+              {error.message || 'Login failed. Please try again.'}
             </Typography>
           )}
 
-          <Box sx={{ position: "relative", my: 3 }}>
+          <Box sx={{ position: 'relative', my: 3 }}>
             <Divider />
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: -10,
-                left: "50%",
-                transform: "translateX(-50%)",
-                bgcolor: "background.paper",
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bgcolor: 'background.paper',
                 px: 2,
               }}
             >
@@ -156,11 +155,16 @@ function LoginPage() {
             </Grid>
           </Grid>
 
-          <Box sx={{ mt: 3, textAlign: "center" }}>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <Link to="/auth/signup">
-                <Typography component="span" variant="body2" color="primary" fontWeight="medium">
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="primary"
+                  fontWeight="medium"
+                >
                   Sign up
                 </Typography>
               </Link>

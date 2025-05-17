@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR from 'swr';
 
 export const useSpaceDetails = (spaceId) => {
   const { data, error, isLoading } = useSWR(

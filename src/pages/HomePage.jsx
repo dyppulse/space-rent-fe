@@ -1,35 +1,44 @@
-import { Link } from "react-router-dom"
-import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from "@mui/material"
-import SearchIcon from "@mui/icons-material/Search"
-import LocationOnIcon from "@mui/icons-material/LocationOn"
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday"
-import FilterListIcon from "@mui/icons-material/FilterList"
-import SpaceGrid from "../components/SpaceGrid"
-import { mockSpaces } from "../data/mockData"
+import { Link } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  Paper,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SpaceGrid from '../components/SpaceGrid';
+import { mockSpaces } from '../data/mockData';
 
 function HomePage() {
   return (
     <Box>
       {/* Hero Section */}
-      <Box className="hero-gradient" sx={{ py: 10, color: "white" }}>
+      <Box className="hero-gradient" sx={{ py: 10, color: 'white' }}>
         <Container maxWidth="lg">
-          <Box sx={{ textAlign: "center", maxWidth: 800, mx: "auto" }}>
+          <Box sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto' }}>
             <Typography variant="h2" component="h1" gutterBottom>
               Find the perfect space for your next event
             </Typography>
             <Typography variant="h5" sx={{ mb: 5, opacity: 0.9 }}>
-              Discover and book unique venues, studios, and meeting spaces without the hassle.
+              Discover and book unique venues, studios, and meeting spaces
+              without the hassle.
             </Typography>
 
             <Paper
               elevation={3}
               sx={{
                 p: 2,
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
                 gap: 1,
                 maxWidth: 600,
-                mx: "auto",
+                mx: 'auto',
               }}
             >
               <TextField
@@ -38,9 +47,11 @@ function HomePage() {
                 fullWidth
                 slotProps={{
                   input: {
-                    startAdornment: <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
                   },
                 }}
                 size="medium"
@@ -50,7 +61,7 @@ function HomePage() {
                 color="primary"
                 sx={{
                   px: 4,
-                  height: { xs: 40, sm: "auto" },
+                  height: { xs: 40, sm: 'auto' },
                   minWidth: { sm: 120 },
                 }}
               >
@@ -62,15 +73,15 @@ function HomePage() {
       </Box>
 
       {/* Main Content */}
-      <Box sx={{ py: 8, bgcolor: "grey.50" }}>
+      <Box sx={{ py: 8, bgcolor: 'grey.50' }}>
         <Container maxWidth="lg">
           {/* Filters */}
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "flex-start", sm: "center" },
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
               mb: 4,
               gap: 2,
             }}
@@ -78,14 +89,26 @@ function HomePage() {
             <Typography variant="h4" component="h2" fontWeight="bold">
               Available Spaces
             </Typography>
-            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <Button variant="outlined" startIcon={<LocationOnIcon />} size="medium">
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="outlined"
+                startIcon={<LocationOnIcon />}
+                size="medium"
+              >
                 Location
               </Button>
-              <Button variant="outlined" startIcon={<CalendarTodayIcon />} size="medium">
+              <Button
+                variant="outlined"
+                startIcon={<CalendarTodayIcon />}
+                size="medium"
+              >
                 Date
               </Button>
-              <Button variant="outlined" startIcon={<FilterListIcon />} size="medium">
+              <Button
+                variant="outlined"
+                startIcon={<FilterListIcon />}
+                size="medium"
+              >
                 Filters
               </Button>
             </Box>
@@ -97,13 +120,23 @@ function HomePage() {
       </Box>
 
       {/* CTA Section */}
-      <Box sx={{ py: 8, bgcolor: "grey.100" }}>
-        <Container maxWidth="lg" sx={{ textAlign: "center" }}>
-          <Typography variant="h3" component="h2" fontWeight="bold" gutterBottom>
+      <Box sx={{ py: 8, bgcolor: 'grey.100' }}>
+        <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            fontWeight="bold"
+            gutterBottom
+          >
             Own a space? List it on our platform
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 700, mx: "auto" }}>
-            Join our community of space owners and start earning from your venue today.
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ mb: 4, maxWidth: 700, mx: 'auto' }}
+          >
+            Join our community of space owners and start earning from your venue
+            today.
           </Typography>
           <Button
             component={Link}
@@ -118,7 +151,7 @@ function HomePage() {
         </Container>
       </Box>
     </Box>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;

@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -16,28 +16,28 @@ import {
   ListItemButton,
   Divider,
   Container,
-} from "@mui/material"
-import MenuIcon from "@mui/icons-material/Menu"
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
 
   // Mock authentication state - replace with actual auth later
-  const isLoggedIn = false
+  const isLoggedIn = false;
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Explore", path: "/spaces" },
-    { name: "How It Works", path: "/how-it-works" },
-  ]
+    { name: 'Home', path: '/' },
+    { name: 'Explore', path: '/spaces' },
+    { name: 'How It Works', path: '/how-it-works' },
+  ];
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
         SpaceHire
       </Typography>
@@ -50,10 +50,10 @@ function Header() {
               to={item.path}
               selected={location.pathname === item.path}
               sx={{
-                textAlign: "center",
-                "&.Mui-selected": {
-                  backgroundColor: "rgba(13, 148, 136, 0.08)",
-                  color: "primary.main",
+                textAlign: 'center',
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                  color: 'primary.main',
                 },
               }}
             >
@@ -64,19 +64,31 @@ function Header() {
         <Divider sx={{ my: 1 }} />
         {isLoggedIn ? (
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="/dashboard" sx={{ textAlign: "center" }}>
+            <ListItemButton
+              component={Link}
+              to="/dashboard"
+              sx={{ textAlign: 'center' }}
+            >
               <ListItemText primary="Dashboard" />
             </ListItemButton>
           </ListItem>
         ) : (
           <>
             <ListItem disablePadding>
-              <ListItemButton component={Link} to="/auth/login" sx={{ textAlign: "center" }}>
+              <ListItemButton
+                component={Link}
+                to="/auth/login"
+                sx={{ textAlign: 'center' }}
+              >
                 <ListItemText primary="Log in" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton component={Link} to="/auth/signup" sx={{ textAlign: "center" }}>
+              <ListItemButton
+                component={Link}
+                to="/auth/signup"
+                sx={{ textAlign: 'center' }}
+              >
                 <ListItemText primary="Sign up" />
               </ListItemButton>
             </ListItem>
@@ -84,7 +96,7 @@ function Header() {
         )}
       </List>
     </Box>
-  )
+  );
 
   return (
     <>
@@ -97,9 +109,9 @@ function Header() {
               to="/"
               sx={{
                 flexGrow: 1,
-                display: { xs: "none", sm: "block" },
+                display: { xs: 'none', sm: 'block' },
                 fontWeight: 700,
-                color: "primary.main",
+                color: 'primary.main',
               }}
             >
               SpaceHire
@@ -110,15 +122,17 @@ function Header() {
               to="/"
               sx={{
                 flexGrow: 1,
-                display: { xs: "block", sm: "none" },
+                display: { xs: 'block', sm: 'none' },
                 fontWeight: 700,
-                color: "primary.main",
+                color: 'primary.main',
               }}
             >
               SpaceHire
             </Typography>
 
-            <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
+            <Box
+              sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}
+            >
               {navLinks.map((item) => (
                 <Button
                   key={item.name}
@@ -126,21 +140,24 @@ function Header() {
                   to={item.path}
                   sx={{
                     mx: 1,
-                    color: location.pathname === item.path ? "primary.main" : "text.primary",
-                    "&:hover": {
-                      backgroundColor: "rgba(13, 148, 136, 0.04)",
+                    color:
+                      location.pathname === item.path
+                        ? 'primary.main'
+                        : 'text.primary',
+                    '&:hover': {
+                      backgroundColor: 'rgba(13, 148, 136, 0.04)',
                     },
-                    position: "relative",
-                    "&::after":
+                    position: 'relative',
+                    '&::after':
                       location.pathname === item.path
                         ? {
                             content: '""',
-                            position: "absolute",
+                            position: 'absolute',
                             bottom: 0,
-                            left: "20%",
-                            width: "60%",
-                            height: "2px",
-                            backgroundColor: "primary.main",
+                            left: '20%',
+                            width: '60%',
+                            height: '2px',
+                            backgroundColor: 'primary.main',
                           }
                         : {},
                   }}
@@ -150,17 +167,27 @@ function Header() {
               ))}
             </Box>
 
-            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 2 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}>
               {isLoggedIn ? (
                 <Button component={Link} to="/dashboard" color="inherit">
                   Dashboard
                 </Button>
               ) : (
                 <>
-                  <Button component={Link} to="/auth/login" color="inherit" sx={{ mr: 1 }}>
+                  <Button
+                    component={Link}
+                    to="/auth/login"
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  >
                     Log in
                   </Button>
-                  <Button component={Link} to="/auth/signup" variant="contained" color="primary">
+                  <Button
+                    component={Link}
+                    to="/auth/signup"
+                    variant="contained"
+                    color="primary"
+                  >
                     Sign up
                   </Button>
                 </>
@@ -172,7 +199,7 @@ function Header() {
               aria-label="open drawer"
               edge="end"
               onClick={handleDrawerToggle}
-              sx={{ display: { md: "none" } }}
+              sx={{ display: { md: 'none' } }}
             >
               <MenuIcon />
             </IconButton>
@@ -188,14 +215,14 @@ function Header() {
           keepMounted: true, // Better open performance on mobile
         }}
         sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
         }}
       >
         {drawer}
       </Drawer>
     </>
-  )
+  );
 }
 
-export default Header
+export default Header;
