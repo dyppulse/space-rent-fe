@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
   FormControlLabel,
+  FormHelperText,
   Checkbox,
   InputAdornment,
   Divider,
@@ -22,21 +23,27 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+import { useRef } from 'react';
+import { postSpace } from '../redux/slices/spaceSlice';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 function NewSpacePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const fileInputRef = useRef(null);
+  const dispatch = useDispatch()
+  const { loading, error } = useSelector(state => state.spaces)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSnackbarOpen(true);
-    }, 1500);
+  const handleClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
+
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -62,6 +69,61 @@ function NewSpacePage() {
     'Dressing Room',
     'Outdoor Space',
   ];
+
+  const validationSchema = yup.object({
+    name: yup.string().required("Required").min(5, "Atleast 5 characters"),
+    spaceType: yup.string().required("Required"),
+    capacity: yup.number().required("Required"),
+    description: yup.string().required(),
+    location: yup.object({
+      address: yup.string().required("Required"),
+      city: yup.string().required("Required"),
+      state: yup.string().required("Required"),
+      zipCode: yup.string().notRequired()
+    }),
+    photos: yup.array().min(6, "Atleast 6"),
+    price: yup.object({
+      amount: yup.number().required("Required"),
+      unit: yup.string().required("Required")
+    }),
+    // minmumBookingDuration: yup.number().required("Required"),
+    // minmumBookingDurationUnit: yup.string().required("Required"),
+    amenities: yup.array().min(1, "Select atleast one")
+  })
+
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      spaceType: "",
+      capacity: null,
+      description: null,
+      location: {
+        address: "",
+        city: "",
+        state: "",
+        zipCode: ""
+      },
+      images: [],
+      price: {
+        amount: "",
+        unit: ""
+      },
+      minmumBookingDuration: null,
+      minmumBookingDurationUnit: "",
+      amenities: []
+    },
+    validationSchema,
+    validateOnBlur: true,
+    validateOnChange: true,
+    validateOnMount: true,
+    onSubmit: (values) => {
+      dispatch(postSpace(values)); // formikValues includes images as File[]
+
+
+    }
+  })
+
+  console.log(formik.values, formik.errors)
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -90,7 +152,7 @@ function NewSpacePage() {
         </Box>
       </Box>
 
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={formik.handleSubmit}>
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Typography variant="h6" gutterBottom>
             Basic Information
@@ -107,6 +169,9 @@ function NewSpacePage() {
                 fullWidth
                 required
                 placeholder="e.g. Modern Downtown Loft"
+                error={formik.errors.name}
+                helperText={formik.errors.name}
+                {...formik.getFieldProps('name')}
               />
             </Grid>
 
@@ -118,13 +183,17 @@ function NewSpacePage() {
                   id="space-type"
                   label="Space Type"
                   defaultValue=""
+                  error={formik.errors.spaceType}
+                  {...formik.getFieldProps('spaceType')}
                 >
                   <MenuItem value="event-venue">Event Venue</MenuItem>
                   <MenuItem value="wedding-venue">Wedding Venue</MenuItem>
                   <MenuItem value="conference-room">Conference Room</MenuItem>
                   <MenuItem value="studio">Studio</MenuItem>
                   <MenuItem value="other">Other</MenuItem>
-                </Select>
+
+                </Select >
+                <FormHelperText error >{formik.errors.spaceType}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -135,6 +204,9 @@ function NewSpacePage() {
                 fullWidth
                 required
                 placeholder="Max number of people"
+                error={formik.errors.capacity}
+                helperText={formik.errors.capacity}
+                {...formik.getFieldProps('capacity')}
               />
             </Grid>
 
@@ -146,6 +218,9 @@ function NewSpacePage() {
                 fullWidth
                 required
                 placeholder="Describe your space in detail..."
+                error={formik.errors.description}
+                helperText={formik.errors.description}
+                {...formik.getFieldProps('description')}
               />
             </Grid>
           </Grid>
@@ -165,21 +240,39 @@ function NewSpacePage() {
               <TextField
                 label="Address"
                 fullWidth
-                required
                 placeholder="Street address"
+                error={formik.errors.location?.address}
+                helperText={formik.errors.location?.address}
+                {...formik.getFieldProps('location.address')}
               />
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 4 }}>
-              <TextField label="City" fullWidth required />
+              <TextField
+                label="City"
+                fullWidth
+                error={formik.errors.location?.city}
+                helperText={formik.errors.location?.city}
+                {...formik.getFieldProps('location.city')}
+              />
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 4 }}>
-              <TextField label="State/Province" fullWidth required />
+              <TextField
+                label="state"
+                fullWidth
+                error={formik.errors.location?.state}
+                helperText={formik.errors.location?.state}
+                {...formik.getFieldProps('location.state')}
+              />
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 4 }}>
-              <TextField label="Zip/Postal Code" fullWidth required />
+              <TextField
+                label="Zip/Postal Code"
+                fullWidth
+                {...formik.getFieldProps('location.zipCode')}
+              />
             </Grid>
           </Grid>
         </Paper>
@@ -194,37 +287,68 @@ function NewSpacePage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={2}>
-            {[1, 2, 3, 4, 5, 6].map((index) => (
-              <Grid item key={index} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Box
-                  sx={{
-                    border: '2px dashed',
-                    borderColor: 'divider',
-                    borderRadius: 2,
-                    p: 2,
-                    height: 140,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      bgcolor: 'action.hover',
-                    },
-                  }}
-                >
-                  <CloudUploadIcon
-                    sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
+            <Grid item xs={12} sm={6} md={4}>
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                multiple
+                onChange={(event) => {
+                  const newFiles = Array.from(event.currentTarget.files);
+                  const existingFiles = formik.values.images || [];
+
+                  const uniqueFiles = [...existingFiles, ...newFiles].filter(
+                    (file, index, self) =>
+                      index === self.findIndex((f) => f.name === file.name && f.lastModified === file.lastModified)
+                  );
+                  formik.setFieldValue("images", uniqueFiles)
+                }} />
+
+              {/* Upload Box */}
+              <Box
+                onClick={handleClick}
+                sx={{
+                  border: '2px dashed',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  p: 2,
+                  height: 140,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                  },
+                }}
+              >
+                <CloudUploadIcon
+                  sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  Upload photo
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              {formik.values.images && formik.values.images.length > 0 &&
+                formik.values.images.map((file, index) => (
+                  <img
+                    key={index}
+                    src={URL.createObjectURL(file)}
+                    alt={`preview-${index}`}
+                    style={{ width: 100, height: 100, objectFit: 'cover', marginRight: 10 }}
                   />
-                  <Typography variant="body2" color="text.secondary">
-                    Upload photo {index}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
+                ))
+              }
+            </Grid>
           </Grid>
+
         </Paper>
 
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -242,29 +366,34 @@ function NewSpacePage() {
                 label="Price"
                 type="number"
                 fullWidth
-                required
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
+                    <InputAdornment position="start">Shs</InputAdornment>
                   ),
                 }}
                 placeholder="0.00"
+                error={formik.errors.price?.amount}
+                helperText={formik.errors.price?.amount}
+                {...formik.getFieldProps('price.amount')}
               />
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth required>
+              <FormControl fullWidth>
                 <InputLabel id="price-unit-label">Per</InputLabel>
                 <Select
                   labelId="price-unit-label"
                   id="price-unit"
                   label="Per"
                   defaultValue=""
+                  error={formik.errors.price?.unit}
+                  {...formik.getFieldProps('price.unit')}
                 >
                   <MenuItem value="hour">Hour</MenuItem>
                   <MenuItem value="day">Day</MenuItem>
                   <MenuItem value="event">Event</MenuItem>
                 </Select>
+                <FormHelperText error>{formik.errors.price?.unit}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -274,6 +403,8 @@ function NewSpacePage() {
                 type="number"
                 fullWidth
                 placeholder="Minimum hours/days"
+                error={formik.errors.minmumBookingDuration}
+                helperText={formik.errors.minmumBookingDuration}
               />
             </Grid>
 
@@ -285,11 +416,13 @@ function NewSpacePage() {
                   id="duration-unit"
                   label="Unit"
                   defaultValue="hours"
+                  error={formik.errors.minmumBookingDurationUnit}
                 >
                   <MenuItem value="hours">Hours</MenuItem>
                   <MenuItem value="days">Days</MenuItem>
                 </Select>
               </FormControl>
+              <FormHelperText error>{formik.errors.minmumBookingDurationUnit}</FormHelperText>
             </Grid>
           </Grid>
         </Paper>
@@ -299,28 +432,42 @@ function NewSpacePage() {
             Amenities
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Select the amenities available at your space
+            Select all amenities that your space provides
           </Typography>
           <Divider sx={{ mb: 3 }} />
-
-          <Grid container spacing={1}>
+          <Grid container spacing={2}>
             {amenities.map((amenity) => (
-              <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={amenity}>
-                <FormControlLabel control={<Checkbox />} label={amenity} />
+              <Grid item xs={6} sm={4} key={amenity}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.amenities.includes(amenity)}
+                      onChange={(e) => {
+                        const { checked } = e.target;
+                        const prev = formik.values.amenities;
+                        if (checked) {
+                          formik.setFieldValue('amenities', [...prev, amenity]);
+                        } else {
+                          formik.setFieldValue(
+                            'amenities',
+                            prev.filter((a) => a !== amenity)
+                          );
+                        }
+                      }}
+                      name="amenities"
+                    />
+                  }
+                  label={amenity}
+                />
               </Grid>
             ))}
-            <Grid item xs={12} sm={6} md={4}>
-              <FormControlLabel control={<Checkbox />} label="Other" />
-            </Grid>
           </Grid>
-
-          <Box sx={{ mt: 2 }}>
-            <Button startIcon={<AddIcon />} variant="outlined" size="small">
-              Add Custom Amenity
-            </Button>
-          </Box>
+          {formik.errors.amenities && (
+            <FormHelperText error sx={{ mt: 1 }}>
+              {formik.errors.amenities}
+            </FormHelperText>
+          )}
         </Paper>
-
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Box
             sx={{
@@ -336,9 +483,10 @@ function NewSpacePage() {
               variant="contained"
               color="primary"
               size="large"
-              disabled={isSubmitting}
+              disabled={!formik.isValid || loading}
             >
-              {isSubmitting ? 'Creating...' : 'Create Listing'}
+
+              {loading ? 'Creating...' : 'Create Listing'}
             </Button>
           </Box>
         </Paper>

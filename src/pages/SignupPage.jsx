@@ -99,7 +99,6 @@ function SignupPage() {
   }, [loading])
 
 
-  console.log(loading, "loadingloadingloading")
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
