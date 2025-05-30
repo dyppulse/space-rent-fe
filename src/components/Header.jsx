@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -16,17 +16,53 @@ import {
   Container,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
 
   // Mock authentication state - replace with actual auth later
-  const isLoggedIn = false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      setIsLoggedIn(true)
+    } else {
+      setIsLoggedIn(false)
+    }
+  }, [localStorage.getItem("token")])
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const logout = () => {
+    Swal.fire({
+      icon: "question",
+      title: "Are You Sure?",
+      html: "Do you want to log out",
+      confirmButtonText: "Yes",
+      showCancelButton: true,
+      confirmButtonColor: "#0d9488",
+      cancelButtonColor: "#CE0610",
+      allowOutsideClick: false,
+      reverseButtons: true,
+      customClass: {
+        container: "my-swal"
+      }
+    }).then((value) => {
+      if (value.isConfirmed) {
+        localStorage.removeItem('token');
+        navigate('/auth/login')
+
+      }
+    })
+  }
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -149,14 +185,14 @@ function Header() {
                     '&::after':
                       location.pathname === item.path
                         ? {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: 0,
-                            left: '20%',
-                            width: '60%',
-                            height: '2px',
-                            backgroundColor: 'primary.main',
-                          }
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 0,
+                          left: '20%',
+                          width: '60%',
+                          height: '2px',
+                          backgroundColor: 'primary.main',
+                        }
                         : {},
                   }}
                 >
@@ -167,9 +203,12 @@ function Header() {
 
             <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}>
               {isLoggedIn ? (
-                <Button component={Link} to="/dashboard" color="inherit">
-                  Dashboard
-                </Button>
+                <Typography display={"flex"} alignItems={"center"}>
+                  <Button component={Link} to="/dashboard" color="inherit">
+                    Dashboard
+                  </Button>
+                  <PowerSettingsNewIcon sx={{ cursor: "pointer" }} onClick={() => logout()} />
+                </Typography>
               ) : (
                 <>
                   <Button

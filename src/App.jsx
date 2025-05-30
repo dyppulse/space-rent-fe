@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
 import { SWRConfig } from 'swr';
 import { swrConfig } from './api/swrConfig';
@@ -82,7 +84,7 @@ const theme = createTheme({
 
 function App() {
   return (
-    <SWRConfig value={swrConfig}>
+    <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
@@ -125,7 +127,7 @@ function App() {
           </div>
         </Router>
       </ThemeProvider>
-    </SWRConfig>
+      </Provider>
   );
 }
 

@@ -17,10 +17,18 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { useAuth } from '../hooks/useAuth';
 import PhoneInputFormik from '../components/PhoneInput';
+import { useDispatch, useSelector } from 'react-redux';
+import { signUp } from '../redux/slices/authSlice';
+import { useEffect } from 'react';
+import Swal from 'sweetalert2';
+import { useState } from 'react';
 
 function SignupPage() {
+  const [swalFire, setSwalFire] = useState(false)
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const dispatch = useDispatch();
+  const { loading, signUpError } = useSelector(state => state?.auth)
+
 
   const validationSchema = yup.object({
     fullName: yup.string().required('Required').min(5, 'At least 5 characters'),
@@ -54,27 +62,44 @@ function SignupPage() {
       phoneNumber: '',
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting, setErrors }) => {
-      try {
-        await register(
-          values.fullName,
-          values.email,
-          values.password,
-          values.phoneNumber
-        );
-
-        navigate('/auth/login');
-      } catch (err) {
-        console.error(err);
-        setErrors({ email: 'Invalid email or password' });
-      } finally {
-        setSubmitting(false);
-      }
-    },
+    onSubmit: (values) => {
+      dispatch(signUp({
+          name: values?.fullName,
+        email: values?.email,
+        password: values?.password,
+        phone: values?.phoneNumber
+      }))
+    }
   });
 
-  console.log(formik.values, 'values');
+  useEffect(() => {
+    if (loading) {
+      setSwalFire(true)
+    }
+    if (swalFire) {
+      if (signUpError) {
+        Swal.fire({
+          icon: "error",
+          title: "Uh Oh Something is Wrong",
+          html: signUpError,
+          confirmButtonText: "Try Again",
+          confirmButtonColor: "#CE0610",
+          allowOutsideClick: false,
+          customClass: {
+            container: "my-swal"
+          }
+        }).then(() => {
+          setSwalFire(false)
+        })
+      } else {
+        navigate('/dashboard')
+        setSwalFire(false)
+      }
+    }
+  }, [loading])
 
+
+  console.log(loading, "loadingloadingloading")
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
@@ -188,6 +213,7 @@ function SignupPage() {
             color="primary"
             size="large"
             sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
           >
             Create account
           </Button>

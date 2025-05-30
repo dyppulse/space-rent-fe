@@ -11,6 +11,11 @@ const axiosInstance = axios.create({
   withCredentials: true, // Optional, if you're using cookies
 });
 
+const unProtectedAxiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
+
+})
+
 // Add a response interceptor
 // axiosInstance.interceptors.response.use(
 //   response => response, // Pass through successful responses
@@ -29,3 +34,4 @@ const axiosInstance = axios.create({
 // );
 
 export default axiosInstance;
+export {unProtectedAxiosInstance}

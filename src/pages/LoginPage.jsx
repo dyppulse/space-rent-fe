@@ -12,36 +12,10 @@ import {
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import { useAuth } from '../hooks/useAuth';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 
 function LoginPage() {
-  const { login, isLoading, error } = useAuth();
 
-  const navigate = useNavigate();
-
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: '',
-    },
-    validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email').required('Email is required'),
-      password: Yup.string().required('Password is required'),
-    }),
-    onSubmit: async (values, { setSubmitting, setErrors }) => {
-      try {
-        await login(values.email, values.password);
-        // Redirect to dashboard or show toast
-        navigate('/dashboard');
-      } catch (err) {
-        console.error(err);
-        setErrors({ email: 'Invalid email or password' });
-      } finally {
-        setSubmitting(false);
-      }
-    },
-  });
+  const {formik, loading, error} = useAuth()
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -113,14 +87,15 @@ function LoginPage() {
             color="primary"
             size="large"
             sx={{ mt: 3, mb: 2 }}
-            disabled={formik.isSubmitting || isLoading}
+            // disabled={formik.isSubmitting || isLoading}
+            disabled={loading}
           >
-            {formik.isSubmitting || isLoading ? 'Logging in...' : 'Log in'}
+            {loading ? 'Logging in...' : 'Log in'}
           </Button>
 
           {error && (
             <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-              {error.message || 'Login failed. Please try again.'}
+              {error || 'Login failed. Please try again.'}
             </Typography>
           )}
 
