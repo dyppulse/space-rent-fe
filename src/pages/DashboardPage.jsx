@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -21,6 +21,9 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SpacesList from '../components/SpacesList';
 import BookingsList from '../components/BookingsList';
 import { mockSpaces, mockBookings } from '../data/mockData';
+import { useDispatch } from 'react-redux';
+import { fetchSpaces } from '../redux/slices/spaceSlice.js'
+import { useSelector } from 'react-redux';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -41,6 +44,9 @@ function TabPanel(props) {
 function DashboardPage() {
   const [tabValue, setTabValue] = useState(0);
 
+  const dispatch = useDispatch();
+  const { list } = useSelector(state => state.spaces)
+
   // Filter spaces for the current user (in a real app, this would be based on the authenticated user)
   const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1');
 
@@ -53,6 +59,10 @@ function DashboardPage() {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
+
+  useEffect(() => {
+    dispatch(fetchSpaces())
+  }, [dispatch])
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -107,7 +117,7 @@ function DashboardPage() {
                 </Typography>
                 <HomeIcon color="action" fontSize="small" />
               </Box>
-              <Typography variant="h4">{userSpaces.length}</Typography>
+              <Typography variant="h4">{list?.spaces?.length}</Typography>
               <Typography variant="caption" color="text.secondary">
                 {userSpaces.length > 0
                   ? '+1 space this month'
@@ -211,8 +221,8 @@ function DashboardPage() {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          {userSpaces.length > 0 ? (
-            <SpacesList spaces={userSpaces} />
+          {list?.spaces?.length > 0 ? (
+            <SpacesList spaces={list.spaces} />
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>

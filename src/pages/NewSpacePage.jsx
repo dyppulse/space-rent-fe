@@ -31,12 +31,11 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
 function NewSpacePage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fileInputRef = useRef(null);
   const dispatch = useDispatch()
-  const { loading, error } = useSelector(state => state.spaces)
+  const { loading } = useSelector(state => state.spaces)
 
   const handleClick = () => {
     if (fileInputRef.current) {

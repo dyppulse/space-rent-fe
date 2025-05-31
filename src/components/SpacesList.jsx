@@ -53,10 +53,10 @@ function SpacesList({ spaces }) {
                   }}
                 >
                   <img
-                    src={space.images[0] || '/placeholder.svg'}
+                    src={space.images[0].url || '/placeholder.svg'}
                     alt={space.name}
                   />
-                  {space.featured && (
+                  {space?.featured && (
                     <Chip
                       label="Featured"
                       color="primary"
@@ -92,7 +92,7 @@ function SpacesList({ spaces }) {
                         {space.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {space.location}
+                        {space.location.address}
                       </Typography>
                     </Box>
                     <IconButton
@@ -154,14 +154,14 @@ function SpacesList({ spaces }) {
                   >
                     <Box>
                       <Typography variant="h6" component="span">
-                        ${space.price}
+                        ${space.price.amount}
                       </Typography>
                       <Typography
                         variant="body2"
                         component="span"
                         color="text.secondary"
                       >
-                        /{space.priceUnit}
+                        /{space.price.unit}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>

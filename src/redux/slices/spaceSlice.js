@@ -3,6 +3,7 @@ import axiosInstance from '../../api/axiosInstance';
 
 const initialState = {
   list: [],
+  selected: null,
   loading: false,
   error: null,
 };
@@ -43,11 +44,17 @@ const appendFormData = (formData, data, parentKey = '') => {
   });
 };
 
-
-
-
-
-
+export const getSpace = createAsyncThunk(
+  'spaces/getById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/spaces/${id}`);
+      return res.data.space;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 
 export const postSpace = createAsyncThunk(
   'spaces/create',
@@ -65,6 +72,7 @@ export const postSpace = createAsyncThunk(
       }
 
       // 2️⃣  Append everything else
+      // eslint-disable-next-line no-unused-vars
       const { images, ...rest } = values;
       appendFormData(formData, rest);
       for (let pair of formData.entries()) {
@@ -81,11 +89,6 @@ export const postSpace = createAsyncThunk(
     }
   }
 );
-
-
-
-
-
 
 
 const spaceSlice = createSlice({
@@ -106,6 +109,7 @@ const spaceSlice = createSlice({
         state.loading = false;
         state.error = 'Error loading spaces';
       })
+
       .addCase(postSpace.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -117,7 +121,22 @@ const spaceSlice = createSlice({
       .addCase(postSpace.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Error creating space';
-      });;
+      })
+
+      .addCase(getSpace.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.selected = null;
+      })
+      .addCase(getSpace.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selected = action.payload;
+      })
+      .addCase(getSpace.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Error fetching space';
+        state.selected = null;
+      });
   },
 });
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -13,10 +13,11 @@ import {
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PeopleIcon from '@mui/icons-material/People';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+// import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BookingForm from '../components/BookingForm';
-import { mockSpaces } from '../data/mockData';
+import { useDispatch, useSelector } from 'react-redux';
+import { getSpace } from '../redux/slices/spaceSlice'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -35,15 +36,18 @@ function TabPanel(props) {
 }
 
 function SpaceDetailPage() {
+  const dispatch = useDispatch();
+  const { selected: space, loading } = useSelector(state => state.spaces)
   const { id } = useParams();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
 
-  // Find the space from mock data
-  const space = mockSpaces.find((space) => space.id === id);
+  useEffect(() => {
+    dispatch(getSpace(id))
+  }, [dispatch, id])
 
   // If space not found, redirect to spaces page
-  if (!space) {
+  if (!loading && !space) {
     navigate('/spaces');
     return null;
   }
@@ -52,18 +56,20 @@ function SpaceDetailPage() {
     setTabValue(newValue);
   };
 
+  
+
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Grid container spacing={4}>
         {/* Left column - Space details */}
         <Grid item size={{ xs: 12, md: 8 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            {space.name}
+            {space?.name}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
             <LocationOnIcon color="action" sx={{ mr: 1 }} />
             <Typography variant="body1" color="text.secondary">
-              {space.location}
+              {space?.location?.address}
             </Typography>
           </Box>
 
@@ -84,12 +90,12 @@ function SpaceDetailPage() {
                   }}
                 >
                   <img
-                    src={space.images[0] || '/placeholder.svg'}
-                    alt={space.name}
+                    src={space?.images[0].url || '/placeholder.svg'}
+                    alt={space?.name}
                   />
                 </Box>
               </Grid>
-              {space.images.slice(1, 5).map((image, index) => (
+              {space?.images?.slice(1, 5).map((image, index) => (
                 <Grid item key={index} size={{ xs: 6, sm: 3 }}>
                   <Box
                     sx={{
@@ -104,8 +110,8 @@ function SpaceDetailPage() {
                     }}
                   >
                     <img
-                      src={image || '/placeholder.svg'}
-                      alt={`${space.name} ${index + 1}`}
+                      src={image?.url || '/placeholder.svg'}
+                      alt={`${space?.name} ${index + 1}`}
                     />
                   </Box>
                 </Grid>
@@ -135,16 +141,16 @@ function SpaceDetailPage() {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <PeopleIcon color="action" sx={{ mr: 1 }} />
-                    <Typography>Capacity: {space.capacity} people</Typography>
+                    <Typography>Capacity: {space?.capacity} people</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <AccessTimeIcon color="action" sx={{ mr: 1 }} />
                     <Typography>
-                      ${space.price}/{space.priceUnit}
+                      ${space.price}/{space?.price?.unit}
                     </Typography>
-                  </Box>
+                  </Box> */}
                   <Chip
-                    label={space.type}
+                    label={space?.spaceType}
                     color="primary"
                     sx={{
                       bgcolor: 'rgba(13, 148, 136, 0.1)',
@@ -156,17 +162,17 @@ function SpaceDetailPage() {
                 <Typography variant="h6" gutterBottom>
                   Description
                 </Typography>
-                <Typography paragraph>{space.description}</Typography>
+                <Typography paragraph>{space?.description}</Typography>
 
                 <Typography variant="h6" gutterBottom>
                   Space Details
                 </Typography>
                 <Typography paragraph>
-                  This {space.type.toLowerCase()} is available for bookings.
+                  This {space?.spaceType?.toLowerCase()} is available for bookings.
                   Perfect for
-                  {space.type === 'Event Venue'
+                  {space?.spaceType === 'Event Venue'
                     ? ' events, parties, and gatherings'
-                    : space.type === 'Conference Room'
+                    : space?.spaceType === 'Conference Room'
                       ? ' meetings, workshops, and presentations'
                       : ' creative work, photoshoots, and productions'}
                   .
@@ -176,7 +182,7 @@ function SpaceDetailPage() {
 
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={2}>
-                {space.amenities.map((amenity) => (
+                {space?.amenities?.map((amenity) => (
                   <Grid item key={amenity} size={{ xs: 12, sm: 6 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <CheckCircleIcon color="primary" sx={{ mr: 1 }} />
@@ -189,7 +195,7 @@ function SpaceDetailPage() {
 
             <TabPanel value={tabValue} index={2}>
               <Typography paragraph>
-                Located in {space.location}. Detailed directions will be
+                Located in {space?.location?.address}. Detailed directions will be
                 provided after booking.
               </Typography>
               <Box
@@ -209,13 +215,13 @@ function SpaceDetailPage() {
             </TabPanel>
 
             <TabPanel value={tabValue} index={3}>
-              {space.rating ? (
+              {space?.rating ? (
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <Typography variant="h4" component="span" sx={{ mr: 2 }}>
-                      {space.rating}
+                      {space?.rating}
                     </Typography>
-                    <Rating value={space.rating} precision={0.5} readOnly />
+                    <Rating value={space?.rating} precision={0.5} readOnly />
                   </Box>
                   <Typography color="text.secondary">
                     Reviews will be displayed here.
@@ -236,9 +242,9 @@ function SpaceDetailPage() {
                 Book this space
               </Typography>
               <BookingForm
-                spaceId={space.id}
-                price={space.price}
-                priceUnit={space.priceUnit}
+                spaceId={space?.id}
+                price={space?.price?.amount}
+                priceUnit={space?.price?.unit}
               />
             </Paper>
           </Box>
