@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../redux/slices/authSlice";
 import Swal from 'sweetalert2';
 import * as Yup from 'yup';
+import axiosInstance from '../api/axiosInstance'
 
 
 
@@ -59,12 +60,12 @@ export const useAuth = () => {
 
   const logout = async () => {
     await axiosInstance.post('/auth/logout');
-    // await mutate(null); // Clear session
     localStorage.removeItem('token');
   };
 
   return {
     formik,
-    loading, error
+    loading, error,
+    logout
   };
 };

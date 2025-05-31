@@ -20,11 +20,11 @@ const formattedCountries = countries.map((country) => ({
 }));
 
 // Get flag emoji from country code
-function getFlagEmoji(code) {
-  return code
-    .toUpperCase()
-    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
-}
+// function getFlagEmoji(code) {
+//   return code
+//     .toUpperCase()
+//     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+// }
 
 export default function PhoneInputFormik({ formik, formikValue }) {
   //   const formik = useFormik({

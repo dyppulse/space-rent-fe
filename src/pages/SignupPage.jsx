@@ -15,7 +15,6 @@ import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { useAuth } from '../hooks/useAuth';
 import PhoneInputFormik from '../components/PhoneInput';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../redux/slices/authSlice';
@@ -96,7 +95,7 @@ function SignupPage() {
         setSwalFire(false)
       }
     }
-  }, [loading])
+  }, [loading, navigate, signUpError, swalFire])
 
 
   return (
