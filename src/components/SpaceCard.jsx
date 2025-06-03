@@ -141,7 +141,7 @@ function SpaceCard({ space }) {
             </Typography>
           </Box>
           <Chip
-            label={space.type}
+            label={space.spaceType}
             size="small"
             sx={{
               bgcolor: 'rgba(13, 148, 136, 0.1)',
