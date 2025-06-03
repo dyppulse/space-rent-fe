@@ -22,7 +22,7 @@ import SpacesList from '../components/SpacesList';
 import BookingsList from '../components/BookingsList';
 import { mockSpaces, mockBookings } from '../data/mockData';
 import { useDispatch } from 'react-redux';
-import { fetchSpaces } from '../redux/slices/spaceSlice.js'
+import { fetchMySpaces } from '../redux/slices/spaceSlice.js'
 import { useSelector } from 'react-redux';
 
 function TabPanel(props) {
@@ -61,7 +61,7 @@ function DashboardPage() {
   };
 
   useEffect(() => {
-    dispatch(fetchSpaces())
+    dispatch(fetchMySpaces())
   }, [dispatch])
 
   return (
