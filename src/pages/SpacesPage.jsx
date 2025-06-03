@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import {
   Box,
   Container,
@@ -14,29 +14,79 @@ import {
   Slider,
   ToggleButtonGroup,
   ToggleButton,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import GridViewIcon from '@mui/icons-material/GridView';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import SpaceGrid from '../components/SpaceGrid';
-import { mockSpaces } from '../data/mockData';
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import GridViewIcon from '@mui/icons-material/GridView'
+import ViewListIcon from '@mui/icons-material/ViewList'
+import SpaceGrid from '../components/SpaceGrid'
+import { useDispatch } from 'react-redux'
+import { useEffect } from 'react'
+import { fetchSpaces } from '../redux/slices/spaceSlice'
+import { useSelector } from 'react-redux'
 
 function SpacesPage() {
-  const [viewMode, setViewMode] = useState('grid');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [viewMode, setViewMode] = useState('grid')
+  const [priceRange, setPriceRange] = useState([0, 10000000])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [spaceType, setSpaceType] = useState('all')
+  const [sort, setSort] = useState('recommended')
+  const [capacity, setCapacity] = useState('any')
+
+  const dispatch = useDispatch()
+  const { list } = useSelector((state) => state.spaces)
 
   const handleViewModeChange = (event, newMode) => {
     if (newMode !== null) {
-      setViewMode(newMode);
+      setViewMode(newMode)
     }
-  };
+  }
 
   const handlePriceRangeChange = (event, newValue) => {
-    setPriceRange(newValue);
-  };
+    setPriceRange(newValue)
+  }
+
+  const handleSpaceTypeChange = (event) => {
+    setSpaceType(event.target.value)
+  }
+
+  const handleSearchTermChange = (event) => {
+    console.log(event.target.value, 'event.target.value')
+    setSearchTerm(event.target.value)
+  }
+
+  const handleSortByChange = (event) => {
+    setSort(event.target.value)
+  }
+
+  const handleCapacityChange = (event) => {
+    setCapacity(event.target.value)
+  }
+
+  // ✅ Immediate fetch on mount — no debounce
+  useEffect(() => {
+    dispatch(fetchSpaces())
+  }, [dispatch])
+
+  // ✅ Debounced fetch on filters
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      dispatch(
+        fetchSpaces({
+          search: searchTerm,
+          spaceType,
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          sort,
+          capacity,
+        })
+      )
+    }, 500) // Debounce delay
+
+    return () => clearTimeout(handler) // Cleanup timeout
+  }, [searchTerm, spaceType, priceRange, sort, capacity, dispatch])
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -65,6 +115,7 @@ function SpacesPage() {
                 </InputAdornment>
               ),
             }}
+            onChange={handleSearchTermChange}
           />
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <Button
@@ -100,6 +151,7 @@ function SpacesPage() {
                 id="space-type"
                 value="all"
                 label="Space Type"
+                onChange={handleSpaceTypeChange}
               >
                 <MenuItem value="all">All Types</MenuItem>
                 <MenuItem value="event-venue">Event Venue</MenuItem>
@@ -118,6 +170,7 @@ function SpacesPage() {
                 id="capacity"
                 value="any"
                 label="Capacity"
+                onChange={handleCapacityChange}
               >
                 <MenuItem value="any">Any Size</MenuItem>
                 <MenuItem value="small">Small (1-20)</MenuItem>
@@ -138,7 +191,7 @@ function SpacesPage() {
                 onChange={handlePriceRangeChange}
                 valueLabelDisplay="auto"
                 min={0}
-                max={1000}
+                max={1000000000} // we can get the max from all bookings, an additional endpoint can do this
                 step={50}
                 aria-labelledby="price-range-slider"
               />
@@ -147,7 +200,7 @@ function SpacesPage() {
                   $0
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  $1000+
+                  UGX 1,000,000,000
                 </Typography>
               </Box>
             </Box>
@@ -161,6 +214,7 @@ function SpacesPage() {
                 id="sort-by"
                 value="recommended"
                 label="Sort By"
+                onChange={handleSortByChange}
               >
                 <MenuItem value="recommended">Recommended</MenuItem>
                 <MenuItem value="price-low">Price: Low to High</MenuItem>
@@ -182,9 +236,7 @@ function SpacesPage() {
           mb: 3,
         }}
       >
-        <Typography variant="h6">
-          {mockSpaces.length} spaces available
-        </Typography>
+        <Typography variant="h6">{list?.spaces?.length} spaces available</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
             View:
@@ -206,9 +258,9 @@ function SpacesPage() {
         </Box>
       </Box>
 
-      <SpaceGrid spaces={mockSpaces} />
+      <SpaceGrid spaces={list} />
     </Container>
-  );
+  )
 }
 
-export default SpacesPage;
+export default SpacesPage
