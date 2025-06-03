@@ -1,26 +1,36 @@
-import { Box, Paper, Typography, Chip, Button, Divider } from '@mui/material';
+import { useState } from 'react';
+import { Box, Paper, Typography, Chip, Button, Divider, Snackbar, Alert } from '@mui/material';
 import { format } from 'date-fns';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { updateBookingStatus } from '../redux/slices/bookingSlice';
 
-function BookingsList({ bookings, spaces }) {
-  // Helper function to get space name by ID
-  const getSpaceName = (spaceId) => {
-    const space = spaces.find((s) => s.id === spaceId);
-    return space ? space.name : 'Unknown Space';
-  };
-
+function BookingsList({ bookings }) {
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [alertType, setAlertType] = useState('success');
+  const [chosenAction, setChosenAction] = useState('');
+  const dispatch = useDispatch();
+  const { loading } = useSelector(state => state.bookings)
   // Group bookings by status
-  const pendingBookings = bookings.filter((b) => b.status === 'pending');
-  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
+  const pendingBookings = bookings?.filter((b) => b.status === 'pending');
+  const confirmedBookings = bookings?.filter((b) => b.status === 'confirmed');
   const pastBookings = bookings.filter(
     (b) => b.status === 'cancelled' || b.status === 'completed'
   );
 
+  const handleBooking = async ({ status, bookingId }) => {
+    await dispatch(updateBookingStatus({ status, id: bookingId })).unwrap();
+    setAlertType(status === "confirmed" ? 'success' : 'warning');
+    setChosenAction(status === "confirmed" ? 'Booking request confirmed!' : 'Booking request cancelled!')
+    setSnackbarOpen(true);
+  }
+
   const renderBookingCard = (booking) => {
     return (
       <Paper
-        key={booking.id}
+        key={booking?._id}
         variant="outlined"
         sx={{ mb: 2, p: 3, borderRadius: 2 }}
       >
@@ -34,11 +44,11 @@ function BookingsList({ bookings, spaces }) {
         >
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Typography variant="h6">{booking.customerName}</Typography>
+              <Typography variant="h6">{booking.clientName}</Typography>
               <Chip
                 label={
-                  booking.status.charAt(0).toUpperCase() +
-                  booking.status.slice(1)
+                  booking?.status?.charAt(0).toUpperCase() +
+                  booking?.status?.slice(1)
                 }
                 size="small"
                 color={
@@ -68,14 +78,14 @@ function BookingsList({ bookings, spaces }) {
               />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              {getSpaceName(booking.spaceId)}
+              {(booking?.space.name)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {format(new Date(booking.eventDate), 'MMMM d, yyyy')} •{' '}
-              {booking.startTime} - {booking.endTime}
+              {format(new Date(booking.eventDate), "EEEE, MMMM do yyyy")} •{' '}
+              {format(new Date(booking.startTime), "hh:mm a")} - {format(new Date(booking.endTime), "hh:mm a")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {booking.customerEmail} • {booking.customerPhone}
+              {booking.clientEmail} • {booking.customerPhone}
             </Typography>
           </Box>
 
@@ -88,7 +98,7 @@ function BookingsList({ bookings, spaces }) {
             }}
           >
             <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-              <Typography variant="h6">${booking.totalPrice}</Typography>
+              <Typography variant="h6">UGX {booking.totalPrice}</Typography>
               <Typography variant="caption" color="text.secondary">
                 Total price
               </Typography>
@@ -101,6 +111,8 @@ function BookingsList({ bookings, spaces }) {
                   color="error"
                   size="small"
                   startIcon={<CloseIcon />}
+                  onClick={() => handleBooking({ status: 'cancelled', bookingId: booking._id })}
+                  disabled={loading}
                 >
                   Decline
                 </Button>
@@ -109,6 +121,8 @@ function BookingsList({ bookings, spaces }) {
                   color="success"
                   size="small"
                   startIcon={<CheckIcon />}
+                  onClick={() => handleBooking({ status: 'confirmed', bookingId: booking._id })}
+                  disabled={loading}
                 >
                   Accept
                 </Button>
@@ -171,6 +185,15 @@ function BookingsList({ bookings, spaces }) {
           </Typography>
         </Paper>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert severity={alertType} sx={{ width: '100%' }} onClose={() => setSnackbarOpen(false)}>
+          {chosenAction}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

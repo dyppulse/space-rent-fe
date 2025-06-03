@@ -56,6 +56,19 @@ export const getSpace = createAsyncThunk(
   }
 );
 
+export const fetchMySpaces = createAsyncThunk(
+  'spaces/fetchMySpaces',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get('/spaces/owner/my-spaces');
+      return res.data; // assume it's an array of spaces
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+
 export const postSpace = createAsyncThunk(
   'spaces/create',
   /**
@@ -136,7 +149,21 @@ const spaceSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Error fetching space';
         state.selected = null;
+      })
+
+      .addCase(fetchMySpaces.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMySpaces.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(fetchMySpaces.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Error fetching your spaces';
       });
+      
   },
 });
 
