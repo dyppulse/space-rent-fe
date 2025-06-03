@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
+  Backdrop,
   Box,
+  CircularProgress,
   Container,
   Typography,
   TextField,
@@ -25,17 +27,20 @@ import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { useRef } from 'react';
 import { postSpace } from '../redux/slices/spaceSlice';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 function NewSpacePage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fileInputRef = useRef(null);
+  const [swalFire, setSwalFire] = useState(false)
+  const navigate = useNavigate()
+
   const dispatch = useDispatch()
-  const { loading } = useSelector(state => state.spaces)
+  const { loading, error } = useSelector(state => state.spaces)
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -80,7 +85,7 @@ function NewSpacePage() {
       state: yup.string().required("Required"),
       zipCode: yup.string().notRequired()
     }),
-    photos: yup.array().min(6, "Atleast 6"),
+    images: yup.array().min(6, "Atleast 6"),
     price: yup.object({
       amount: yup.number().required("Required"),
       unit: yup.string().required("Required")
@@ -122,7 +127,36 @@ function NewSpacePage() {
     }
   })
 
-  console.log(formik.values, formik.errors)
+  console.log(loading, "dhjdhjdhdjhdjdhj", error)
+
+  useEffect(() => {
+    if (loading) {
+      setSwalFire(true)
+    }
+    if (swalFire) {
+      if (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Uh Oh Something is Wrong",
+          html: error,
+          confirmButtonText: "Try Again",
+          confirmButtonColor: "#CE0610",
+          allowOutsideClick: false,
+          customClass: {
+            container: "my-swal"
+          }
+        }).then(() => {
+          setSwalFire(false)
+        })
+      } else {
+        navigate('/dashboard')
+        setSnackbarOpen(true)
+        setSwalFire(false)
+      }
+    }
+  }, [loading])
+
+
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -347,7 +381,7 @@ function NewSpacePage() {
               }
             </Grid>
           </Grid>
-
+            <Typography color='error'>{formik.errors.images}</Typography>
         </Paper>
 
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -505,6 +539,18 @@ function NewSpacePage() {
           listings.
         </Alert>
       </Snackbar>
+      <Backdrop
+        sx={{
+          color: "#fff",
+          zIndex: theme => theme.zIndex.drawer + 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+        <span>updating....</span>
+      </Backdrop>
     </Container>
   );
 }

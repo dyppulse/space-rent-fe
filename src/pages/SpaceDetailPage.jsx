@@ -90,7 +90,7 @@ function SpaceDetailPage() {
                   }}
                 >
                   <img
-                    src={space?.images[0].url || '/placeholder.svg'}
+                    src={space?.images[0]?.url || '/placeholder.svg'}
                     alt={space?.name}
                   />
                 </Box>

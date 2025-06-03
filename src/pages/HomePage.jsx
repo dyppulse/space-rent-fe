@@ -14,8 +14,19 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SpaceGrid from '../components/SpaceGrid';
 import { mockSpaces } from '../data/mockData';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSpaces } from '../redux/slices/spaceSlice';
 
 function HomePage() {
+
+  const dispatch = useDispatch()
+  const { list } = useSelector(state => state.spaces)
+
+  console.log(list, "dhdkhdjhdjhdj",)
+  useEffect(() => {
+    dispatch(fetchSpaces())
+  }, [dispatch])
   return (
     <Box>
       {/* Hero Section */}
@@ -115,7 +126,7 @@ function HomePage() {
           </Box>
 
           {/* Space Grid */}
-          <SpaceGrid spaces={mockSpaces.slice(0, 6)} />
+          <SpaceGrid spaces={list?.spaces?.slice(0, 6) ?? []} />
         </Container>
       </Box>
 
