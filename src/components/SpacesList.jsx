@@ -53,7 +53,7 @@ function SpacesList({ spaces }) {
                   }}
                 >
                   <img
-                    src={space.images[0].url || '/placeholder.svg'}
+                    src={space.images[0]?.url ?? '/placeholder.svg'}
                     alt={space.name}
                   />
                   {space?.featured && (
@@ -154,7 +154,7 @@ function SpacesList({ spaces }) {
                   >
                     <Box>
                       <Typography variant="h6" component="span">
-                        ${space.price.amount}
+                        shs {space.price.amount}
                       </Typography>
                       <Typography
                         variant="body2"

@@ -30,7 +30,7 @@ function SpaceCard({ space }) {
         <CardMedia
           component="img"
           height="200"
-          image={space.images[0] || '/placeholder.svg'}
+          image={space.images[0]?.url || '/placeholder.svg'}
           alt={space.name}
         />
         {space.featured && (
@@ -83,7 +83,7 @@ function SpaceCard({ space }) {
         >
           <LocationOnIcon fontSize="small" sx={{ mr: 0.5 }} />
           <Typography variant="body2" noWrap>
-            {space.location}
+            {space.location?.address}
           </Typography>
         </Box>
 
@@ -134,10 +134,10 @@ function SpaceCard({ space }) {
         >
           <Box>
             <Typography variant="h6" component="span">
-              ${space.price}
+              ${space.price?.amount}
             </Typography>
             <Typography variant="body2" component="span" color="text.secondary">
-              /{space.priceUnit}
+              /{space.price?.unit}
             </Typography>
           </Box>
           <Chip
