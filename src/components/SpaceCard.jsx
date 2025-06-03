@@ -1,14 +1,6 @@
-import { Link } from 'react-router-dom';
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Box,
-  Chip,
-  Rating,
-} from '@mui/material';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { Link } from 'react-router-dom'
+import { Card, CardContent, CardMedia, Typography, Box, Chip, Rating } from '@mui/material'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
 
 function SpaceCard({ space }) {
   return (
@@ -47,9 +39,7 @@ function SpaceCard({ space }) {
           />
         )}
       </Box>
-      <CardContent
-        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
-      >
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box
           sx={{
             display: 'flex',
@@ -63,12 +53,7 @@ function SpaceCard({ space }) {
           </Typography>
           {space.rating && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Rating
-                value={space.rating}
-                precision={0.5}
-                size="small"
-                readOnly
-              />
+              <Rating value={space.rating} precision={0.5} size="small" readOnly />
             </Box>
           )}
         </Box>
@@ -134,7 +119,7 @@ function SpaceCard({ space }) {
         >
           <Box>
             <Typography variant="h6" component="span">
-              ${space.price?.amount}
+              UGX {space.price?.amount}
             </Typography>
             <Typography variant="body2" component="span" color="text.secondary">
               /{space.price?.unit}
@@ -152,7 +137,7 @@ function SpaceCard({ space }) {
         </Box>
       </CardContent>
     </Card>
-  );
+  )
 }
 
-export default SpaceCard;
+export default SpaceCard
