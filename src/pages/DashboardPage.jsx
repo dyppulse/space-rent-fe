@@ -20,9 +20,10 @@ import PeopleIcon from '@mui/icons-material/People';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SpacesList from '../components/SpacesList';
 import BookingsList from '../components/BookingsList';
-import { mockSpaces, mockBookings } from '../data/mockData';
+import { mockSpaces } from '../data/mockData';
 import { useDispatch } from 'react-redux';
 import { fetchMySpaces } from '../redux/slices/spaceSlice.js'
+import { fetchOwnerBookings } from '../redux/slices/bookingSlice.js'
 import { useSelector } from 'react-redux';
 
 function TabPanel(props) {
@@ -46,22 +47,18 @@ function DashboardPage() {
 
   const dispatch = useDispatch();
   const { list } = useSelector(state => state.spaces)
+  const { list: userBookings } = useSelector(state => state.bookings);
 
   // Filter spaces for the current user (in a real app, this would be based on the authenticated user)
   const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1');
-
-  // Filter bookings for the user's spaces
-  const userSpaceIds = userSpaces.map((space) => space.id);
-  const userBookings = mockBookings.filter((booking) =>
-    userSpaceIds.includes(booking.spaceId)
-  );
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
   useEffect(() => {
-    dispatch(fetchMySpaces())
+    dispatch(fetchMySpaces());
+    dispatch(fetchOwnerBookings());
   }, [dispatch])
 
   return (
@@ -246,7 +243,7 @@ function DashboardPage() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          {userBookings.length > 0 ? (
+          {userBookings?.length > 0 ? (
             <BookingsList bookings={userBookings} spaces={userSpaces} />
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>

@@ -38,6 +38,7 @@ function TabPanel(props) {
 function SpaceDetailPage() {
   const dispatch = useDispatch();
   const { selected: space, loading } = useSelector(state => state.spaces)
+  const { user } = useSelector(state => state.auth);
   const { id } = useParams();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
@@ -56,7 +57,7 @@ function SpaceDetailPage() {
     setTabValue(newValue);
   };
 
-  
+
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -235,7 +236,7 @@ function SpaceDetailPage() {
         </Grid>
 
         {/* Right column - Booking form */}
-        <Grid item size={{ xs: 12, md: 4 }}>
+        {space?.owner !== user?.userId && (<Grid item size={{ xs: 12, md: 4 }}>
           <Box sx={{ position: { md: 'sticky' }, top: 24 }}>
             <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
               <Typography variant="h5" gutterBottom>
@@ -248,7 +249,7 @@ function SpaceDetailPage() {
               />
             </Paper>
           </Box>
-        </Grid>
+        </Grid>)}
       </Grid>
     </Container>
   );

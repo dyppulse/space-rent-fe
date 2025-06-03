@@ -19,11 +19,14 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { useDispatch } from 'react-redux';
+import { logout as authSliceLogout } from '../redux/slices/authSlice';
 
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
 
   // Mock authentication state - replace with actual auth later
@@ -58,6 +61,7 @@ function Header() {
     }).then((value) => {
       if (value.isConfirmed) {
         localStorage.removeItem('token');
+        dispatch(authSliceLogout());
         navigate('/auth/login')
 
       }

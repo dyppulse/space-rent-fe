@@ -13,75 +13,102 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { createBooking } from '../redux/slices/bookingSlice';
 
 function BookingForm({ spaceId, price, priceUnit }) {
-  const [date, setDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const dispatch = useDispatch()
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+  const formik = useFormik({
+    initialValues: {
+      clientName: '',
+      clientEmail: '',
+      clientPhone: '',
+      eventDate: null,
+      startTime: null,
+      endTime: null,
+      details: '',
+    },
+    validationSchema: Yup.object({
+      clientName: Yup.string().required('Required'),
+      clientEmail: Yup.string().email('Invalid email').required('Required'),
+      clientPhone: Yup.string().required('Required'),
+      eventDate: Yup.date().required('Required').nullable(),
+      startTime: Yup.date().required('Required').nullable(),
+      endTime: Yup.date().required('Required').nullable(),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      await dispatch(createBooking({ ...values, spaceId })).unwrap()
       setSnackbarOpen(true);
-    }, 1500);
-  };
+      resetForm?.();
+    },
+  });
 
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
+  console.log(formik.errors, 'firmike errors')
+  console.log(formik.values, 'firmike vaues')
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+      <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: '100%' }}>
         <Box sx={{ mb: 3 }}>
           <TextField
             size="small"
             label="Full Name"
+            name="clientName"
             fullWidth
             margin="normal"
-            required
             placeholder="Your name"
+            value={formik.values.clientName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.clientName && Boolean(formik.errors.clientName)}
+            helperText={formik.touched.clientName && formik.errors.clientName}
           />
           <TextField
             size="small"
             label="Email"
             type="email"
+            name="clientEmail"
             fullWidth
             margin="normal"
-            required
             placeholder="your@email.com"
+            value={formik.values.clientEmail}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.clientEmail && Boolean(formik.errors.clientEmail)}
+            helperText={formik.touched.clientEmail && formik.errors.clientEmail}
           />
           <TextField
             size="small"
             label="Phone Number"
+            name="clientPhone"
             fullWidth
             margin="normal"
-            required
-            placeholder="(123) 456-7890"
+            placeholder="0700000000"
+            value={formik.values.clientPhone}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.clientPhone && Boolean(formik.errors.clientPhone)}
+            helperText={formik.touched.clientPhone && formik.errors.clientPhone}
           />
         </Box>
 
         <Box sx={{ mb: 3 }}>
           <DatePicker
             label="Event Date"
-            value={date}
-            onChange={(newDate) => setDate(newDate)}
+            value={formik.values.eventDate}
+            onChange={(value) => formik.setFieldValue('eventDate', value)}
             renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
                 margin="normal"
-                required
                 size="small"
+                error={formik.touched.eventDate && Boolean(formik.errors.eventDate)}
+                helperText={formik.touched.eventDate && formik.errors.eventDate}
               />
             )}
             disablePast
@@ -90,14 +117,15 @@ function BookingForm({ spaceId, price, priceUnit }) {
           <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <TimePicker
               label="Start Time"
-              value={startTime}
-              onChange={(newTime) => setStartTime(newTime)}
+              value={formik.values.startTime}
+              onChange={(value) => formik.setFieldValue('startTime', value)}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   fullWidth
-                  required
                   size="small"
+                  error={formik.touched.startTime && Boolean(formik.errors.startTime)}
+                  helperText={formik.touched.startTime && formik.errors.startTime}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -110,13 +138,15 @@ function BookingForm({ spaceId, price, priceUnit }) {
             />
             <TimePicker
               label="End Time"
-              value={endTime}
-              onChange={(newTime) => setEndTime(newTime)}
+              value={formik.values.endTime}
+              onChange={(value) => formik.setFieldValue('endTime', value)}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   fullWidth
-                  required
+                  size="small"
+                  error={formik.touched.endTime && Boolean(formik.errors.endTime)}
+                  helperText={formik.touched.endTime && formik.errors.endTime}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -132,11 +162,14 @@ function BookingForm({ spaceId, price, priceUnit }) {
 
         <TextField
           label="Event Details"
+          name="details"
           multiline
           rows={3}
           fullWidth
           margin="normal"
-          placeholder="Tell us about your event (type, number of guests, special requirements, etc.)"
+          placeholder="Tell us about your event"
+          value={formik.values.details}
+          onChange={formik.handleChange}
         />
 
         <Box sx={{ mt: 3, pt: 2 }}>
@@ -145,7 +178,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
               Price
             </Typography>
             <Typography variant="body1" fontWeight="medium">
-              ${price}/{priceUnit}
+              UGX {price}/{priceUnit}
             </Typography>
           </Box>
 
@@ -155,9 +188,9 @@ function BookingForm({ spaceId, price, priceUnit }) {
             color="primary"
             fullWidth
             size="large"
-            disabled={isSubmitting}
+            disabled={formik.isSubmitting}
           >
-            {isSubmitting ? 'Submitting...' : 'Request to Book'}
+            {formik.isSubmitting ? 'Submitting...' : 'Request to Book'}
           </Button>
 
           <Typography
@@ -173,14 +206,10 @@ function BookingForm({ spaceId, price, priceUnit }) {
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
+          onClose={() => setSnackbarOpen(false)}
         >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity="success"
-            sx={{ width: '100%' }}
-          >
-            Booking request submitted! The space owner will contact you shortly.
+          <Alert severity="success" sx={{ width: '100%' }} onClose={() => setSnackbarOpen(false)}>
+            Booking request submitted!
           </Alert>
         </Snackbar>
       </Box>
