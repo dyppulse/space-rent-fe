@@ -2,9 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axiosInstance, { unProtectedAxiosInstance } from '../../api/axiosInstance'
 
 const initialState = {
-  list: [],
+  list: {spaces: []},
   selected: null,
   loading: false,
+  updating: false,
   error: null,
 }
 
@@ -95,9 +96,6 @@ export const postSpace = createAsyncThunk(
       // eslint-disable-next-line no-unused-vars
       const { images, ...rest } = values
       appendFormData(formData, rest)
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}:`, pair[1])
-      }
 
       const res = await axiosInstance.post('/spaces', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -110,10 +108,54 @@ export const postSpace = createAsyncThunk(
   }
 )
 
+export const updateSpace = createAsyncThunk(
+  'spaces/edit',
+  /**
+   * @param {object} values  – Full Formik values { name, description, images, ... }
+   * @param {*} thunkAPI
+   */
+  async ({ values, id }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData()
+      if (values.newImages && values.newImages.length) {
+        values.newImages.forEach((file) => formData.append('newImages', file))
+      }
+      // eslint-disable-next-line no-unused-vars
+      const { newImages, ...rest } = values
+      appendFormData(formData, rest)
+
+      const res = await axiosInstance.patch(`/spaces/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
+      console.log(res, "resesese")
+      return res.data // newly created space object
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message)
+    }
+  }
+)
+
+
+export const deleteSpace = createAsyncThunk(
+  'spaces/delete',
+  /**
+   * @param {string} spaceId – The ID of the space to delete
+   * @param {*} thunkAPI
+   */
+  async (spaceId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.delete(`/spaces/${spaceId}`)
+      return res.data // success message or deleted space ID
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message)
+    }
+  }
+)
+
 const spaceSlice = createSlice({
   name: 'spaces',
   initialState,
-  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchSpaces.pending, (state) => {
@@ -135,7 +177,7 @@ const spaceSlice = createSlice({
       })
       .addCase(postSpace.fulfilled, (state, action) => {
         state.loading = false
-        state.list.push(action.payload) // add the new space
+        state.list.spaces.push(action.payload?.space) // add the new space
       })
       .addCase(postSpace.rejected, (state, action) => {
         state.loading = false
@@ -169,7 +211,45 @@ const spaceSlice = createSlice({
         state.loading = false
         state.error = action.payload || 'Error fetching your spaces'
       })
+
+      .addCase(deleteSpace.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteSpace.fulfilled, (state, action) => {
+        state.loading = false
+        const deletedId = action.meta.arg // The space ID we passed
+        state.list.spaces = state.list.spaces.filter((space) => space._id !== deletedId)
+        state.list.count -= 1
+      })
+      .addCase(deleteSpace.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || 'Error deleting space'
+      })
+      .addCase(updateSpace.pending, (state) => {
+        state.updating = true
+        state.error = null
+      })
+      .addCase(updateSpace.fulfilled, (state, action) => {
+        state.updating = false
+        const updatedSpace = action.payload
+        // Update in list
+        const index = state.list.spaces.findIndex(space => space._id === updatedSpace._id)
+        if (index !== -1) {
+          state.list.spaces[index] = updatedSpace
+        }
+        // Also update selected if it's the same space
+        if (state.selected?._id === updatedSpace._id) {
+          state.selected = updatedSpace
+        }
+      })
+      .addCase(updateSpace.rejected, (state, action) => {
+        state.updating = false
+        state.error = action.payload || 'Error updating space'
+      })
+
   },
 })
+export const { storeSpaceData } = spaceSlice.actions
 
 export default spaceSlice.reducer

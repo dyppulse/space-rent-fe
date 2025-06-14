@@ -166,14 +166,14 @@ function DashboardPage() {
                 <AttachMoneyIcon color="action" fontSize="small" />
               </Box>
               <Typography variant="h4">
-                $
+                UGX 
                 {userBookings.reduce(
                   (sum, booking) => sum + booking.totalPrice,
                   0
                 )}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                +$1,200 from last month
+                + UGX 1,200 from last month
               </Typography>
             </CardContent>
           </Paper>

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Backdrop,
   Box,
+  CircularProgress,
   Card,
   CardContent,
   Typography,
@@ -13,15 +15,24 @@ import {
   ListItemIcon,
   ListItemText,
   Grid,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteSpace } from '../redux/slices/spaceSlice';
+import { useState } from 'react';
 
 function SpacesList({ spaces }) {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [selectedSpaceId, setSelectedSpaceId] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedSpaceId, setSelectedSpaceId] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const dispatch = useDispatch();
+  const { loading } = useSelector(state => state.spaces)
 
   const handleMenuOpen = (event, spaceId) => {
     setAnchorEl(event.currentTarget);
@@ -33,11 +44,25 @@ function SpacesList({ spaces }) {
     setSelectedSpaceId(null);
   };
 
+  const deleteMySpace = (id) => {
+    setAnchorEl(null);
+    setSelectedSpaceId(null);
+    dispatch(deleteSpace(id))
+  }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+  console.log(spaces, "dklddldjdkdjk")
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {spaces.map((space) => (
         <Card key={space.id} variant="outlined" sx={{ overflow: 'hidden' }}>
           <CardContent sx={{ p: 0 }}>
+            {console.log(space?.images, "djdhdjhdjdhjdhj")}
             <Grid container>
               <Grid item size={{ xs: 12, sm: 4, md: 3 }}>
                 <Box
@@ -53,8 +78,8 @@ function SpacesList({ spaces }) {
                   }}
                 >
                   <img
-                    src={space.images[0]?.url ?? '/placeholder.svg'}
-                    alt={space.name}
+                    src={space?.images?.[0]?.url ?? '/placeholder.svg'}
+                    alt={space?.name}
                   />
                   {space?.featured && (
                     <Chip
@@ -216,13 +241,39 @@ function SpacesList({ spaces }) {
           </ListItemIcon>
           <ListItemText>Edit</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={() => deleteMySpace(selectedSpaceId)} sx={{ color: 'error.main' }}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" color="error" />
           </ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
       </Menu>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          Space Deleted successfully! Your new space has been removed from your
+          listings.
+        </Alert>
+      </Snackbar>
+      <Backdrop
+        sx={{
+          color: "#fff",
+          zIndex: theme => theme.zIndex.drawer + 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+        <span>deleting....</span>
+      </Backdrop>
     </Box>
   );
 }
