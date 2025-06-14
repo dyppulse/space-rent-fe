@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Backdrop,
   Box,
+  IconButton,
   CircularProgress,
   Container,
   Typography,
@@ -27,20 +28,21 @@ import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { postSpace } from '../redux/slices/spaceSlice';
+import { getSpace, postSpace, updateSpace } from '../redux/slices/spaceSlice';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 
-function NewSpacePage() {
+function EditSpace() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fileInputRef = useRef(null);
+  const { id } = useParams()
   const [swalFire, setSwalFire] = useState(false)
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
-  const { loading, error } = useSelector(state => state.spaces)
+  const { updating, error, selected } = useSelector(state => state.spaces)
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -48,6 +50,9 @@ function NewSpacePage() {
     }
   };
 
+  useEffect(() => {
+    dispatch(getSpace(id))
+  }, [dispatch, id])
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -85,7 +90,7 @@ function NewSpacePage() {
       state: yup.string().required("Required"),
       zipCode: yup.string().notRequired()
     }),
-    images: yup.array().min(6, "Atleast 6"),
+    images: yup.array().min(1, "Atleast 1"),
     price: yup.object({
       amount: yup.number().required("Required"),
       unit: yup.string().required("Required")
@@ -95,41 +100,32 @@ function NewSpacePage() {
     amenities: yup.array().min(1, "Select atleast one")
   })
 
+
   const formik = useFormik({
-    initialValues: {
-      name: "",
-      spaceType: "",
-      capacity: null,
-      description: null,
-      location: {
-        address: "",
-        city: "",
-        state: "",
-        zipCode: ""
-      },
-      images: [],
-      price: {
-        amount: "",
-        unit: ""
-      },
-      minmumBookingDuration: null,
-      minmumBookingDurationUnit: "",
-      amenities: []
-    },
+    initialValues: {...selected, imagesToremove: []},
     validationSchema,
     validateOnBlur: true,
     validateOnChange: true,
     validateOnMount: true,
+    enableReinitialize: true,
     onSubmit: (values) => {
-      dispatch(postSpace(values)); // formikValues includes images as File[]
+      console.log(values, "sjdkjdkdjkdjk")
+      const newImages = values.images.filter(
+        (obj) => obj.file instanceof File
+      ).map(image => image.file) 
+      // console.log(newImages, "newImages")
+      delete values.images
+      dispatch(updateSpace({id, values: {...values, newImages}}))
+           // dispatch(postSpace(values)); 
+      // formikValues includes images as File[]
 
 
     }
   })
 
-
+  console.log(formik.values, "djdkjdkjdkjdk", updating)
   useEffect(() => {
-    if (loading) {
+    if (updating) {
       setSwalFire(true)
     }
     if (swalFire) {
@@ -153,7 +149,7 @@ function NewSpacePage() {
         setSwalFire(false)
       }
     }
-  }, [loading])
+  }, [updating])
 
 
 
@@ -176,10 +172,10 @@ function NewSpacePage() {
         </Button>
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
-            Add New Space
+            Edit Space
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Create a new listing for your space
+            Edit a listing for your space
           </Typography>
         </Box>
       </Box>
@@ -323,20 +319,26 @@ function NewSpacePage() {
               {/* Hidden File Input */}
               <input
                 type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
                 multiple
-                onChange={(event) => {
-                  const newFiles = Array.from(event.currentTarget.files);
-                  const existingFiles = formik.values.images || [];
+                accept="image/*"
+                style={{ display: 'none' }}
+                ref={fileInputRef}
+                onChange={(e) => {
+                  const newFiles = Array.from(e.target.files);
+                  const newImageObjects = newFiles.map(file => ({
+                    file,
+                    preview: URL.createObjectURL(file)
+                  }));
 
-                  const uniqueFiles = [...existingFiles, ...newFiles].filter(
-                    (file, index, self) =>
-                      index === self.findIndex((f) => f.name === file.name && f.lastModified === file.lastModified)
-                  );
-                  formik.setFieldValue("images", uniqueFiles)
-                }} />
+                  formik.setFieldValue('images', [
+                    ...formik.values.images,
+                    ...newImageObjects
+                  ]);
+                }}
+              />
+              <Button onClick={() => fileInputRef.current.click()}>
+                Add Images
+              </Button>
 
               {/* Upload Box */}
               <Box
@@ -367,20 +369,44 @@ function NewSpacePage() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              {formik.values.images && formik.values.images.length > 0 &&
-                formik.values.images.map((file, index) => (
-                  <img
-                    key={index}
-                    src={URL.createObjectURL(file)}
-                    alt={`preview-${index}`}
-                    style={{ width: 100, height: 100, objectFit: 'cover', marginRight: 10 }}
-                  />
-                ))
-              }
+            <Grid item xs={12}>
+              <Grid container spacing={2}>
+                {formik?.values?.images?.map((image, index) => {
+                  const imageUrl = image.url || image.preview;
+                  return (
+                    <Grid item key={index}>
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <img
+                          src={imageUrl}
+                          alt={`preview-${index}`}
+                          style={{ width: 100, height: 100, objectFit: 'cover' }}
+                        />
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newImages = [...formik.values.images];
+                            const removed = newImages.splice(index, 1);
+                            formik.setFieldValue('images', newImages);
+                            formik.setFieldValue("imagesToremove", [...formik.values.imagesToremove, removed[0]?.public_id])
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            background: 'rgba(255,255,255,0.7)'
+                          }}
+                        >
+                          ❌
+                        </IconButton>
+                      </div>
+                    </Grid>
+                  );
+                })}
+              </Grid>
             </Grid>
+
           </Grid>
-            <Typography color='error'>{formik.errors.images}</Typography>
+          <Typography color='error'>{formik.errors.images}</Typography>
         </Paper>
 
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -473,10 +499,10 @@ function NewSpacePage() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={formik.values.amenities.includes(amenity)}
+                      checked={formik?.values?.amenities?.includes(amenity)}
                       onChange={(e) => {
                         const { checked } = e.target;
-                        const prev = formik.values.amenities;
+                        const prev = formik?.values?.amenities;
                         if (checked) {
                           formik.setFieldValue('amenities', [...prev, amenity]);
                         } else {
@@ -494,7 +520,7 @@ function NewSpacePage() {
               </Grid>
             ))}
           </Grid>
-          {formik.errors.amenities && (
+          {formik?.errors?.amenities && (
             <FormHelperText error sx={{ mt: 1 }}>
               {formik.errors.amenities}
             </FormHelperText>
@@ -515,10 +541,10 @@ function NewSpacePage() {
               variant="contained"
               color="primary"
               size="large"
-              disabled={!formik.isValid || loading}
+              disabled={!formik.isValid || updating}
             >
 
-              {loading ? 'Creating...' : 'Create Listing'}
+              {updating ? 'Updating...' : 'Update Space'}
             </Button>
           </Box>
         </Paper>
@@ -545,7 +571,7 @@ function NewSpacePage() {
           display: "flex",
           flexDirection: "column",
         }}
-        open={loading}
+        open={updating}
       >
         <CircularProgress color="inherit" />
         <span>updating....</span>
@@ -554,4 +580,4 @@ function NewSpacePage() {
   );
 }
 
-export default NewSpacePage;
+export default EditSpace;

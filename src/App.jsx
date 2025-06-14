@@ -19,6 +19,7 @@ import NotFound from './pages/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import EditSpace from './pages/EditSpace';
 
 // Create a theme
 const theme = createTheme({
@@ -96,6 +97,13 @@ function App() {
                 <Route path="/how-it-works" element={<HowItWorksPage />} />
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/signup" element={<SignupPage />} />
+                <Route path='/dashboard/spaces/:id/edit'
+                  element={
+                    <PrivateRoute>
+                      <EditSpace />
+                    </PrivateRoute>
+                  }
+                />
 
                 {/* Protected Routes */}
                 <Route

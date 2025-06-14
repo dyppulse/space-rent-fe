@@ -126,7 +126,7 @@ function HomePage() {
           </Box>
 
           {/* Space Grid */}
-          <SpaceGrid spaces={list?.spaces?.slice(0, 6) ?? []} />
+          <SpaceGrid spaces={list?.spaces ?? list?.slice(0, 6) ?? []} />
         </Container>
       </Box>
 
