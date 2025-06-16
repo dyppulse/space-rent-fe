@@ -2,8 +2,9 @@ import axios from 'axios';
 
 const token = localStorage.getItem('token');
 
+const apiUrl = import.meta.env.VITE_API_URL
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
   headers: {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -12,7 +13,7 @@ const axiosInstance = axios.create({
 });
 
 const unProtectedAxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
 
 })
 
