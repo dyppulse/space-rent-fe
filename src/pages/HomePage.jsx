@@ -13,7 +13,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SpaceGrid from '../components/SpaceGrid';
-import { mockSpaces } from '../data/mockData';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSpaces } from '../redux/slices/spaceSlice';
