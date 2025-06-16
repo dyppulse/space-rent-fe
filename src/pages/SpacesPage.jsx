@@ -149,7 +149,7 @@ function SpacesPage() {
               <Select
                 labelId="space-type-label"
                 id="space-type"
-                value="all"
+                value={spaceType}
                 label="Space Type"
                 onChange={handleSpaceTypeChange}
               >
@@ -168,7 +168,7 @@ function SpacesPage() {
               <Select
                 labelId="capacity-label"
                 id="capacity"
-                value="any"
+                value={capacity}
                 label="Capacity"
                 onChange={handleCapacityChange}
               >
