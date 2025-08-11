@@ -20,7 +20,17 @@ function HomePage() {
   return (
     <Box>
       {/* Hero Section */}
-      <Box className="hero-gradient" sx={{ py: 10, color: 'white' }}>
+      <Box
+        sx={(theme) => ({
+          position: 'relative',
+          py: 10,
+          color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.text.primary,
+          backgroundImage:
+            theme.palette.mode === 'dark'
+              ? 'radial-gradient(1000px 500px at 20% 0%, rgba(255,56,92,0.15), transparent 60%), linear-gradient(180deg, #0F0F10 0%, #151516 100%)'
+              : 'radial-gradient(1000px 500px at 20% 0%, rgba(255,56,92,0.08), transparent 60%), linear-gradient(180deg, #FFF8FA 0%, #FFFFFF 100%)',
+        })}
+      >
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto' }}>
             <Typography variant="h2" component="h1" gutterBottom>
@@ -73,7 +83,7 @@ function HomePage() {
       </Box>
 
       {/* Main Content */}
-      <Box sx={{ py: 8, bgcolor: 'grey.50' }}>
+      <Box sx={{ py: 8, bgcolor: 'background.default' }}>
         <Container maxWidth="lg">
           {/* Filters */}
           <Box
@@ -114,7 +124,7 @@ function HomePage() {
       </Box>
 
       {/* CTA Section */}
-      <Box sx={{ py: 8, bgcolor: 'grey.100' }}>
+      <Box sx={{ py: 8, bgcolor: 'background.paper', borderTop: 1, borderColor: 'divider' }}>
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
           <Typography variant="h3" component="h2" fontWeight="bold" gutterBottom>
             Own a space? List it on our platform

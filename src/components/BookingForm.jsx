@@ -1,11 +1,22 @@
 import { useMemo, useState } from 'react'
-import { Box, TextField, Button, Typography, InputAdornment, Snackbar, Alert } from '@mui/material'
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  InputAdornment,
+  Snackbar,
+  Alert,
+  IconButton,
+} from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useDispatch } from 'react-redux'
@@ -26,15 +37,26 @@ function BookingForm({ spaceId, price, priceUnit }) {
       eventDate: null,
       startTime: null,
       endTime: null,
+      checkInDate: null,
+      checkOutDate: null,
+      guests: 1,
       details: '',
     },
     validationSchema: Yup.object({
       clientName: Yup.string().required('Required'),
       clientEmail: Yup.string().email('Invalid email').required('Required'),
       clientPhone: Yup.string().required('Required'),
-      eventDate: Yup.date().required('Required').nullable(),
-      startTime: Yup.date().required('Required').nullable(),
-      endTime: Yup.date().required('Required').nullable(),
+      eventDate:
+        priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+      startTime:
+        priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+      endTime:
+        priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+      checkInDate:
+        priceUnit === 'day' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+      checkOutDate:
+        priceUnit === 'day' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+      guests: Yup.number().min(1).max(50),
     }),
     onSubmit: async (values, { resetForm }) => {
       await dispatch(createBooking({ ...values, spaceId })).unwrap()
@@ -52,33 +74,50 @@ function BookingForm({ spaceId, price, priceUnit }) {
   }
 
   const { durationHours, durationDays, totalPrice } = useMemo(() => {
-    const eventDate = formik.values.eventDate
-    const start = combineDateAndTime(eventDate, formik.values.startTime)
-    const end = combineDateAndTime(eventDate, formik.values.endTime)
-    if (!start || !end || isNaN(start) || isNaN(end)) {
-      return { durationHours: 0, durationDays: 0, totalPrice: 0 }
+    let hours = 0
+    let days = 0
+    if (priceUnit === 'hour') {
+      const eventDate = formik.values.eventDate
+      const start = combineDateAndTime(eventDate, formik.values.startTime)
+      const end = combineDateAndTime(eventDate, formik.values.endTime)
+      if (start && end && !isNaN(start) && !isNaN(end)) {
+        const minutes = Math.max(0, differenceInMinutes(end, start))
+        hours = Math.ceil(minutes / 60)
+        days = Math.ceil(hours / 24)
+      }
+    } else if (priceUnit === 'day') {
+      const inD = formik.values.checkInDate ? new Date(formik.values.checkInDate) : null
+      const outD = formik.values.checkOutDate ? new Date(formik.values.checkOutDate) : null
+      if (inD && outD && !isNaN(inD) && !isNaN(outD)) {
+        const diffMs = Math.max(0, outD.setHours(0, 0, 0, 0) - inD.setHours(0, 0, 0, 0))
+        days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
+        hours = days * 24
+      }
     }
-    const minutes = Math.max(0, differenceInMinutes(end, start))
-    const hours = Math.ceil(minutes / 60)
-    const days = Math.ceil(hours / 24)
-
     let total = 0
     if (priceUnit === 'hour') total = Math.max(1, hours) * (price || 0)
     else if (priceUnit === 'day') total = Math.max(1, days) * (price || 0)
     else total = price || 0
     return { durationHours: hours, durationDays: days, totalPrice: total }
-  }, [formik.values.eventDate, formik.values.startTime, formik.values.endTime, price, priceUnit])
+  }, [
+    formik.values.eventDate,
+    formik.values.startTime,
+    formik.values.endTime,
+    formik.values.checkInDate,
+    formik.values.checkOutDate,
+    price,
+    priceUnit,
+  ])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box component="form" onSubmit={formik.handleSubmit} sx={{ width: '100%' }}>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 2 }}>
           <TextField
             size="small"
-            label="Full Name"
+            label="Full name"
             name="clientName"
             fullWidth
-            margin="normal"
             placeholder="Your name"
             value={formik.values.clientName}
             onChange={formik.handleChange}
@@ -86,33 +125,33 @@ function BookingForm({ spaceId, price, priceUnit }) {
             error={formik.touched.clientName && Boolean(formik.errors.clientName)}
             helperText={formik.touched.clientName && formik.errors.clientName}
           />
-          <TextField
-            size="small"
-            label="Email"
-            type="email"
-            name="clientEmail"
-            fullWidth
-            margin="normal"
-            placeholder="your@email.com"
-            value={formik.values.clientEmail}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.clientEmail && Boolean(formik.errors.clientEmail)}
-            helperText={formik.touched.clientEmail && formik.errors.clientEmail}
-          />
-          <TextField
-            size="small"
-            label="Phone Number"
-            name="clientPhone"
-            fullWidth
-            margin="normal"
-            placeholder="0700000000"
-            value={formik.values.clientPhone}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.clientPhone && Boolean(formik.errors.clientPhone)}
-            helperText={formik.touched.clientPhone && formik.errors.clientPhone}
-          />
+          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+            <TextField
+              size="small"
+              label="Email"
+              type="email"
+              name="clientEmail"
+              fullWidth
+              placeholder="your@email.com"
+              value={formik.values.clientEmail}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.clientEmail && Boolean(formik.errors.clientEmail)}
+              helperText={formik.touched.clientEmail && formik.errors.clientEmail}
+            />
+            <TextField
+              size="small"
+              label="Phone"
+              name="clientPhone"
+              fullWidth
+              placeholder="0700000000"
+              value={formik.values.clientPhone}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.clientPhone && Boolean(formik.errors.clientPhone)}
+              helperText={formik.touched.clientPhone && formik.errors.clientPhone}
+            />
+          </Box>
         </Box>
 
         <Box sx={{ mb: 3 }}>
@@ -185,12 +224,11 @@ function BookingForm({ spaceId, price, priceUnit }) {
         </Box>
 
         <TextField
-          label="Event Details"
+          label="Event details"
           name="details"
           multiline
           rows={3}
           fullWidth
-          margin="normal"
           placeholder="Tell us about your event"
           value={formik.values.details}
           onChange={formik.handleChange}

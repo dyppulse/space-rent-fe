@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { useEffect, useMemo, useState } from 'react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Provider } from 'react-redux'
 import store from './redux/store'
@@ -23,66 +24,134 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import EditSpace from './pages/EditSpace'
 
-// Create a theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#0d9488', // teal-600
-      light: '#14b8a6', // teal-500
-      dark: '#0f766e', // teal-700
-      contrastText: '#ffffff',
+function useMode() {
+  const getInitial = () => {
+    const saved = localStorage.getItem('theme-mode')
+    if (saved === 'light' || saved === 'dark') return saved
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+  }
+  const [mode, setMode] = useState(getInitial)
+  useEffect(() => {
+    localStorage.setItem('theme-mode', mode)
+    document.documentElement.setAttribute('data-color-scheme', mode)
+  }, [mode])
+  return { mode, setMode }
+}
+
+function buildTheme(mode) {
+  const isDark = mode === 'dark'
+  return createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: '#FF385C',
+        light: '#FF6B82',
+        dark: '#E11D48',
+        contrastText: '#ffffff',
+      },
+      secondary: {
+        main: isDark ? '#EAEAEA' : '#222222',
+        light: isDark ? '#FFFFFF' : '#3C3C3C',
+        dark: isDark ? '#C7C7C7' : '#000000',
+        contrastText: isDark ? '#000000' : '#ffffff',
+      },
+      background: {
+        default: isDark ? '#141414' : '#ffffff',
+        paper: isDark ? '#1A1A1A' : '#ffffff',
+      },
+      text: {
+        primary: isDark ? '#FFFFFF' : '#222222',
+        secondary: isDark ? '#B0B0B0' : '#717171',
+      },
+      divider: isDark ? 'rgba(255,255,255,0.12)' : '#EAEAEA',
     },
-    secondary: {
-      main: '#f5f5f5', // light gray
-      contrastText: '#0d9488',
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+      h1: { fontWeight: 700 },
+      h2: { fontWeight: 700 },
+      h3: { fontWeight: 600 },
+      h4: { fontWeight: 600 },
+      button: { textTransform: 'none' },
     },
-    background: {
-      default: '#ffffff',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontWeight: 700,
-    },
-    h2: {
-      fontWeight: 700,
-    },
-    h3: {
-      fontWeight: 600,
-    },
-    h4: {
-      fontWeight: 600,
-    },
-    button: {
-      textTransform: 'none',
-    },
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          padding: '8px 16px',
+    shape: { borderRadius: 8 },
+    components: {
+      MuiTextField: {
+        defaultProps: { variant: 'outlined' },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            backgroundColor: isDark ? '#1F1F1F' : '#fff',
+            transition: 'box-shadow 120ms ease, border-color 120ms ease',
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#e0e0e0',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.35)' : '#9e9e9e',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#FF385C',
+              boxShadow: isDark
+                ? '0 0 0 3px rgba(255, 56, 92, 0.2)'
+                : '0 0 0 3px rgba(255, 56, 92, 0.15)',
+            },
+          },
+          input: { padding: '14px 14px' },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: { borderRadius: 8, padding: '8px 16px' },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.6)' : '0 4px 12px rgba(0,0,0,0.06)',
+            backgroundColor: isDark ? '#1A1A1A' : '#fff',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundColor: isDark ? '#1A1A1A' : '#fff',
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          colorDefault: {
+            backgroundColor: isDark ? '#1A1A1A' : '#fff',
+          },
+        },
+      },
+      MuiList: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'transparent',
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: isDark ? '#1A1A1A' : '#fff',
+          },
         },
       },
     },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-        },
-      },
-    },
-  },
-})
+  })
+}
 
 function App() {
+  const { mode, setMode } = useMode()
+  const theme = useMemo(() => buildTheme(mode), [mode])
+  const toggleTheme = () => setMode((m) => (m === 'light' ? 'dark' : 'light'))
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
@@ -90,7 +159,7 @@ function App() {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Router>
             <div className="app">
-              <Header />
+              <Header onToggleTheme={toggleTheme} mode={mode} />
 
               <main>
                 <Routes>
