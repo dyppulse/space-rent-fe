@@ -9,6 +9,7 @@ import BookingForm from '../components/BookingForm'
 import { useDispatch, useSelector } from 'react-redux'
 import { getSpace } from '../redux/slices/spaceSlice'
 import DetailSkeleton from '../components/ui/skeletons/DetailSkeleton'
+import ImageGallery from '../components/ImageGallery'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props
@@ -74,45 +75,7 @@ function SpaceDetailPage() {
 
           {/* Image gallery */}
           <Box sx={{ mb: 4 }}>
-            <Grid container spacing={2}>
-              <Grid item size={{ xs: 12 }}>
-                <Box
-                  sx={{
-                    height: 400,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    '& img': {
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    },
-                  }}
-                >
-                  <img src={space?.images[0]?.url || '/placeholder.svg'} alt={space?.name} />
-                </Box>
-              </Grid>
-              {space?.images?.slice(1, 5).map((image, index) => (
-                <Grid item key={index} size={{ xs: 6, sm: 3 }}>
-                  <Box
-                    sx={{
-                      height: 120,
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      '& img': {
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      },
-                    }}
-                  >
-                    <img
-                      src={image?.url || '/placeholder.svg'}
-                      alt={`${space?.name} ${index + 1}`}
-                    />
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
+            <ImageGallery images={space?.images || []} name={space?.name} />
           </Box>
 
           {/* Tabs for details */}

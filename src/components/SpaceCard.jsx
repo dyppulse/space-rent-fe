@@ -1,5 +1,15 @@
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardMedia, Typography, Box, Chip, Rating } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Box,
+  Chip,
+  Rating,
+  IconButton,
+} from '@mui/material'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 
 function SpaceCard({ space }) {
@@ -25,6 +35,18 @@ function SpaceCard({ space }) {
           image={space.images[0]?.url || '/placeholder.svg'}
           alt={space.name}
         />
+        <IconButton
+          aria-label="save"
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            bgcolor: 'rgba(255,255,255,0.9)',
+            '&:hover': { bgcolor: 'white' },
+          }}
+        >
+          <FavoriteBorderIcon fontSize="small" />
+        </IconButton>
         {space.featured && (
           <Chip
             label="Featured"
@@ -33,7 +55,7 @@ function SpaceCard({ space }) {
             sx={{
               position: 'absolute',
               top: 8,
-              right: 8,
+              left: 8,
               fontWeight: 'medium',
             }}
           />

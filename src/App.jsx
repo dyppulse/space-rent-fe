@@ -3,6 +3,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Provider } from 'react-redux'
 import store from './redux/store'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -85,53 +87,55 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <div className="app">
-            <Header />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Router>
+            <div className="app">
+              <Header />
 
-            <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/spaces" element={<SpacesPage />} />
-                <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-                <Route path="/how-it-works" element={<HowItWorksPage />} />
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/signup" element={<SignupPage />} />
-                <Route
-                  path="/dashboard/spaces/:id/edit"
-                  element={
-                    <PrivateRoute>
-                      <EditSpace />
-                    </PrivateRoute>
-                  }
-                />
+              <main>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/spaces" element={<SpacesPage />} />
+                  <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+                  <Route path="/how-it-works" element={<HowItWorksPage />} />
+                  <Route path="/auth/login" element={<LoginPage />} />
+                  <Route path="/auth/signup" element={<SignupPage />} />
+                  <Route
+                    path="/dashboard/spaces/:id/edit"
+                    element={
+                      <PrivateRoute>
+                        <EditSpace />
+                      </PrivateRoute>
+                    }
+                  />
 
-                {/* Protected Routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <PrivateRoute>
-                      <DashboardPage />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard/spaces/new"
-                  element={
-                    <PrivateRoute>
-                      <NewSpacePage />
-                    </PrivateRoute>
-                  }
-                />
+                  {/* Protected Routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <PrivateRoute>
+                        <DashboardPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/spaces/new"
+                    element={
+                      <PrivateRoute>
+                        <NewSpacePage />
+                      </PrivateRoute>
+                    }
+                  />
 
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
+                  {/* 404 */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
 
-            <Footer />
-          </div>
-        </Router>
+              <Footer />
+            </div>
+          </Router>
+        </LocalizationProvider>
       </ThemeProvider>
     </Provider>
   )
