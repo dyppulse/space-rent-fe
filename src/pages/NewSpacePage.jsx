@@ -1,9 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  Backdrop,
   Box,
-  CircularProgress,
   Container,
   Typography,
   TextField,
@@ -21,40 +19,40 @@ import {
   Divider,
   Snackbar,
   Alert,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { useFormik } from 'formik';
-import * as yup from 'yup';
-import { postSpace } from '../redux/slices/spaceSlice';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import Swal from 'sweetalert2';
+} from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AddIcon from '@mui/icons-material/Add'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import { postSpace } from '../redux/slices/spaceSlice'
+import { useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
+import Swal from 'sweetalert2'
 
 function NewSpacePage() {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null)
   const [swalFire, setSwalFire] = useState(false)
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
-  const { loading, error } = useSelector(state => state.spaces)
+  const { loading, error } = useSelector((state) => state.spaces)
 
   const handleClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click();
+      fileInputRef.current.click()
     }
-  };
-
+  }
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
-      return;
+      return
     }
-    setSnackbarOpen(false);
-  };
+    setSnackbarOpen(false)
+  }
 
   const amenities = [
     'WiFi',
@@ -72,61 +70,58 @@ function NewSpacePage() {
     'Tables/Chairs',
     'Dressing Room',
     'Outdoor Space',
-  ];
+  ]
 
   const validationSchema = yup.object({
-    name: yup.string().required("Required").min(5, "Atleast 5 characters"),
-    spaceType: yup.string().required("Required"),
-    capacity: yup.number().required("Required"),
+    name: yup.string().required('Required').min(5, 'Atleast 5 characters'),
+    spaceType: yup.string().required('Required'),
+    capacity: yup.number().required('Required'),
     description: yup.string().required(),
     location: yup.object({
-      address: yup.string().required("Required"),
-      city: yup.string().required("Required"),
-      state: yup.string().required("Required"),
-      zipCode: yup.string().notRequired()
+      address: yup.string().required('Required'),
+      city: yup.string().required('Required'),
+      state: yup.string().required('Required'),
+      zipCode: yup.string().notRequired(),
     }),
-    images: yup.array().min(6, "Atleast 6"),
+    images: yup.array().min(6, 'Atleast 6'),
     price: yup.object({
-      amount: yup.number().required("Required"),
-      unit: yup.string().required("Required")
+      amount: yup.number().required('Required'),
+      unit: yup.string().required('Required'),
     }),
     // minmumBookingDuration: yup.number().required("Required"),
     // minmumBookingDurationUnit: yup.string().required("Required"),
-    amenities: yup.array().min(1, "Select atleast one")
+    amenities: yup.array().min(1, 'Select atleast one'),
   })
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      spaceType: "",
+      name: '',
+      spaceType: '',
       capacity: null,
       description: null,
       location: {
-        address: "",
-        city: "",
-        state: "",
-        zipCode: ""
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
       },
       images: [],
       price: {
-        amount: "",
-        unit: ""
+        amount: '',
+        unit: '',
       },
       minmumBookingDuration: null,
-      minmumBookingDurationUnit: "",
-      amenities: []
+      minmumBookingDurationUnit: '',
+      amenities: [],
     },
     validationSchema,
     validateOnBlur: true,
     validateOnChange: true,
     validateOnMount: true,
     onSubmit: (values) => {
-      dispatch(postSpace(values)); // formikValues includes images as File[]
-
-
-    }
+      dispatch(postSpace(values)) // formikValues includes images as File[]
+    },
   })
-
 
   useEffect(() => {
     if (loading) {
@@ -135,15 +130,15 @@ function NewSpacePage() {
     if (swalFire) {
       if (error) {
         Swal.fire({
-          icon: "error",
-          title: "Uh Oh Something is Wrong",
+          icon: 'error',
+          title: 'Uh Oh Something is Wrong',
           html: error,
-          confirmButtonText: "Try Again",
-          confirmButtonColor: "#CE0610",
+          confirmButtonText: 'Try Again',
+          confirmButtonColor: '#CE0610',
           allowOutsideClick: false,
           customClass: {
-            container: "my-swal"
-          }
+            container: 'my-swal',
+          },
         }).then(() => {
           setSwalFire(false)
         })
@@ -153,9 +148,7 @@ function NewSpacePage() {
         setSwalFire(false)
       }
     }
-  }, [loading])
-
-
+  }, [error, loading, navigate, swalFire])
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -166,12 +159,7 @@ function NewSpacePage() {
           mb: 4,
         }}
       >
-        <Button
-          component={Link}
-          to="/dashboard"
-          startIcon={<ArrowBackIcon />}
-          sx={{ mr: 2 }}
-        >
+        <Button component={Link} to="/dashboard" startIcon={<ArrowBackIcon />} sx={{ mr: 2 }}>
           Back
         </Button>
         <Box>
@@ -223,9 +211,8 @@ function NewSpacePage() {
                   <MenuItem value="conference-room">Conference Room</MenuItem>
                   <MenuItem value="studio">Studio</MenuItem>
                   <MenuItem value="other">Other</MenuItem>
-
-                </Select >
-                <FormHelperText error >{formik.errors.spaceType}</FormHelperText>
+                </Select>
+                <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -328,15 +315,19 @@ function NewSpacePage() {
                 style={{ display: 'none' }}
                 multiple
                 onChange={(event) => {
-                  const newFiles = Array.from(event.currentTarget.files);
-                  const existingFiles = formik.values.images || [];
+                  const newFiles = Array.from(event.currentTarget.files)
+                  const existingFiles = formik.values.images || []
 
                   const uniqueFiles = [...existingFiles, ...newFiles].filter(
                     (file, index, self) =>
-                      index === self.findIndex((f) => f.name === file.name && f.lastModified === file.lastModified)
-                  );
-                  formik.setFieldValue("images", uniqueFiles)
-                }} />
+                      index ===
+                      self.findIndex(
+                        (f) => f.name === file.name && f.lastModified === file.lastModified
+                      )
+                  )
+                  formik.setFieldValue('images', uniqueFiles)
+                }}
+              />
 
               {/* Upload Box */}
               <Box
@@ -359,16 +350,15 @@ function NewSpacePage() {
                   },
                 }}
               >
-                <CloudUploadIcon
-                  sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
-                />
+                <CloudUploadIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
                   Upload photo
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
-              {formik.values.images && formik.values.images.length > 0 &&
+              {formik.values.images &&
+                formik.values.images.length > 0 &&
                 formik.values.images.map((file, index) => (
                   <img
                     key={index}
@@ -376,11 +366,10 @@ function NewSpacePage() {
                     alt={`preview-${index}`}
                     style={{ width: 100, height: 100, objectFit: 'cover', marginRight: 10 }}
                   />
-                ))
-              }
+                ))}
             </Grid>
           </Grid>
-            <Typography color='error'>{formik.errors.images}</Typography>
+          <Typography color="error">{formik.errors.images}</Typography>
         </Paper>
 
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -399,9 +388,7 @@ function NewSpacePage() {
                 type="number"
                 fullWidth
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">Shs</InputAdornment>
-                  ),
+                  startAdornment: <InputAdornment position="start">Shs</InputAdornment>,
                 }}
                 placeholder="0.00"
                 error={formik.errors.price?.amount}
@@ -475,15 +462,15 @@ function NewSpacePage() {
                     <Checkbox
                       checked={formik.values.amenities.includes(amenity)}
                       onChange={(e) => {
-                        const { checked } = e.target;
-                        const prev = formik.values.amenities;
+                        const { checked } = e.target
+                        const prev = formik.values.amenities
                         if (checked) {
-                          formik.setFieldValue('amenities', [...prev, amenity]);
+                          formik.setFieldValue('amenities', [...prev, amenity])
                         } else {
                           formik.setFieldValue(
                             'amenities',
                             prev.filter((a) => a !== amenity)
-                          );
+                          )
                         }
                       }}
                       name="amenities"
@@ -517,41 +504,20 @@ function NewSpacePage() {
               size="large"
               disabled={!formik.isValid || loading}
             >
-
+              {loading && <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />}
               {loading ? 'Creating...' : 'Create Listing'}
             </Button>
           </Box>
         </Paper>
       </Box>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity="success"
-          sx={{ width: '100%' }}
-        >
-          Space created successfully! Your new space has been added to your
-          listings.
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          Space created successfully! Your new space has been added to your listings.
         </Alert>
       </Snackbar>
-      <Backdrop
-        sx={{
-          color: "#fff",
-          zIndex: theme => theme.zIndex.drawer + 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-        <span>updating....</span>
-      </Backdrop>
     </Container>
-  );
+  )
 }
 
-export default NewSpacePage;
+export default NewSpacePage

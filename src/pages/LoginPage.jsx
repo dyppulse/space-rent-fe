@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import {
   Box,
   Container,
@@ -8,14 +9,19 @@ import {
   Paper,
   Divider,
   Grid,
-} from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import { useAuth } from '../hooks/useAuth';
+  IconButton,
+  InputAdornment,
+} from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import GoogleIcon from '@mui/icons-material/Google'
+import FacebookIcon from '@mui/icons-material/Facebook'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import { useAuth } from '../hooks/useAuth'
 
 function LoginPage() {
-
-  const {formik, loading, error} = useAuth()
+  const { formik, loading, error } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -71,13 +77,26 @@ function LoginPage() {
             size="small"
             name="password"
             label="Password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             value={formik.values.password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.password && Boolean(formik.errors.password)}
             helperText={formik.touched.password && formik.errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           <Button
@@ -89,6 +108,7 @@ function LoginPage() {
             sx={{ mt: 3, mb: 2 }}
             // disabled={formik.isSubmitting || isLoading}
             disabled={loading}
+            startIcon={loading ? <CircularProgress color="inherit" size={18} /> : null}
           >
             {loading ? 'Logging in...' : 'Log in'}
           </Button>
@@ -134,12 +154,7 @@ function LoginPage() {
             <Typography variant="body2" color="text.secondary">
               Don't have an account?{' '}
               <Link to="/auth/signup">
-                <Typography
-                  component="span"
-                  variant="body2"
-                  color="primary"
-                  fontWeight="medium"
-                >
+                <Typography component="span" variant="body2" color="primary" fontWeight="medium">
                   Sign up
                 </Typography>
               </Link>
@@ -148,7 +163,7 @@ function LoginPage() {
         </Box>
       </Paper>
     </Container>
-  );
+  )
 }
 
-export default LoginPage;
+export default LoginPage

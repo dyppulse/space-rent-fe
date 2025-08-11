@@ -1,26 +1,21 @@
-import { useState } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  InputAdornment,
-  Snackbar,
-  Alert,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
-import { createBooking } from '../redux/slices/bookingSlice';
+import { useState } from 'react'
+import { Box, TextField, Button, Typography, InputAdornment, Snackbar, Alert } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
+import { createBooking } from '../redux/slices/bookingSlice'
 
 function BookingForm({ spaceId, price, priceUnit }) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
   const dispatch = useDispatch()
+  const { loading: isBookingLoading } = useSelector((state) => state.bookings)
 
   const formik = useFormik({
     initialValues: {
@@ -42,10 +37,10 @@ function BookingForm({ spaceId, price, priceUnit }) {
     }),
     onSubmit: async (values, { resetForm }) => {
       await dispatch(createBooking({ ...values, spaceId })).unwrap()
-      setSnackbarOpen(true);
-      resetForm?.();
+      setSnackbarOpen(true)
+      resetForm?.()
     },
-  });
+  })
 
   console.log(formik.errors, 'firmike errors')
   console.log(formik.values, 'firmike vaues')
@@ -188,9 +183,10 @@ function BookingForm({ spaceId, price, priceUnit }) {
             color="primary"
             fullWidth
             size="large"
-            disabled={formik.isSubmitting}
+            disabled={isBookingLoading}
+            startIcon={isBookingLoading ? <CircularProgress color="inherit" size={18} /> : null}
           >
-            {formik.isSubmitting ? 'Submitting...' : 'Request to Book'}
+            {isBookingLoading ? 'Submitting...' : 'Request to Book'}
           </Button>
 
           <Typography
@@ -214,7 +210,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
         </Snackbar>
       </Box>
     </LocalizationProvider>
-  );
+  )
 }
 
-export default BookingForm;
+export default BookingForm

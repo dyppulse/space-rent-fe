@@ -26,6 +26,7 @@ import { useDispatch } from 'react-redux'
 import { useEffect } from 'react'
 import { fetchSpaces } from '../redux/slices/spaceSlice'
 import { useSelector } from 'react-redux'
+import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function SpacesPage() {
   const [viewMode, setViewMode] = useState('grid')
@@ -36,7 +37,7 @@ function SpacesPage() {
   const [capacity, setCapacity] = useState('any')
 
   const dispatch = useDispatch()
-  const { list } = useSelector((state) => state.spaces)
+  const { list, loading } = useSelector((state) => state.spaces)
 
   const handleViewModeChange = (event, newMode) => {
     if (newMode !== null) {
@@ -258,7 +259,7 @@ function SpacesPage() {
         </Box>
       </Box>
 
-      <SpaceGrid spaces={list} />
+      {loading ? <ListSkeleton items={9} /> : <SpaceGrid spaces={list?.spaces || []} />}
     </Container>
   )
 }

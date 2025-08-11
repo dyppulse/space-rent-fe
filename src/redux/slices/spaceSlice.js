@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axiosInstance, { unProtectedAxiosInstance } from '../../api/axiosInstance'
 
 const initialState = {
-  list: {spaces: []},
+  list: { spaces: [] },
   selected: null,
   loading: false,
   updating: false,
@@ -128,14 +128,13 @@ export const updateSpace = createAsyncThunk(
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
-      console.log(res, "resesese")
+      console.log(res, 'resesese')
       return res.data // newly created space object
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message)
     }
   }
 )
-
 
 export const deleteSpace = createAsyncThunk(
   'spaces/delete',
@@ -164,7 +163,14 @@ const spaceSlice = createSlice({
       })
       .addCase(fetchSpaces.fulfilled, (state, action) => {
         state.loading = false
-        state.list = action.payload
+        const payload = action.payload
+        if (Array.isArray(payload)) {
+          state.list = { ...state.list, spaces: payload, count: payload.length }
+        } else if (payload && Array.isArray(payload.spaces)) {
+          state.list = payload
+        } else {
+          state.list = { ...state.list, spaces: [] }
+        }
       })
       .addCase(fetchSpaces.rejected, (state) => {
         state.loading = false
@@ -205,7 +211,14 @@ const spaceSlice = createSlice({
       })
       .addCase(fetchMySpaces.fulfilled, (state, action) => {
         state.loading = false
-        state.list = action.payload
+        const payload = action.payload
+        if (Array.isArray(payload)) {
+          state.list = { ...state.list, spaces: payload, count: payload.length }
+        } else if (payload && Array.isArray(payload.spaces)) {
+          state.list = payload
+        } else {
+          state.list = { ...state.list, spaces: [] }
+        }
       })
       .addCase(fetchMySpaces.rejected, (state, action) => {
         state.loading = false
@@ -234,7 +247,7 @@ const spaceSlice = createSlice({
         state.updating = false
         const updatedSpace = action.payload
         // Update in list
-        const index = state.list.spaces.findIndex(space => space._id === updatedSpace._id)
+        const index = state.list.spaces.findIndex((space) => space._id === updatedSpace._id)
         if (index !== -1) {
           state.list.spaces[index] = updatedSpace
         }
@@ -247,7 +260,6 @@ const spaceSlice = createSlice({
         state.updating = false
         state.error = action.payload || 'Error updating space'
       })
-
   },
 })
 export const { storeSpaceData } = spaceSlice.actions

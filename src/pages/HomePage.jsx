@@ -1,28 +1,19 @@
-import { Link } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  Paper,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import SpaceGrid from '../components/SpaceGrid';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSpaces } from '../redux/slices/spaceSlice';
+import { Link } from 'react-router-dom'
+import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import SpaceGrid from '../components/SpaceGrid'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchSpaces } from '../redux/slices/spaceSlice'
+import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function HomePage() {
-
   const dispatch = useDispatch()
-  const { list } = useSelector(state => state.spaces)
+  const { list, loading } = useSelector((state) => state.spaces)
 
-  console.log(list, "dhdkhdjhdjhdj",)
   useEffect(() => {
     dispatch(fetchSpaces())
   }, [dispatch])
@@ -36,8 +27,7 @@ function HomePage() {
               Find the perfect space for your next event
             </Typography>
             <Typography variant="h5" sx={{ mb: 5, opacity: 0.9 }}>
-              Discover and book unique venues, studios, and meeting spaces
-              without the hassle.
+              Discover and book unique venues, studios, and meeting spaces without the hassle.
             </Typography>
 
             <Paper
@@ -100,53 +90,37 @@ function HomePage() {
               Available Spaces
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Button
-                variant="outlined"
-                startIcon={<LocationOnIcon />}
-                size="medium"
-              >
+              <Button variant="outlined" startIcon={<LocationOnIcon />} size="medium">
                 Location
               </Button>
-              <Button
-                variant="outlined"
-                startIcon={<CalendarTodayIcon />}
-                size="medium"
-              >
+              <Button variant="outlined" startIcon={<CalendarTodayIcon />} size="medium">
                 Date
               </Button>
-              <Button
-                variant="outlined"
-                startIcon={<FilterListIcon />}
-                size="medium"
-              >
+              <Button variant="outlined" startIcon={<FilterListIcon />} size="medium">
                 Filters
               </Button>
             </Box>
           </Box>
 
           {/* Space Grid */}
-          <SpaceGrid spaces={list?.spaces ?? list?.slice(0, 6) ?? []} />
+          {loading ? (
+            <ListSkeleton items={6} />
+          ) : list?.spaces?.length ? (
+            <SpaceGrid spaces={list.spaces} />
+          ) : (
+            <SpaceGrid spaces={[]} />
+          )}
         </Container>
       </Box>
 
       {/* CTA Section */}
       <Box sx={{ py: 8, bgcolor: 'grey.100' }}>
         <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-          <Typography
-            variant="h3"
-            component="h2"
-            fontWeight="bold"
-            gutterBottom
-          >
+          <Typography variant="h3" component="h2" fontWeight="bold" gutterBottom>
             Own a space? List it on our platform
           </Typography>
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{ mb: 4, maxWidth: 700, mx: 'auto' }}
-          >
-            Join our community of space owners and start earning from your venue
-            today.
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 700, mx: 'auto' }}>
+            Join our community of space owners and start earning from your venue today.
           </Typography>
           <Button
             component={Link}
@@ -161,7 +135,7 @@ function HomePage() {
         </Container>
       </Box>
     </Box>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage

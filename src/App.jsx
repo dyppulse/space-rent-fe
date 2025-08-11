@@ -1,25 +1,25 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Provider } from 'react-redux';
-import store from './redux/store';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import { Provider } from 'react-redux'
+import store from './redux/store'
 
 // Pages
-import HomePage from './pages/HomePage';
-import SpacesPage from './pages/SpacesPage';
-import SpaceDetailPage from './pages/SpaceDetailPage';
-import HowItWorksPage from './pages/HowItWorksPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
-import NewSpacePage from './pages/NewSpacePage';
-import NotFound from './pages/NotFound';
+import HomePage from './pages/HomePage'
+import SpacesPage from './pages/SpacesPage'
+import SpaceDetailPage from './pages/SpaceDetailPage'
+import HowItWorksPage from './pages/HowItWorksPage'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
+import DashboardPage from './pages/DashboardPage'
+import NewSpacePage from './pages/NewSpacePage'
+import NotFound from './pages/NotFound'
 
 // Components
-import PrivateRoute from './components/PrivateRoute';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import EditSpace from './pages/EditSpace';
+import PrivateRoute from './components/PrivateRoute'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import EditSpace from './pages/EditSpace'
 
 // Create a theme
 const theme = createTheme({
@@ -78,7 +78,7 @@ const theme = createTheme({
       },
     },
   },
-});
+})
 
 function App() {
   return (
@@ -97,7 +97,8 @@ function App() {
                 <Route path="/how-it-works" element={<HowItWorksPage />} />
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/signup" element={<SignupPage />} />
-                <Route path='/dashboard/spaces/:id/edit'
+                <Route
+                  path="/dashboard/spaces/:id/edit"
                   element={
                     <PrivateRoute>
                       <EditSpace />
@@ -132,8 +133,8 @@ function App() {
           </div>
         </Router>
       </ThemeProvider>
-      </Provider>
-  );
+    </Provider>
+  )
 }
 
-export default App;
+export default App
