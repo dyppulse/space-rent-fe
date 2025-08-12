@@ -1,21 +1,19 @@
-import { useFormik } from "formik";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { login } from "../redux/slices/authSlice";
-import Swal from 'sweetalert2';
-import * as Yup from 'yup';
+import { useFormik } from 'formik'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { login } from '../redux/slices/authSlice'
+import Swal from 'sweetalert2'
+import * as Yup from 'yup'
 import axiosInstance from '../api/axiosInstance'
 
-
-
 export const useAuth = () => {
-   const [swalFire, setSwalFire] = useState(false)
+  const [swalFire, setSwalFire] = useState(false)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { loading, error } = useSelector(state => state?.auth)
+  const { loading, error } = useSelector((state) => state?.auth)
 
   const formik = useFormik({
     initialValues: {
@@ -29,8 +27,8 @@ export const useAuth = () => {
 
     onSubmit: (values) => {
       dispatch(login(values))
-    }
-  });
+    },
+  })
 
   useEffect(() => {
     if (loading) {
@@ -39,33 +37,39 @@ export const useAuth = () => {
     if (swalFire) {
       if (error) {
         Swal.fire({
-          icon: "error",
-          title: "Uh Oh Something is Wrong",
+          icon: 'error',
+          title: 'Uh Oh Something is Wrong',
           html: error,
-          confirmButtonText: "Try Again",
-          confirmButtonColor: "#CE0610",
+          confirmButtonText: 'Try Again',
+          confirmButtonColor: '#CE0610',
           allowOutsideClick: false,
           customClass: {
-            container: "my-swal"
-          }
+            container: 'my-swal',
+          },
         }).then(() => {
           setSwalFire(false)
         })
-      }else {
-      navigate('/dashboard')
-      setSwalFire(false)
+      } else {
+        const savedPath = localStorage.getItem('postLoginRedirect')
+        if (savedPath) {
+          localStorage.removeItem('postLoginRedirect')
+          navigate(savedPath)
+        } else {
+          navigate('/dashboard')
+        }
+        setSwalFire(false)
+      }
     }
-    } 
-  }, [loading])
+  }, [error, loading, navigate, swalFire])
 
   const logout = async () => {
-    await axiosInstance.post('/auth/logout');
-    localStorage.removeItem('token');
-  };
+    await axiosInstance.post('/auth/logout')
+  }
 
   return {
     formik,
-    loading, error,
-    logout
-  };
-};
+    loading,
+    error,
+    logout,
+  }
+}

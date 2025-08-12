@@ -1,38 +1,53 @@
-import axios from 'axios';
-
-const token = localStorage.getItem('token');
+import axios from 'axios'
 
 const apiUrl = import.meta.env.VITE_API_URL
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
   },
-  withCredentials: true, // Optional, if you're using cookies
-});
-
-const unProtectedAxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
-
+  withCredentials: true,
 })
 
-// Add a response interceptor
-// axiosInstance.interceptors.response.use(
-//   response => response, // Pass through successful responses
-//   error => {
-//     if (error.response && error.response.status === 401 && !error.config.url.includes('/api/auth/login')) {
-//       // Remove token on 401 Unauthorized
-//       localStorage.removeItem("token");
+const unProtectedAxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+})
 
-//       // Optionally redirect to login
-//       window.location.href = "/auth/login";
-//     }
+// Auto-logout on 401 and remember last page
+const handleUnauthorized = (error) => {
+  const status = error?.response?.status
+  const requestUrl = error?.config?.url || ''
+  if (
+    status === 401 &&
+    !requestUrl.includes('/auth/login') &&
+    !requestUrl.includes('/auth/register')
+  ) {
+    try {
+      const lastPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
+      localStorage.setItem('postLoginRedirect', lastPath)
+    } catch {
+      // ignore storage errors
+    }
+    if (window.location.pathname !== '/auth/login') {
+      window.location.replace('/auth/login')
+    }
+  }
+  return Promise.reject(error)
+}
 
-//     // Always reject the error so calling code can handle it too
-//     return Promise.reject(error);
-//   }
-// );
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => handleUnauthorized(error)
+)
 
-export default axiosInstance;
-export {unProtectedAxiosInstance}
+unProtectedAxiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => handleUnauthorized(error)
+)
+
+export default axiosInstance
+export { unProtectedAxiosInstance }

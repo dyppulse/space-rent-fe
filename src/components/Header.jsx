@@ -22,6 +22,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import { useEffect } from 'react'
 import Swal from 'sweetalert2'
 import { useDispatch } from 'react-redux'
+import axiosInstance from '../api/axiosInstance'
 import { logout as authSliceLogout } from '../redux/slices/authSlice'
 
 function Header({ onToggleTheme, mode }) {
@@ -34,12 +35,17 @@ function Header({ onToggleTheme, mode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
-      setIsLoggedIn(true)
-    } else {
-      setIsLoggedIn(false)
+    const check = async () => {
+      try {
+        await axiosInstance.get('/auth/me')
+        setIsLoggedIn(true)
+      } catch (_e) {
+        console.error(_e)
+        setIsLoggedIn(false)
+      }
     }
-  }, [localStorage.getItem('token')])
+    check()
+  }, [])
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -59,9 +65,9 @@ function Header({ onToggleTheme, mode }) {
       customClass: {
         container: 'my-swal',
       },
-    }).then((value) => {
+    }).then(async (value) => {
       if (value.isConfirmed) {
-        localStorage.removeItem('token')
+        await axiosInstance.post('/auth/logout')
         dispatch(authSliceLogout())
         navigate('/auth/login')
       }
