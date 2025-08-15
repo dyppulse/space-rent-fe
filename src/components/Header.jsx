@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
   Box,
@@ -14,65 +14,48 @@ import {
   ListItemButton,
   Divider,
   Container,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { useEffect } from 'react';
-import Swal from 'sweetalert2';
-import { useDispatch } from 'react-redux';
-import { logout as authSliceLogout } from '../redux/slices/authSlice';
+} from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
+import ConfirmDialog from './ConfirmDialog'
+import { useDispatch, useSelector } from 'react-redux'
+import axiosInstance from '../api/axiosInstance'
+import { logout as authSliceLogout } from '../redux/slices/authSlice'
 
-function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+function Header({ onToggleTheme, mode }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
+  const [confirm, setConfirm] = useState(false)
 
-  // Mock authentication state - replace with actual auth later
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Get authentication state from Redux
+  const authState = useSelector((state) => state.auth)
+  const { user } = authState
+  const isLoggedIn = !!user
+  const isAdmin = user?.role === 'superadmin'
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      setIsLoggedIn(true)
-    } else {
-      setIsLoggedIn(false)
-    }
-  }, [localStorage.getItem("token")])
+  // Debug logging
+  console.log('Header - Full auth state:', authState)
+  console.log('Header - Computed values:', { user, isLoggedIn, isAdmin })
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const logout = () => {
-    Swal.fire({
-      icon: "question",
-      title: "Are You Sure?",
-      html: "Do you want to log out",
-      confirmButtonText: "Yes",
-      showCancelButton: true,
-      confirmButtonColor: "#0d9488",
-      cancelButtonColor: "#CE0610",
-      allowOutsideClick: false,
-      reverseButtons: true,
-      customClass: {
-        container: "my-swal"
-      }
-    }).then((value) => {
-      if (value.isConfirmed) {
-        localStorage.removeItem('token');
-        dispatch(authSliceLogout());
-        navigate('/auth/login')
-
-      }
-    })
+    setMobileOpen(!mobileOpen)
   }
 
+  const handleLogout = async () => {
+    setConfirm(true)
+  }
+
+  // Create navLinks dynamically based on auth state
   const navLinks = [
-    { name: 'Home', path: '/' },
+    { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
     { name: 'Explore', path: '/spaces' },
     { name: 'How It Works', path: '/how-it-works' },
-  ];
+  ]
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
@@ -90,7 +73,7 @@ function Header() {
               sx={{
                 textAlign: 'center',
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                  backgroundColor: 'action.selected',
                   color: 'primary.main',
                 },
               }}
@@ -101,32 +84,24 @@ function Header() {
         ))}
         <Divider sx={{ my: 1 }} />
         {isLoggedIn ? (
-          <ListItem disablePadding>
-            <ListItemButton
-              component={Link}
-              to="/dashboard"
-              sx={{ textAlign: 'center' }}
-            >
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
-          </ListItem>
+          <>
+            {isAdmin && (
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/admin" sx={{ textAlign: 'center' }}>
+                  <ListItemText primary="Admin" />
+                </ListItemButton>
+              </ListItem>
+            )}
+          </>
         ) : (
           <>
             <ListItem disablePadding>
-              <ListItemButton
-                component={Link}
-                to="/auth/login"
-                sx={{ textAlign: 'center' }}
-              >
+              <ListItemButton component={Link} to="/auth/login" sx={{ textAlign: 'center' }}>
                 <ListItemText primary="Log in" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton
-                component={Link}
-                to="/auth/signup"
-                sx={{ textAlign: 'center' }}
-              >
+              <ListItemButton component={Link} to="/auth/signup" sx={{ textAlign: 'center' }}>
                 <ListItemText primary="Sign up" />
               </ListItemButton>
             </ListItem>
@@ -134,7 +109,7 @@ function Header() {
         )}
       </List>
     </Box>
-  );
+  )
 
   return (
     <>
@@ -144,7 +119,7 @@ function Header() {
             <Typography
               variant="h6"
               component={Link}
-              to="/"
+              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'none', sm: 'block' },
@@ -157,7 +132,7 @@ function Header() {
             <Typography
               variant="h6"
               component={Link}
-              to="/"
+              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'block', sm: 'none' },
@@ -168,9 +143,7 @@ function Header() {
               SpaceHire
             </Typography>
 
-            <Box
-              sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}
-            >
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
               {navLinks.map((item) => (
                 <Button
                   key={item.name}
@@ -178,25 +151,22 @@ function Header() {
                   to={item.path}
                   sx={{
                     mx: 1,
-                    color:
-                      location.pathname === item.path
-                        ? 'primary.main'
-                        : 'text.primary',
+                    color: location.pathname === item.path ? 'primary.main' : 'text.primary',
                     '&:hover': {
-                      backgroundColor: 'rgba(13, 148, 136, 0.04)',
+                      backgroundColor: 'action.hover',
                     },
                     position: 'relative',
                     '&::after':
                       location.pathname === item.path
                         ? {
-                          content: '""',
-                          position: 'absolute',
-                          bottom: 0,
-                          left: '20%',
-                          width: '60%',
-                          height: '2px',
-                          backgroundColor: 'primary.main',
-                        }
+                            content: '""',
+                            position: 'absolute',
+                            bottom: 0,
+                            left: '20%',
+                            width: '60%',
+                            height: '2px',
+                            backgroundColor: 'primary.main',
+                          }
                         : {},
                   }}
                 >
@@ -205,30 +175,25 @@ function Header() {
               ))}
             </Box>
 
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2, alignItems: 'center', gap: 1 }}>
+              <IconButton onClick={onToggleTheme} aria-label="Toggle theme" color="inherit">
+                {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
               {isLoggedIn ? (
-                <Typography display={"flex"} alignItems={"center"}>
-                  <Button component={Link} to="/dashboard" color="inherit">
-                    Dashboard
-                  </Button>
-                  <PowerSettingsNewIcon sx={{ cursor: "pointer" }} onClick={() => logout()} />
+                <Typography display={'flex'} alignItems={'center'}>
+                  {isAdmin && (
+                    <Button component={Link} to="/admin" color="inherit">
+                      Admin
+                    </Button>
+                  )}
+                  <PowerSettingsNewIcon sx={{ cursor: 'pointer' }} onClick={handleLogout} />
                 </Typography>
               ) : (
                 <>
-                  <Button
-                    component={Link}
-                    to="/auth/login"
-                    color="inherit"
-                    sx={{ mr: 1 }}
-                  >
+                  <Button component={Link} to="/auth/login" color="inherit" sx={{ mr: 1 }}>
                     Log in
                   </Button>
-                  <Button
-                    component={Link}
-                    to="/auth/signup"
-                    variant="contained"
-                    color="primary"
-                  >
+                  <Button component={Link} to="/auth/signup" variant="contained" color="primary">
                     Sign up
                   </Button>
                 </>
@@ -262,8 +227,22 @@ function Header() {
       >
         {drawer}
       </Drawer>
+
+      <ConfirmDialog
+        open={confirm}
+        title="Log out?"
+        content="Do you want to log out?"
+        confirmText="Log out"
+        onClose={() => setConfirm(false)}
+        onConfirm={async () => {
+          setConfirm(false)
+          await axiosInstance.post('/auth/logout')
+          dispatch(authSliceLogout())
+          navigate('/auth/login')
+        }}
+      />
     </>
-  );
+  )
 }
 
-export default Header;
+export default Header

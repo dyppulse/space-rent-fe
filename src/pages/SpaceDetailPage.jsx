@@ -1,26 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Chip,
-  Tabs,
-  Tab,
-  Paper,
-  Rating,
-} from '@mui/material';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PeopleIcon from '@mui/icons-material/People';
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Box, Container, Typography, Grid, Chip, Tabs, Tab, Paper, Rating } from '@mui/material'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import PeopleIcon from '@mui/icons-material/People'
 // import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BookingForm from '../components/BookingForm';
-import { useDispatch, useSelector } from 'react-redux';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import BookingForm from '../components/BookingForm'
+import { useDispatch, useSelector } from 'react-redux'
 import { getSpace } from '../redux/slices/spaceSlice'
+import DetailSkeleton from '../components/ui/skeletons/DetailSkeleton'
+import ImageGallery from '../components/ImageGallery'
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -32,32 +24,39 @@ function TabPanel(props) {
     >
       {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 function SpaceDetailPage() {
-  const dispatch = useDispatch();
-  const { selected: space, loading } = useSelector(state => state.spaces)
-  const { user } = useSelector(state => state.auth);
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
+  const dispatch = useDispatch()
+  const { selected: space, loading } = useSelector((state) => state.spaces)
+  const { user } = useSelector((state) => state.auth)
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [tabValue, setTabValue] = useState(0)
 
   useEffect(() => {
     dispatch(getSpace(id))
   }, [dispatch, id])
 
+  // Loading skeleton
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <DetailSkeleton />
+      </Container>
+    )
+  }
+
   // If space not found, redirect to spaces page
   if (!loading && !space) {
-    navigate('/spaces');
-    return null;
+    navigate('/spaces')
+    return null
   }
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
-
+    setTabValue(newValue)
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -76,48 +75,7 @@ function SpaceDetailPage() {
 
           {/* Image gallery */}
           <Box sx={{ mb: 4 }}>
-            <Grid container spacing={2}>
-              <Grid item size={{ xs: 12 }}>
-                <Box
-                  sx={{
-                    height: 400,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    '& img': {
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    },
-                  }}
-                >
-                  <img
-                    src={space?.images[0]?.url || '/placeholder.svg'}
-                    alt={space?.name}
-                  />
-                </Box>
-              </Grid>
-              {space?.images?.slice(1, 5).map((image, index) => (
-                <Grid item key={index} size={{ xs: 6, sm: 3 }}>
-                  <Box
-                    sx={{
-                      height: 120,
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      '& img': {
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      },
-                    }}
-                  >
-                    <img
-                      src={image?.url || '/placeholder.svg'}
-                      alt={`${space?.name} ${index + 1}`}
-                    />
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
+            <ImageGallery images={space?.images || []} name={space?.name} />
           </Box>
 
           {/* Tabs for details */}
@@ -169,8 +127,7 @@ function SpaceDetailPage() {
                   Space Details
                 </Typography>
                 <Typography paragraph>
-                  This {space?.spaceType?.toLowerCase()} is available for bookings.
-                  Perfect for
+                  This {space?.spaceType?.toLowerCase()} is available for bookings. Perfect for
                   {space?.spaceType === 'Event Venue'
                     ? ' events, parties, and gatherings'
                     : space?.spaceType === 'Conference Room'
@@ -196,8 +153,8 @@ function SpaceDetailPage() {
 
             <TabPanel value={tabValue} index={2}>
               <Typography paragraph>
-                Located in {space?.location?.address}. Detailed directions will be
-                provided after booking.
+                Located in {space?.location?.address}. Detailed directions will be provided after
+                booking.
               </Typography>
               <Box
                 sx={{
@@ -209,9 +166,7 @@ function SpaceDetailPage() {
                   justifyContent: 'center',
                 }}
               >
-                <Typography color="text.secondary">
-                  Map will be displayed here
-                </Typography>
+                <Typography color="text.secondary">Map will be displayed here</Typography>
               </Box>
             </TabPanel>
 
@@ -224,9 +179,7 @@ function SpaceDetailPage() {
                     </Typography>
                     <Rating value={space?.rating} precision={0.5} readOnly />
                   </Box>
-                  <Typography color="text.secondary">
-                    Reviews will be displayed here.
-                  </Typography>
+                  <Typography color="text.secondary">Reviews will be displayed here.</Typography>
                 </Box>
               ) : (
                 <Typography color="text.secondary">No reviews yet.</Typography>
@@ -236,23 +189,25 @@ function SpaceDetailPage() {
         </Grid>
 
         {/* Right column - Booking form */}
-        {space?.owner !== user?.userId && (<Grid item size={{ xs: 12, md: 4 }}>
-          <Box sx={{ position: { md: 'sticky' }, top: 24 }}>
-            <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                Book this space
-              </Typography>
-              <BookingForm
-                spaceId={space?.id}
-                price={space?.price?.amount}
-                priceUnit={space?.price?.unit}
-              />
-            </Paper>
-          </Box>
-        </Grid>)}
+        {space?.owner !== user?.userId && (
+          <Grid item size={{ xs: 12, md: 4 }}>
+            <Box sx={{ position: { md: 'sticky' }, top: 24 }}>
+              <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h5" gutterBottom>
+                  Book this space
+                </Typography>
+                <BookingForm
+                  spaceId={space?.id}
+                  price={space?.price?.amount}
+                  priceUnit={space?.price?.unit}
+                />
+              </Paper>
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </Container>
-  );
+  )
 }
 
-export default SpaceDetailPage;
+export default SpaceDetailPage

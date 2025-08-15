@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Box,
   Container,
@@ -11,23 +11,24 @@ import {
   Tabs,
   Tab,
   Divider,
-} from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import HomeIcon from '@mui/icons-material/Home';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PeopleIcon from '@mui/icons-material/People';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import SpacesList from '../components/SpacesList';
-import BookingsList from '../components/BookingsList';
-import { mockSpaces } from '../data/mockData';
-import { useDispatch } from 'react-redux';
+} from '@mui/material'
+import AddCircleIcon from '@mui/icons-material/AddCircle'
+import HomeIcon from '@mui/icons-material/Home'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import SettingsIcon from '@mui/icons-material/Settings'
+import PeopleIcon from '@mui/icons-material/People'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import SpacesList from '../components/SpacesList'
+import BookingsList from '../components/BookingsList'
+import { mockSpaces } from '../data/mockData'
+import { useDispatch } from 'react-redux'
 import { fetchMySpaces } from '../redux/slices/spaceSlice.js'
 import { fetchOwnerBookings } from '../redux/slices/bookingSlice.js'
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux'
+import DashboardSkeleton from '../components/ui/skeletons/DashboardSkeleton'
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -39,28 +40,35 @@ function TabPanel(props) {
     >
       {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 function DashboardPage() {
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(0)
 
-  const dispatch = useDispatch();
-  const { list } = useSelector(state => state.spaces)
-  const { list: userBookings } = useSelector(state => state.bookings);
+  const dispatch = useDispatch()
+  const { list, loading: spacesLoading } = useSelector((state) => state.spaces)
+  const { list: userBookings, loading: bookingsLoading } = useSelector((state) => state.bookings)
 
   // Filter spaces for the current user (in a real app, this would be based on the authenticated user)
-  const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1');
+  const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1')
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
+    setTabValue(newValue)
+  }
 
   useEffect(() => {
-    dispatch(fetchMySpaces());
-    dispatch(fetchOwnerBookings());
+    dispatch(fetchMySpaces())
+    dispatch(fetchOwnerBookings())
   }, [dispatch])
+
+  if (spacesLoading || bookingsLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <DashboardSkeleton />
+      </Container>
+    )
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -117,9 +125,7 @@ function DashboardPage() {
               </Box>
               <Typography variant="h4">{list?.spaces?.length}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {userSpaces.length > 0
-                  ? '+1 space this month'
-                  : 'Add your first space'}
+                {userSpaces.length > 0 ? '+1 space this month' : 'Add your first space'}
               </Typography>
             </CardContent>
           </Paper>
@@ -144,8 +150,7 @@ function DashboardPage() {
                 {userBookings.filter((b) => b.status === 'confirmed').length}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {userBookings.filter((b) => b.status === 'pending').length}{' '}
-                pending requests
+                {userBookings.filter((b) => b.status === 'pending').length} pending requests
               </Typography>
             </CardContent>
           </Paper>
@@ -167,11 +172,8 @@ function DashboardPage() {
                 <AttachMoneyIcon color="action" fontSize="small" />
               </Box>
               <Typography variant="h4">
-                UGX 
-                {userBookings.reduce(
-                  (sum, booking) => sum + booking.totalPrice,
-                  0
-                )}
+                UGX
+                {userBookings.reduce((sum, booking) => sum + booking.totalPrice, 0)}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 + UGX 1,200 from last month
@@ -191,24 +193,14 @@ function DashboardPage() {
             textColor="primary"
             indicatorColor="primary"
           >
-            <Tab
-              icon={<HomeIcon />}
-              iconPosition="start"
-              label="My Spaces"
-              id="dashboard-tab-0"
-            />
+            <Tab icon={<HomeIcon />} iconPosition="start" label="My Spaces" id="dashboard-tab-0" />
             <Tab
               icon={<CalendarTodayIcon />}
               iconPosition="start"
               label="Bookings"
               id="dashboard-tab-1"
             />
-            <Tab
-              icon={<PeopleIcon />}
-              iconPosition="start"
-              label="Clients"
-              id="dashboard-tab-2"
-            />
+            <Tab icon={<PeopleIcon />} iconPosition="start" label="Clients" id="dashboard-tab-2" />
             <Tab
               icon={<SettingsIcon />}
               iconPosition="start"
@@ -227,8 +219,8 @@ function DashboardPage() {
                 No spaces yet
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                You haven't added any spaces to your account yet. Get started by
-                adding your first space.
+                You haven't added any spaces to your account yet. Get started by adding your first
+                space.
               </Typography>
               <Button
                 component={Link}
@@ -289,7 +281,7 @@ function DashboardPage() {
         </TabPanel>
       </Box>
     </Container>
-  );
+  )
 }
 
-export default DashboardPage;
+export default DashboardPage

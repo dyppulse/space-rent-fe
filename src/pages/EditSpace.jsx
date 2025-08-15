@@ -1,10 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  Backdrop,
   Box,
   IconButton,
-  CircularProgress,
   Container,
   Typography,
   TextField,
@@ -22,44 +20,37 @@ import {
   Divider,
   Snackbar,
   Alert,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { useFormik } from 'formik';
-import * as yup from 'yup';
-import { getSpace, postSpace, updateSpace } from '../redux/slices/spaceSlice';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import Swal from 'sweetalert2';
+} from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AddIcon from '@mui/icons-material/Add'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import { getSpace, updateSpace } from '../redux/slices/spaceSlice'
+import { useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 
 function EditSpace() {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null)
   const { id } = useParams()
-  const [swalFire, setSwalFire] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
-  const { updating, error, selected } = useSelector(state => state.spaces)
+  const { updating, error, selected } = useSelector((state) => state.spaces)
 
   const handleClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click();
+      fileInputRef.current.click()
     }
-  };
+  }
 
   useEffect(() => {
     dispatch(getSpace(id))
   }, [dispatch, id])
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
 
   const amenities = [
     'WiFi',
@@ -77,81 +68,64 @@ function EditSpace() {
     'Tables/Chairs',
     'Dressing Room',
     'Outdoor Space',
-  ];
+  ]
 
   const validationSchema = yup.object({
-    name: yup.string().required("Required").min(5, "Atleast 5 characters"),
-    spaceType: yup.string().required("Required"),
-    capacity: yup.number().required("Required"),
+    name: yup.string().required('Required').min(5, 'Atleast 5 characters'),
+    spaceType: yup.string().required('Required'),
+    capacity: yup.number().required('Required'),
     description: yup.string().required(),
     location: yup.object({
-      address: yup.string().required("Required"),
-      city: yup.string().required("Required"),
-      state: yup.string().required("Required"),
-      zipCode: yup.string().notRequired()
+      address: yup.string().required('Required'),
+      city: yup.string().required('Required'),
+      state: yup.string().required('Required'),
+      zipCode: yup.string().notRequired(),
     }),
-    images: yup.array().min(1, "Atleast 1"),
+    images: yup.array().min(1, 'Atleast 1'),
     price: yup.object({
-      amount: yup.number().required("Required"),
-      unit: yup.string().required("Required")
+      amount: yup.number().required('Required'),
+      unit: yup.string().required('Required'),
     }),
     // minmumBookingDuration: yup.number().required("Required"),
     // minmumBookingDurationUnit: yup.string().required("Required"),
-    amenities: yup.array().min(1, "Select atleast one")
+    amenities: yup.array().min(1, 'Select atleast one'),
   })
 
-
   const formik = useFormik({
-    initialValues: {...selected, imagesToremove: []},
+    initialValues: { ...selected, imagesToremove: [] },
     validationSchema,
     validateOnBlur: true,
     validateOnChange: true,
     validateOnMount: true,
     enableReinitialize: true,
     onSubmit: (values) => {
-      console.log(values, "sjdkjdkdjkdjk")
-      const newImages = values.images.filter(
-        (obj) => obj.file instanceof File
-      ).map(image => image.file) 
+      console.log(values, 'sjdkjdkdjkdjk')
+      const newImages = values.images
+        .filter((obj) => obj.file instanceof File)
+        .map((image) => image.file)
       // console.log(newImages, "newImages")
       delete values.images
-      dispatch(updateSpace({id, values: {...values, newImages}}))
-           // dispatch(postSpace(values)); 
+      dispatch(updateSpace({ id, values: { ...values, newImages } }))
+      // dispatch(postSpace(values));
       // formikValues includes images as File[]
-
-
-    }
+    },
   })
 
-  console.log(formik.values, "djdkjdkjdkjdk", updating)
+  console.log(formik.values, 'djdkjdkjdkjdk', updating)
   useEffect(() => {
     if (updating) {
-      setSwalFire(true)
+      setOpen(true)
+      return
     }
-    if (swalFire) {
-      if (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Uh Oh Something is Wrong",
-          html: error,
-          confirmButtonText: "Try Again",
-          confirmButtonColor: "#CE0610",
-          allowOutsideClick: false,
-          customClass: {
-            container: "my-swal"
-          }
-        }).then(() => {
-          setSwalFire(false)
-        })
-      } else {
-        navigate('/dashboard')
-        setSnackbarOpen(true)
-        setSwalFire(false)
-      }
+    setOpen(false)
+    if (error) {
+      setToast({ open: true, message: String(error || 'Failed to update'), severity: 'error' })
+    } else if (!error) {
+      navigate('/dashboard')
+      setToast({ open: true, message: 'Space updated successfully!', severity: 'success' })
     }
-  }, [updating])
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updating, error])
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -162,12 +136,7 @@ function EditSpace() {
           mb: 4,
         }}
       >
-        <Button
-          component={Link}
-          to="/dashboard"
-          startIcon={<ArrowBackIcon />}
-          sx={{ mr: 2 }}
-        >
+        <Button component={Link} to="/dashboard" startIcon={<ArrowBackIcon />} sx={{ mr: 2 }}>
           Back
         </Button>
         <Box>
@@ -219,9 +188,8 @@ function EditSpace() {
                   <MenuItem value="conference-room">Conference Room</MenuItem>
                   <MenuItem value="studio">Studio</MenuItem>
                   <MenuItem value="other">Other</MenuItem>
-
-                </Select >
-                <FormHelperText error >{formik.errors.spaceType}</FormHelperText>
+                </Select>
+                <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -324,21 +292,16 @@ function EditSpace() {
                 style={{ display: 'none' }}
                 ref={fileInputRef}
                 onChange={(e) => {
-                  const newFiles = Array.from(e.target.files);
-                  const newImageObjects = newFiles.map(file => ({
+                  const newFiles = Array.from(e.target.files)
+                  const newImageObjects = newFiles.map((file) => ({
                     file,
-                    preview: URL.createObjectURL(file)
-                  }));
+                    preview: URL.createObjectURL(file),
+                  }))
 
-                  formik.setFieldValue('images', [
-                    ...formik.values.images,
-                    ...newImageObjects
-                  ]);
+                  formik.setFieldValue('images', [...formik.values.images, ...newImageObjects])
                 }}
               />
-              <Button onClick={() => fileInputRef.current.click()}>
-                Add Images
-              </Button>
+              <Button onClick={() => fileInputRef.current.click()}>Add Images</Button>
 
               {/* Upload Box */}
               <Box
@@ -361,9 +324,7 @@ function EditSpace() {
                   },
                 }}
               >
-                <CloudUploadIcon
-                  sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
-                />
+                <CloudUploadIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
                   Upload photo
                 </Typography>
@@ -372,7 +333,7 @@ function EditSpace() {
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 {formik?.values?.images?.map((image, index) => {
-                  const imageUrl = image.url || image.preview;
+                  const imageUrl = image.url || image.preview
                   return (
                     <Grid item key={index}>
                       <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -384,29 +345,31 @@ function EditSpace() {
                         <IconButton
                           size="small"
                           onClick={() => {
-                            const newImages = [...formik.values.images];
-                            const removed = newImages.splice(index, 1);
-                            formik.setFieldValue('images', newImages);
-                            formik.setFieldValue("imagesToremove", [...formik.values.imagesToremove, removed[0]?.public_id])
+                            const newImages = [...formik.values.images]
+                            const removed = newImages.splice(index, 1)
+                            formik.setFieldValue('images', newImages)
+                            formik.setFieldValue('imagesToremove', [
+                              ...formik.values.imagesToremove,
+                              removed[0]?.public_id,
+                            ])
                           }}
                           style={{
                             position: 'absolute',
                             top: 0,
                             right: 0,
-                            background: 'rgba(255,255,255,0.7)'
+                            background: 'rgba(255,255,255,0.7)',
                           }}
                         >
                           ❌
                         </IconButton>
                       </div>
                     </Grid>
-                  );
+                  )
                 })}
               </Grid>
             </Grid>
-
           </Grid>
-          <Typography color='error'>{formik.errors.images}</Typography>
+          <Typography color="error">{formik.errors.images}</Typography>
         </Paper>
 
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -425,9 +388,7 @@ function EditSpace() {
                 type="number"
                 fullWidth
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">Shs</InputAdornment>
-                  ),
+                  startAdornment: <InputAdornment position="start">Shs</InputAdornment>,
                 }}
                 placeholder="0.00"
                 error={formik.errors.price?.amount}
@@ -501,15 +462,15 @@ function EditSpace() {
                     <Checkbox
                       checked={formik?.values?.amenities?.includes(amenity)}
                       onChange={(e) => {
-                        const { checked } = e.target;
-                        const prev = formik?.values?.amenities;
+                        const { checked } = e.target
+                        const prev = formik?.values?.amenities
                         if (checked) {
-                          formik.setFieldValue('amenities', [...prev, amenity]);
+                          formik.setFieldValue('amenities', [...prev, amenity])
                         } else {
                           formik.setFieldValue(
                             'amenities',
                             prev.filter((a) => a !== amenity)
-                          );
+                          )
                         }
                       }}
                       name="amenities"
@@ -543,7 +504,7 @@ function EditSpace() {
               size="large"
               disabled={!formik.isValid || updating}
             >
-
+              {updating && <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />}
               {updating ? 'Updating...' : 'Update Space'}
             </Button>
           </Box>
@@ -551,33 +512,25 @@ function EditSpace() {
       </Box>
 
       <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
+        open={toast.open}
+        autoHideDuration={5000}
+        onClose={() => setToast((t) => ({ ...t, open: false }))}
       >
         <Alert
-          onClose={handleCloseSnackbar}
-          severity="success"
+          onClose={() => setToast((t) => ({ ...t, open: false }))}
+          severity={toast.severity}
           sx={{ width: '100%' }}
         >
-          Space created successfully! Your new space has been added to your
-          listings.
+          {toast.message}
         </Alert>
       </Snackbar>
-      <Backdrop
-        sx={{
-          color: "#fff",
-          zIndex: theme => theme.zIndex.drawer + 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-        open={updating}
-      >
-        <CircularProgress color="inherit" />
-        <span>updating....</span>
-      </Backdrop>
+      <Dialog open={open && !error} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Updating your space…</DialogTitle>
+        <DialogContent>Please wait while we save changes.</DialogContent>
+        <DialogActions></DialogActions>
+      </Dialog>
     </Container>
-  );
+  )
 }
 
-export default EditSpace;
+export default EditSpace

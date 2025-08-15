@@ -1,19 +1,29 @@
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
+import axiosInstance from '../api/axiosInstance'
 
 const PrivateRoute = ({ children }) => {
-  const myToken = localStorage.getItem("token")
-  const [token, setToken] = useState(localStorage.getItem("token"))
-  useEffect(() => {
-    if(myToken){
-      setToken(myToken)
-    }else{
-      setToken(null)
-    }
-  }, [myToken])
-  // const token  = useState(localStorage.getItem("token"))
-  return token ? children : <Navigate to="/auth/login" replace />;
-};
+  const [isAuthenticated, setIsAuthenticated] = useState(null)
 
-export default PrivateRoute;
+  useEffect(() => {
+    let mounted = true
+    const checkAuth = async () => {
+      try {
+        await axiosInstance.get('/auth/me')
+        if (mounted) setIsAuthenticated(true)
+      } catch (_e) {
+        console.error(_e)
+        if (mounted) setIsAuthenticated(false)
+      }
+    }
+    checkAuth()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  if (isAuthenticated === null) return null
+  return isAuthenticated ? children : <Navigate to="/auth/login" replace />
+}
+
+export default PrivateRoute
