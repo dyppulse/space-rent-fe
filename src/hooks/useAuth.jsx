@@ -49,7 +49,7 @@ export const useAuth = () => {
           localStorage.removeItem('postLoginRedirect')
           navigate(savedPath)
         } else if (user?.role === 'superadmin') {
-          navigate('/admin/taxonomies')
+          navigate('/admin')
         } else {
           navigate('/dashboard')
         }

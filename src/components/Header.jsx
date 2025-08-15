@@ -52,7 +52,7 @@ function Header({ onToggleTheme, mode }) {
 
   // Create navLinks dynamically based on auth state
   const navLinks = [
-    { name: 'Home', path: isLoggedIn ? '/dashboard' : '/' },
+    { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
     { name: 'Explore', path: '/spaces' },
     { name: 'How It Works', path: '/how-it-works' },
   ]
@@ -87,11 +87,7 @@ function Header({ onToggleTheme, mode }) {
           <>
             {isAdmin && (
               <ListItem disablePadding>
-                <ListItemButton
-                  component={Link}
-                  to="/admin/taxonomies"
-                  sx={{ textAlign: 'center' }}
-                >
+                <ListItemButton component={Link} to="/admin" sx={{ textAlign: 'center' }}>
                   <ListItemText primary="Admin" />
                 </ListItemButton>
               </ListItem>
@@ -123,7 +119,7 @@ function Header({ onToggleTheme, mode }) {
             <Typography
               variant="h6"
               component={Link}
-              to={isLoggedIn ? '/dashboard' : '/'}
+              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'none', sm: 'block' },
@@ -136,7 +132,7 @@ function Header({ onToggleTheme, mode }) {
             <Typography
               variant="h6"
               component={Link}
-              to={isLoggedIn ? '/dashboard' : '/'}
+              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'block', sm: 'none' },
@@ -186,7 +182,7 @@ function Header({ onToggleTheme, mode }) {
               {isLoggedIn ? (
                 <Typography display={'flex'} alignItems={'center'}>
                   {isAdmin && (
-                    <Button component={Link} to="/admin/taxonomies" color="inherit">
+                    <Button component={Link} to="/admin" color="inherit">
                       Admin
                     </Button>
                   )}

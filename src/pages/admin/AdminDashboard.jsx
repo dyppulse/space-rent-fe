@@ -29,7 +29,8 @@ import {
   Visibility as ViewIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-} from '@mui/icons-material'
+  CircularProgress,
+} from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../api/axiosInstance'
 
@@ -56,7 +57,7 @@ const StatCard = ({ title, value, icon, color, subtitle }) => (
   </Card>
 )
 
-const RecentItem = ({ item, type, onView, onEdit, onDelete }) => {
+const RecentItem = ({ item, type, onView, onEdit, onDelete, isDeleting = false }) => {
   const getIcon = () => {
     switch (type) {
       case 'space':
@@ -97,31 +98,44 @@ const RecentItem = ({ item, type, onView, onEdit, onDelete }) => {
   }
 
   return (
-    <ListItem
-      secondaryAction={
-        <Box>
-          <IconButton edge="end" onClick={() => onView(item)} size="small">
-            <ViewIcon />
-          </IconButton>
-          <IconButton edge="end" onClick={() => onEdit(item)} size="small">
-            <EditIcon />
-          </IconButton>
-          <IconButton edge="end" onClick={() => onDelete(item)} size="small" color="error">
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      }
+    <Box
+      sx={{
+        py: 2,
+        px: 2,
+        mb: 1,
+        borderRadius: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        '&:hover': {
+          backgroundColor: 'action.hover',
+        },
+      }}
     >
-      <ListItemAvatar>
-        <Avatar sx={{ bgcolor: 'primary.main' }}>{getIcon()}</Avatar>
-      </ListItemAvatar>
-      <ListItemText
-        primary={getTitle()}
-        secondary={getSubtitle()}
-        primaryTypographyProps={{ variant: 'subtitle2' }}
-        secondaryTypographyProps={{ variant: 'body2' }}
-      />
-    </ListItem>
+      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+        <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40, mr: 2 }}>{getIcon()}</Avatar>
+        <Box>
+          <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 600 }}>
+            {getTitle()}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+            {getSubtitle()}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
+        <IconButton onClick={() => onView(item)} size="small">
+          <ViewIcon />
+        </IconButton>
+        <IconButton onClick={() => onEdit(item)} size="small">
+          <EditIcon />
+        </IconButton>
+        <IconButton onClick={() => onDelete(item)} size="small" color="error" disabled={isDeleting}>
+          {isDeleting ? <CircularProgress size={16} color="error" /> : <DeleteIcon />}
+        </IconButton>
+      </Box>
+    </Box>
   )
 }
 
@@ -134,6 +148,7 @@ const AdminDashboard = () => {
   const [searchResults, setSearchResults] = useState(null)
   const [loading, setLoading] = useState(true)
   const [searching, setSearching] = useState(false)
+  const [deletingItems, setDeletingItems] = useState(new Set())
 
   useEffect(() => {
     fetchDashboardData()
@@ -170,18 +185,67 @@ const AdminDashboard = () => {
   }
 
   const handleView = (item) => {
-    // Navigate to appropriate view/edit page
-    console.log('View item:', item)
+    // Navigate to appropriate view page based on item type
+    if (item.type === 'space' || item.type === undefined) {
+      navigate(`/spaces/${item.id}`)
+    } else if (item.type === 'booking') {
+      navigate(`/admin/bookings`)
+    } else if (item.type === 'user') {
+      navigate(`/admin/users`)
+    }
   }
 
   const handleEdit = (item) => {
-    // Navigate to appropriate edit page
-    console.log('Edit item:', item)
+    // Navigate to appropriate edit page based on item type
+    if (item.type === 'space' || item.type === undefined) {
+      navigate(`/admin/spaces`)
+    } else if (item.type === 'booking') {
+      navigate(`/admin/bookings`)
+    } else if (item.type === 'user') {
+      navigate(`/admin/users`)
+    }
   }
 
-  const handleDelete = (item) => {
-    // Show delete confirmation
-    console.log('Delete item:', item)
+  const handleDelete = async (item) => {
+    // Show delete confirmation and handle deletion
+    const itemName = item.name || item.title || 'item'
+    const itemType = item.type || 'space'
+
+    if (
+      window.confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)
+    ) {
+      try {
+        // Set loading state for this specific item
+        setDeletingItems((prev) => new Set(prev).add(item.id))
+
+        let endpoint = ''
+        if (itemType === 'space' || itemType === undefined) {
+          endpoint = `/admin/spaces/${item.id}`
+        } else if (itemType === 'booking') {
+          endpoint = `/admin/bookings/${item.id}`
+        } else if (itemType === 'user') {
+          endpoint = `/admin/users/${item.id}`
+        }
+
+        if (endpoint) {
+          await axiosInstance.delete(endpoint)
+          // Show success message
+          alert(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully!`)
+          // Refresh dashboard data after successful deletion
+          fetchDashboardData()
+        }
+      } catch (error) {
+        console.error('Error deleting item:', error)
+        alert(`Failed to delete ${itemType}. Please try again.`)
+      } finally {
+        // Clear loading state for this item
+        setDeletingItems((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(item.id)
+          return newSet
+        })
+      }
+    }
   }
 
   const handleQuickAction = (action) => {
@@ -210,16 +274,16 @@ const AdminDashboard = () => {
     return (
       <Box p={3}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Skeleton variant="rectangular" height={120} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Skeleton variant="rectangular" height={120} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Skeleton variant="rectangular" height={120} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Skeleton variant="rectangular" height={120} />
           </Grid>
         </Grid>
@@ -272,7 +336,7 @@ const AdminDashboard = () => {
             </Typography>
             <Grid container spacing={2}>
               {searchResults.users?.length > 0 && (
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Typography variant="subtitle2" color="primary" gutterBottom>
                     Users ({searchResults.users.length})
                   </Typography>
@@ -294,7 +358,7 @@ const AdminDashboard = () => {
                 </Grid>
               )}
               {searchResults.spaces?.length > 0 && (
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Typography variant="subtitle2" color="primary" gutterBottom>
                     Spaces ({searchResults.spaces.length})
                   </Typography>
@@ -316,7 +380,7 @@ const AdminDashboard = () => {
                 </Grid>
               )}
               {searchResults.bookings?.length > 0 && (
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                   <Typography variant="subtitle2" color="primary" gutterBottom>
                     Bookings ({searchResults.bookings.length})
                   </Typography>
@@ -344,7 +408,7 @@ const AdminDashboard = () => {
 
       {/* Statistics Cards */}
       <Grid container spacing={3} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title="Total Users"
             value={stats?.totalUsers || 0}
@@ -353,7 +417,7 @@ const AdminDashboard = () => {
             subtitle="Platform users"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title="Active Spaces"
             value={stats?.totalSpaces || 0}
@@ -362,7 +426,7 @@ const AdminDashboard = () => {
             subtitle="Available for booking"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title="Total Bookings"
             value={stats?.totalBookings || 0}
@@ -371,7 +435,7 @@ const AdminDashboard = () => {
             subtitle="All time"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title="Pending Bookings"
             value={stats?.pendingBookings || 0}
@@ -388,7 +452,7 @@ const AdminDashboard = () => {
           Quick Actions
         </Typography>
         <Grid container spacing={2}>
-          <Grid item>
+          <Grid>
             <Button
               variant="outlined"
               startIcon={<PeopleIcon />}
@@ -397,7 +461,7 @@ const AdminDashboard = () => {
               Manage Users
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               variant="outlined"
               startIcon={<BusinessIcon />}
@@ -406,7 +470,7 @@ const AdminDashboard = () => {
               Manage Spaces
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               variant="outlined"
               startIcon={<EventIcon />}
@@ -415,12 +479,12 @@ const AdminDashboard = () => {
               Manage Bookings
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button variant="outlined" onClick={() => handleQuickAction('locations')}>
               Manage Locations
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button variant="outlined" onClick={() => handleQuickAction('taxonomies')}>
               Manage Taxonomies
             </Button>
@@ -430,12 +494,12 @@ const AdminDashboard = () => {
 
       {/* Recent Activity */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Recent Spaces
             </Typography>
-            <List dense>
+            <List sx={{ py: 1 }}>
               {recentSpaces.map((space) => (
                 <RecentItem
                   key={space.id}
@@ -444,17 +508,18 @@ const AdminDashboard = () => {
                   onView={handleView}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  isDeleting={deletingItems.has(space.id)}
                 />
               ))}
             </List>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Recent Bookings
             </Typography>
-            <List dense>
+            <List sx={{ py: 1 }}>
               {recentBookings.map((booking) => (
                 <RecentItem
                   key={booking.id}
@@ -463,6 +528,7 @@ const AdminDashboard = () => {
                   onView={handleView}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  isDeleting={deletingItems.has(booking.id)}
                 />
               ))}
             </List>
