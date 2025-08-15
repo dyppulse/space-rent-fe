@@ -11,115 +11,176 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box as MuiBox,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import GoogleIcon from '@mui/icons-material/Google'
 import FacebookIcon from '@mui/icons-material/Facebook'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import EmailIcon from '@mui/icons-material/Email'
+import AppleIcon from '@mui/icons-material/Apple'
 import { useAuth } from '../hooks/useAuth'
 
 function LoginPage() {
-  const { formik, loading, error } = useAuth()
+  const { formik, loading, error, LoginStatusModal } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Log in to your account Log in to your account
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Enter your email and password to access your space owner dashboard
+    <Container
+      maxWidth="sm"
+      sx={{ minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Paper
+        elevation={0}
+        sx={(theme) => ({
+          width: '100%',
+          maxWidth: 560,
+          mx: 'auto',
+          borderRadius: 1,
+          overflow: 'hidden',
+          border: '1px solid',
+          borderColor: theme.palette.mode === 'light' ? '#000' : 'divider',
+        })}
+      >
+        <Box
+          sx={{
+            px: 3,
+            py: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            Log in or sign up
           </Typography>
         </Box>
 
-        <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
-          <TextField
-            fullWidth
-            margin="normal"
-            size="small"
-            id="email"
-            name="email"
-            label="Email Address"
-            type="email"
-            autoComplete="email"
-            autoFocus
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-          />
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
+            Welcome to SpaceHire
+          </Typography>
 
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 1,
-            }}
-          >
-            <Typography variant="body2" component="label" htmlFor="password">
-              Password
-            </Typography>
-            <Link to="/auth/forgot-password">
-              <Typography variant="body2" color="primary">
-                Forgot password?
+          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
+            <Box
+              sx={(theme) => ({
+                border: '1px solid',
+                borderColor:
+                  theme.palette.mode === 'light'
+                    ? theme.palette.grey[400]
+                    : theme.palette.grey[600],
+                borderRadius: 1,
+                overflow: 'hidden',
+              })}
+            >
+              <TextField
+                fullWidth
+                placeholder="Email"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                InputProps={{
+                  sx: {
+                    px: 1.5,
+                    py: 1,
+                    minHeight: 48,
+                    '& .MuiInputBase-input': { py: 0.75 },
+                    '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                    borderRadius: 0,
+                  },
+                }}
+              />
+              <Box
+                sx={(theme) => ({
+                  borderTop: '1px solid',
+                  borderColor:
+                    theme.palette.mode === 'light'
+                      ? theme.palette.grey[400]
+                      : theme.palette.grey[600],
+                })}
+              />
+              <TextField
+                fullWidth
+                placeholder="Password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    px: 1.5,
+                    py: 1,
+                    minHeight: 48,
+                    '& .MuiInputBase-input': { py: 0.75 },
+                    '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                    borderRadius: 0,
+                  },
+                }}
+              />
+            </Box>
+
+            {(formik.touched.email && formik.errors.email) ||
+            (formik.touched.password && formik.errors.password) ? (
+              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                {formik.touched.email && formik.errors.email
+                  ? formik.errors.email
+                  : formik.errors.password}
               </Typography>
-            </Link>
+            ) : null}
+
+            <MuiBox
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}
+            >
+              <Link to="/auth/forgot-password">
+                <Typography variant="body2" color="primary">
+                  Forgot password?
+                </Typography>
+              </Link>
+            </MuiBox>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              size="large"
+              sx={{ mt: 2, mb: 1 }}
+              disabled={loading}
+              startIcon={loading ? <CircularProgress color="inherit" size={18} /> : null}
+            >
+              {loading ? 'Logging in...' : 'Continue'}
+            </Button>
+
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                {error || 'Login failed. Please try again.'}
+              </Typography>
+            )}
           </Box>
 
-          <TextField
-            fullWidth
-            margin="normal"
-            size="small"
-            name="password"
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="current-password"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.password && Boolean(formik.errors.password)}
-            helperText={formik.touched.password && formik.errors.password}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{ mt: 3, mb: 2 }}
-            // disabled={formik.isSubmitting || isLoading}
-            disabled={loading}
-            startIcon={loading ? <CircularProgress color="inherit" size={18} /> : null}
-          >
-            {loading ? 'Logging in...' : 'Log in'}
-          </Button>
-
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-              {error || 'Login failed. Please try again.'}
-            </Typography>
-          )}
-
-          <Box sx={{ position: 'relative', my: 3 }}>
+          <Box sx={{ position: 'relative', my: 2 }}>
             <Divider />
             <Typography
               variant="body2"
@@ -137,20 +198,41 @@ function LoginPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={2}>
-            <Grid item size={{ xs: 6 }}>
-              <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
-                Google
-              </Button>
-            </Grid>
-            <Grid item size={{ xs: 6 }}>
-              <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
-                Facebook
-              </Button>
-            </Grid>
-          </Grid>
+          <List disablePadding sx={{ mb: 2 }}>
+            <ListItemButton
+              dense
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <GoogleIcon />
+              </ListItemIcon>
+              <ListItemText primary="Continue with Google" />
+            </ListItemButton>
+            <ListItemButton
+              dense
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <AppleIcon />
+              </ListItemIcon>
+              <ListItemText primary="Continue with Apple" />
+            </ListItemButton>
+            <ListItemButton
+              dense
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <FacebookIcon />
+              </ListItemIcon>
+              <ListItemText primary="Continue with Facebook" />
+            </ListItemButton>
+          </List>
 
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="caption" color="text.secondary">
+            By continuing, you agree to our Terms of Service and acknowledge our Privacy Policy.
+          </Typography>
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
               Don't have an account?{' '}
               <Link to="/auth/signup">
@@ -162,6 +244,7 @@ function LoginPage() {
           </Box>
         </Box>
       </Paper>
+      {LoginStatusModal}
     </Container>
   )
 }

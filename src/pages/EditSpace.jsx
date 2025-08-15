@@ -30,14 +30,13 @@ import * as yup from 'yup'
 import { getSpace, updateSpace } from '../redux/slices/spaceSlice'
 import { useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
-import Swal from 'sweetalert2'
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 
 function EditSpace() {
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-
   const fileInputRef = useRef(null)
   const { id } = useParams()
-  const [swalFire, setSwalFire] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
@@ -52,13 +51,6 @@ function EditSpace() {
   useEffect(() => {
     dispatch(getSpace(id))
   }, [dispatch, id])
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return
-    }
-    setSnackbarOpen(false)
-  }
 
   const amenities = [
     'WiFi',
@@ -122,30 +114,18 @@ function EditSpace() {
   console.log(formik.values, 'djdkjdkjdkjdk', updating)
   useEffect(() => {
     if (updating) {
-      setSwalFire(true)
+      setOpen(true)
+      return
     }
-    if (swalFire) {
-      if (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Uh Oh Something is Wrong',
-          html: error,
-          confirmButtonText: 'Try Again',
-          confirmButtonColor: '#CE0610',
-          allowOutsideClick: false,
-          customClass: {
-            container: 'my-swal',
-          },
-        }).then(() => {
-          setSwalFire(false)
-        })
-      } else {
-        navigate('/dashboard')
-        setSnackbarOpen(true)
-        setSwalFire(false)
-      }
+    setOpen(false)
+    if (error) {
+      setToast({ open: true, message: String(error || 'Failed to update'), severity: 'error' })
+    } else if (!error) {
+      navigate('/dashboard')
+      setToast({ open: true, message: 'Space updated successfully!', severity: 'success' })
     }
-  }, [updating])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updating, error])
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -531,11 +511,24 @@ function EditSpace() {
         </Paper>
       </Box>
 
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-          Space created successfully! Your new space has been added to your listings.
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={5000}
+        onClose={() => setToast((t) => ({ ...t, open: false }))}
+      >
+        <Alert
+          onClose={() => setToast((t) => ({ ...t, open: false }))}
+          severity={toast.severity}
+          sx={{ width: '100%' }}
+        >
+          {toast.message}
         </Alert>
       </Snackbar>
+      <Dialog open={open && !error} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Updating your space…</DialogTitle>
+        <DialogContent>Please wait while we save changes.</DialogContent>
+        <DialogActions></DialogActions>
+      </Dialog>
     </Container>
   )
 }

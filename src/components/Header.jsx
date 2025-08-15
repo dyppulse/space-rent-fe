@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
@@ -19,9 +19,8 @@ import MenuIcon from '@mui/icons-material/Menu'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
-import { useEffect } from 'react'
-import Swal from 'sweetalert2'
-import { useDispatch } from 'react-redux'
+import ConfirmDialog from './ConfirmDialog'
+import { useDispatch, useSelector } from 'react-redux'
 import axiosInstance from '../api/axiosInstance'
 import { logout as authSliceLogout } from '../redux/slices/authSlice'
 
@@ -31,51 +30,29 @@ function Header({ onToggleTheme, mode }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  // Mock authentication state - replace with actual auth later
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [confirm, setConfirm] = useState(false)
 
-  useEffect(() => {
-    const check = async () => {
-      try {
-        await axiosInstance.get('/auth/me')
-        setIsLoggedIn(true)
-      } catch (_e) {
-        console.error(_e)
-        setIsLoggedIn(false)
-      }
-    }
-    check()
-  }, [])
+  // Get authentication state from Redux
+  const authState = useSelector((state) => state.auth)
+  const { user } = authState
+  const isLoggedIn = !!user
+  const isAdmin = user?.role === 'superadmin'
+
+  // Debug logging
+  console.log('Header - Full auth state:', authState)
+  console.log('Header - Computed values:', { user, isLoggedIn, isAdmin })
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
 
-  const logout = () => {
-    Swal.fire({
-      icon: 'question',
-      title: 'Are You Sure?',
-      html: 'Do you want to log out',
-      confirmButtonText: 'Yes',
-      showCancelButton: true,
-      confirmButtonColor: '#0d9488',
-      cancelButtonColor: '#CE0610',
-      allowOutsideClick: false,
-      reverseButtons: true,
-      customClass: {
-        container: 'my-swal',
-      },
-    }).then(async (value) => {
-      if (value.isConfirmed) {
-        await axiosInstance.post('/auth/logout')
-        dispatch(authSliceLogout())
-        navigate('/auth/login')
-      }
-    })
+  const handleLogout = async () => {
+    setConfirm(true)
   }
 
+  // Create navLinks dynamically based on auth state
   const navLinks = [
-    { name: 'Home', path: '/' },
+    { name: 'Home', path: isLoggedIn ? '/dashboard' : '/' },
     { name: 'Explore', path: '/spaces' },
     { name: 'How It Works', path: '/how-it-works' },
   ]
@@ -107,11 +84,19 @@ function Header({ onToggleTheme, mode }) {
         ))}
         <Divider sx={{ my: 1 }} />
         {isLoggedIn ? (
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/dashboard" sx={{ textAlign: 'center' }}>
-              <ListItemText primary="Dashboard" />
-            </ListItemButton>
-          </ListItem>
+          <>
+            {isAdmin && (
+              <ListItem disablePadding>
+                <ListItemButton
+                  component={Link}
+                  to="/admin/taxonomies"
+                  sx={{ textAlign: 'center' }}
+                >
+                  <ListItemText primary="Admin" />
+                </ListItemButton>
+              </ListItem>
+            )}
+          </>
         ) : (
           <>
             <ListItem disablePadding>
@@ -138,7 +123,7 @@ function Header({ onToggleTheme, mode }) {
             <Typography
               variant="h6"
               component={Link}
-              to="/"
+              to={isLoggedIn ? '/dashboard' : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'none', sm: 'block' },
@@ -151,7 +136,7 @@ function Header({ onToggleTheme, mode }) {
             <Typography
               variant="h6"
               component={Link}
-              to="/"
+              to={isLoggedIn ? '/dashboard' : '/'}
               sx={{
                 flexGrow: 1,
                 display: { xs: 'block', sm: 'none' },
@@ -200,10 +185,12 @@ function Header({ onToggleTheme, mode }) {
               </IconButton>
               {isLoggedIn ? (
                 <Typography display={'flex'} alignItems={'center'}>
-                  <Button component={Link} to="/dashboard" color="inherit">
-                    Dashboard
-                  </Button>
-                  <PowerSettingsNewIcon sx={{ cursor: 'pointer' }} onClick={() => logout()} />
+                  {isAdmin && (
+                    <Button component={Link} to="/admin/taxonomies" color="inherit">
+                      Admin
+                    </Button>
+                  )}
+                  <PowerSettingsNewIcon sx={{ cursor: 'pointer' }} onClick={handleLogout} />
                 </Typography>
               ) : (
                 <>
@@ -244,6 +231,20 @@ function Header({ onToggleTheme, mode }) {
       >
         {drawer}
       </Drawer>
+
+      <ConfirmDialog
+        open={confirm}
+        title="Log out?"
+        content="Do you want to log out?"
+        confirmText="Log out"
+        onClose={() => setConfirm(false)}
+        onConfirm={async () => {
+          setConfirm(false)
+          await axiosInstance.post('/auth/logout')
+          dispatch(authSliceLogout())
+          navigate('/auth/login')
+        }}
+      />
     </>
   )
 }

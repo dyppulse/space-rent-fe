@@ -3,17 +3,24 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../redux/slices/authSlice'
-import Swal from 'sweetalert2'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+} from '@mui/material'
 import * as Yup from 'yup'
 import axiosInstance from '../api/axiosInstance'
 
 export const useAuth = () => {
-  const [swalFire, setSwalFire] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { loading, error } = useSelector((state) => state?.auth)
+  const { loading, error, user } = useSelector((state) => state?.auth)
 
   const formik = useFormik({
     initialValues: {
@@ -31,36 +38,25 @@ export const useAuth = () => {
   })
 
   useEffect(() => {
-    if (loading) {
-      setSwalFire(true)
-    }
-    if (swalFire) {
-      if (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Uh Oh Something is Wrong',
-          html: error,
-          confirmButtonText: 'Try Again',
-          confirmButtonColor: '#CE0610',
-          allowOutsideClick: false,
-          customClass: {
-            container: 'my-swal',
-          },
-        }).then(() => {
-          setSwalFire(false)
-        })
-      } else {
+    // Show modal while the login request is in-flight
+    if (loading && !open) setOpen(true)
+
+    // When request finishes, decide where to go and close modal
+    if (!loading && open) {
+      if (!error && user) {
         const savedPath = localStorage.getItem('postLoginRedirect')
         if (savedPath) {
           localStorage.removeItem('postLoginRedirect')
           navigate(savedPath)
+        } else if (user?.role === 'superadmin') {
+          navigate('/admin/taxonomies')
         } else {
           navigate('/dashboard')
         }
-        setSwalFire(false)
       }
+      setOpen(false)
     }
-  }, [error, loading, navigate, swalFire])
+  }, [error, loading, navigate, open, user])
 
   const logout = async () => {
     await axiosInstance.post('/auth/logout')
@@ -71,5 +67,18 @@ export const useAuth = () => {
     loading,
     error,
     logout,
+    LoginStatusModal: (
+      <Dialog open={open && loading} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Logging you in…</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Please wait while we prepare your dashboard.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    ),
   }
 }

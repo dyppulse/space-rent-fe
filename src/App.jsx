@@ -1,210 +1,242 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { useEffect, useMemo, useState } from 'react'
-import CssBaseline from '@mui/material/CssBaseline'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 import store from './redux/store'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-
-// Pages
+import { useState, useEffect, createContext } from 'react'
+import Header from './components/Header'
+import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import SpacesPage from './pages/SpacesPage'
 import SpaceDetailPage from './pages/SpaceDetailPage'
-import HowItWorksPage from './pages/HowItWorksPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import NewSpacePage from './pages/NewSpacePage'
-import NotFound from './pages/NotFound'
-
-// Components
-import PrivateRoute from './components/PrivateRoute'
-import Header from './components/Header'
-import Footer from './components/Footer'
 import EditSpace from './pages/EditSpace'
+import HowItWorksPage from './pages/HowItWorksPage'
+import NotFound from './pages/NotFound'
+import WorkInProgress from './pages/WorkInProgress'
+import PrivateRoute from './components/PrivateRoute'
+import AdminRoute from './components/AdminRoute'
+import SmartRoute from './components/SmartRoute'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import UsersPage from './pages/admin/UsersPage'
+import AdminSpacesPage from './pages/admin/SpacesPage'
+import TaxonomiesPage from './pages/admin/TaxonomiesPage'
+import LocationsPage from './pages/admin/LocationsPage'
+import BookingsPage from './pages/admin/BookingsPage'
+import './App.css'
 
-function useMode() {
-  const getInitial = () => {
-    const saved = localStorage.getItem('theme-mode')
-    if (saved === 'light' || saved === 'dark') return saved
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light'
-  }
-  const [mode, setMode] = useState(getInitial)
-  useEffect(() => {
-    localStorage.setItem('theme-mode', mode)
-    document.documentElement.setAttribute('data-color-scheme', mode)
-  }, [mode])
-  return { mode, setMode }
-}
+// Create theme with system preference detection
+const getDesignTokens = (mode) => ({
+  palette: {
+    mode,
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    background: {
+      default: mode === 'light' ? '#fafafa' : '#121212',
+      paper: mode === 'light' ? '#fff' : '#1e1e1e',
+    },
+    text: {
+      primary: mode === 'light' ? 'rgba(0, 0, 0, 0.87)' : '#fff',
+      secondary: mode === 'light' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+    },
+  },
+  typography: {
+    fontFamily: '"Nunito Sans", "Poppins", "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
+    },
+    h2: {
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+    },
+    h3: {
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+    },
+    h4: {
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+    body1: {
+      fontWeight: 400,
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontWeight: 400,
+      lineHeight: 1.6,
+    },
+    button: {
+      fontWeight: 600,
+      textTransform: 'none',
+      letterSpacing: '0.01em',
+    },
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+  },
+})
 
-function buildTheme(mode) {
-  const isDark = mode === 'dark'
-  return createTheme({
-    palette: {
-      mode,
-      primary: {
-        main: '#FF385C',
-        light: '#FF6B82',
-        dark: '#E11D48',
-        contrastText: '#ffffff',
-      },
-      secondary: {
-        main: isDark ? '#EAEAEA' : '#222222',
-        light: isDark ? '#FFFFFF' : '#3C3C3C',
-        dark: isDark ? '#C7C7C7' : '#000000',
-        contrastText: isDark ? '#000000' : '#ffffff',
-      },
-      background: {
-        default: isDark ? '#141414' : '#ffffff',
-        paper: isDark ? '#1A1A1A' : '#ffffff',
-      },
-      text: {
-        primary: isDark ? '#FFFFFF' : '#222222',
-        secondary: isDark ? '#B0B0B0' : '#717171',
-      },
-      divider: isDark ? 'rgba(255,255,255,0.12)' : '#EAEAEA',
-    },
-    typography: {
-      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-      h1: { fontWeight: 700 },
-      h2: { fontWeight: 700 },
-      h3: { fontWeight: 600 },
-      h4: { fontWeight: 600 },
-      button: { textTransform: 'none' },
-    },
-    shape: { borderRadius: 8 },
-    components: {
-      MuiTextField: {
-        defaultProps: { variant: 'outlined' },
-      },
-      MuiOutlinedInput: {
-        styleOverrides: {
-          root: {
-            borderRadius: 12,
-            backgroundColor: isDark ? '#1F1F1F' : '#fff',
-            transition: 'box-shadow 120ms ease, border-color 120ms ease',
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#e0e0e0',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.35)' : '#9e9e9e',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#FF385C',
-              boxShadow: isDark
-                ? '0 0 0 3px rgba(255, 56, 92, 0.2)'
-                : '0 0 0 3px rgba(255, 56, 92, 0.15)',
-            },
-          },
-          input: { padding: '14px 14px' },
-        },
-      },
-      MuiButton: {
-        styleOverrides: {
-          root: { borderRadius: 8, padding: '8px 16px' },
-        },
-      },
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            borderRadius: 12,
-            boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.6)' : '0 4px 12px rgba(0,0,0,0.06)',
-            backgroundColor: isDark ? '#1A1A1A' : '#fff',
-          },
-        },
-      },
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundColor: isDark ? '#1A1A1A' : '#fff',
-          },
-        },
-      },
-      MuiAppBar: {
-        styleOverrides: {
-          colorDefault: {
-            backgroundColor: isDark ? '#1A1A1A' : '#fff',
-          },
-        },
-      },
-      MuiList: {
-        styleOverrides: {
-          root: {
-            backgroundColor: 'transparent',
-          },
-        },
-      },
-      MuiDrawer: {
-        styleOverrides: {
-          paper: {
-            backgroundColor: isDark ? '#1A1A1A' : '#fff',
-          },
-        },
-      },
-    },
-  })
+// Create theme context
+export const ThemeContext = createContext()
+
+// Detect system preference
+const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+// Component to conditionally render footer
+function AppContent({ toggleTheme, mode }) {
+  const location = useLocation()
+  const isAdminRoute = location.pathname.startsWith('/admin')
+
+  return (
+    <div className="App">
+      <Header onToggleTheme={toggleTheme} mode={mode} />
+      <main>
+        <Routes>
+          {/* Smart Routes - Redirect logged-in users */}
+          <Route
+            path="/"
+            element={
+              <SmartRoute>
+                <HomePage />
+              </SmartRoute>
+            }
+          />
+
+          {/* Public Routes - Available to all users */}
+          <Route path="/spaces" element={<SpacesPage />} />
+          <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/work-in-progress" element={<WorkInProgress />} />
+
+          {/* Auth Routes - Redirect logged-in users to dashboard */}
+          <Route
+            path="/auth/login"
+            element={
+              <SmartRoute redirectTo="/dashboard">
+                <LoginPage />
+              </SmartRoute>
+            }
+          />
+          <Route
+            path="/auth/signup"
+            element={
+              <SmartRoute redirectTo="/dashboard">
+                <SignupPage />
+              </SmartRoute>
+            }
+          />
+
+          {/* Protected Owner Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/spaces/new"
+            element={
+              <PrivateRoute>
+                <NewSpacePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/spaces/:id/edit"
+            element={
+              <PrivateRoute>
+                <EditSpace />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Protected Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout onToggleTheme={toggleTheme} mode={mode} />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="spaces" element={<AdminSpacesPage />} />
+            <Route path="bookings" element={<BookingsPage />} />
+            <Route path="locations" element={<LocationsPage />} />
+            <Route path="taxonomies" element={<TaxonomiesPage />} />
+          </Route>
+
+          {/* Root redirect for logged-in users */}
+          <Route
+            path="/home"
+            element={
+              <SmartRoute>
+                <HomePage />
+              </SmartRoute>
+            }
+          />
+
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      {!isAdminRoute && <Footer />}
+    </div>
+  )
 }
 
 function App() {
-  const { mode, setMode } = useMode()
-  const theme = useMemo(() => buildTheme(mode), [mode])
-  const toggleTheme = () => setMode((m) => (m === 'light' ? 'dark' : 'light'))
+  const [mode, setMode] = useState(prefersDarkMode ? 'dark' : 'light')
+
+  const theme = createTheme(getDesignTokens(mode))
+
+  const toggleTheme = () => {
+    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
+  }
+
+  // Save theme preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('theme-mode', mode)
+  }, [mode])
+
+  // Load theme preference from localStorage on mount
+  useEffect(() => {
+    const savedMode = localStorage.getItem('theme-mode')
+    if (savedMode) {
+      setMode(savedMode)
+    }
+  }, [])
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Router>
-            <div className="app">
-              <Header onToggleTheme={toggleTheme} mode={mode} />
-
-              <main>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/spaces" element={<SpacesPage />} />
-                  <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-                  <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/auth/login" element={<LoginPage />} />
-                  <Route path="/auth/signup" element={<SignupPage />} />
-                  <Route
-                    path="/dashboard/spaces/:id/edit"
-                    element={
-                      <PrivateRoute>
-                        <EditSpace />
-                      </PrivateRoute>
-                    }
-                  />
-
-                  {/* Protected Routes */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <PrivateRoute>
-                        <DashboardPage />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/spaces/new"
-                    element={
-                      <PrivateRoute>
-                        <NewSpacePage />
-                      </PrivateRoute>
-                    }
-                  />
-
-                  {/* 404 */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-
-              <Footer />
-            </div>
-          </Router>
-        </LocalizationProvider>
+        <Router>
+          <AppContent toggleTheme={toggleTheme} mode={mode} />
+        </Router>
       </ThemeProvider>
     </Provider>
   )

@@ -23,11 +23,12 @@ import PhoneInputFormik from '../components/PhoneInput'
 import { useDispatch, useSelector } from 'react-redux'
 import { signUp } from '../redux/slices/authSlice'
 import { useEffect } from 'react'
-import Swal from 'sweetalert2'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from '@mui/material'
 import { useState } from 'react'
 
 function SignupPage() {
-  const [swalFire, setSwalFire] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
@@ -93,29 +94,22 @@ function SignupPage() {
 
   useEffect(() => {
     if (loading) {
-      setSwalFire(true)
+      setOpen(true)
+      return
     }
-    if (swalFire) {
-      if (signUpError) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Uh Oh Something is Wrong',
-          html: signUpError,
-          confirmButtonText: 'Try Again',
-          confirmButtonColor: '#CE0610',
-          allowOutsideClick: false,
-          customClass: {
-            container: 'my-swal',
-          },
-        }).then(() => {
-          setSwalFire(false)
-        })
-      } else {
-        navigate('/dashboard')
-        setSwalFire(false)
-      }
+    setOpen(false)
+    if (signUpError) {
+      setToast({
+        open: true,
+        message: String(signUpError || 'Failed to create account'),
+        severity: 'error',
+      })
+    } else if (!signUpError) {
+      navigate('/dashboard')
+      setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
     }
-  }, [loading, navigate, signUpError, swalFire])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, signUpError])
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -290,6 +284,24 @@ function SignupPage() {
           </Box>
         </Box>
       </Paper>
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={5000}
+        onClose={() => setToast((t) => ({ ...t, open: false }))}
+      >
+        <Alert
+          onClose={() => setToast((t) => ({ ...t, open: false }))}
+          severity={toast.severity}
+          sx={{ width: '100%' }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
+      <Dialog open={open && !signUpError} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Creating your account…</DialogTitle>
+        <DialogContent>Please wait while we set things up.</DialogContent>
+        <DialogActions></DialogActions>
+      </Dialog>
     </Container>
   )
 }

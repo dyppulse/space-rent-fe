@@ -1,19 +1,30 @@
 import axios from 'axios'
 
-const apiUrl = import.meta.env.VITE_API_URL
+const rawEnvBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
+const fallbackLocalBase =
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:4000/api'
+    : ''
+
+const normalizeBase = (value) => {
+  if (!value) return value
+  const v = String(value).trim()
+  if (/^https?:\/\//i.test(v)) return v
+  if (/^(localhost|127\.0\.0\.1|\[::1\])/i.test(v)) return `http://${v}`
+  return `https://${v}`
+}
+
+const baseURL = normalizeBase(rawEnvBase) || fallbackLocalBase
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL,
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
 const unProtectedAxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || apiUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL,
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
