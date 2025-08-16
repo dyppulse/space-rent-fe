@@ -20,27 +20,34 @@ import LightModeIcon from '@mui/icons-material/LightMode'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import ConfirmDialog from './ConfirmDialog'
-import { useDispatch, useSelector } from 'react-redux'
-
-import { logoutUser } from '../redux/slices/authSlice'
+import { useAuth } from '../contexts/AuthContext'
 
 function Header({ onToggleTheme, mode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const { user, logout, initialized } = useAuth()
 
   const [confirm, setConfirm] = useState(false)
 
-  // Get authentication state from Redux
-  const authState = useSelector((state) => state.auth)
-  const { user } = authState
+  // Get authentication state from context
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'superadmin'
 
-  // Debug logging
-  console.log('Header - Full auth state:', authState)
-  console.log('Header - Computed values:', { user, isLoggedIn, isAdmin })
+  // Show loading state until auth is initialized
+  if (!initialized) {
+    return (
+      <AppBar position="static" color="default" elevation={1}>
+        <Container maxWidth="lg">
+          <Toolbar disableGutters>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              SpaceHire
+            </Typography>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    )
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -52,7 +59,7 @@ function Header({ onToggleTheme, mode }) {
 
   const confirmLogout = async () => {
     try {
-      await dispatch(logoutUser())
+      await logout()
       setConfirm(false)
       navigate('/')
     } catch (error) {

@@ -1,39 +1,32 @@
-import { useState } from 'react';
-import { Box, Paper, Typography, Chip, Button, Divider, Snackbar, Alert } from '@mui/material';
-import { format } from 'date-fns';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import { updateBookingStatus } from '../redux/slices/bookingSlice';
+import { useState } from 'react'
+import { Box, Paper, Typography, Chip, Button, Divider, Snackbar, Alert } from '@mui/material'
+import { format } from 'date-fns'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
+import { useUpdateBookingStatus } from '../api/queries/bookingQueries'
 
 function BookingsList({ bookings }) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [alertType, setAlertType] = useState('success');
-  const [chosenAction, setChosenAction] = useState('');
-  const dispatch = useDispatch();
-  const { loading } = useSelector(state => state.bookings)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [alertType, setAlertType] = useState('success')
+  const [chosenAction, setChosenAction] = useState('')
+  const { mutate: updateBookingStatus, isPending: loading } = useUpdateBookingStatus()
   // Group bookings by status
-  const pendingBookings = bookings?.filter((b) => b.status === 'pending');
-  const confirmedBookings = bookings?.filter((b) => b.status === 'confirmed');
-  const pastBookings = bookings.filter(
-    (b) => b.status === 'cancelled' || b.status === 'completed'
-  );
+  const pendingBookings = bookings?.filter((b) => b.status === 'pending')
+  const confirmedBookings = bookings?.filter((b) => b.status === 'confirmed')
+  const pastBookings = bookings.filter((b) => b.status === 'cancelled' || b.status === 'completed')
 
   const handleBooking = async ({ status, bookingId }) => {
-    await dispatch(updateBookingStatus({ status, id: bookingId })).unwrap();
-    setAlertType(status === "confirmed" ? 'success' : 'warning');
-    setChosenAction(status === "confirmed" ? 'Booking request confirmed!' : 'Booking request cancelled!')
-    setSnackbarOpen(true);
+    updateBookingStatus({ status, id: bookingId })
+    setAlertType(status === 'confirmed' ? 'success' : 'warning')
+    setChosenAction(
+      status === 'confirmed' ? 'Booking request confirmed!' : 'Booking request cancelled!'
+    )
+    setSnackbarOpen(true)
   }
 
   const renderBookingCard = (booking) => {
     return (
-      <Paper
-        key={booking?._id}
-        variant="outlined"
-        sx={{ mb: 2, p: 3, borderRadius: 2 }}
-      >
+      <Paper key={booking?._id} variant="outlined" sx={{ mb: 2, p: 3, borderRadius: 2 }}>
         <Box
           sx={{
             display: 'flex',
@@ -46,10 +39,7 @@ function BookingsList({ bookings }) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Typography variant="h6">{booking.clientName}</Typography>
               <Chip
-                label={
-                  booking?.status?.charAt(0).toUpperCase() +
-                  booking?.status?.slice(1)
-                }
+                label={booking?.status?.charAt(0).toUpperCase() + booking?.status?.slice(1)}
                 size="small"
                 color={
                   booking.status === 'confirmed'
@@ -78,11 +68,12 @@ function BookingsList({ bookings }) {
               />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              {(booking?.space.name)}
+              {booking?.space.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {format(new Date(booking.eventDate), "EEEE, MMMM do yyyy")} •{' '}
-              {format(new Date(booking.startTime), "hh:mm a")} - {format(new Date(booking.endTime), "hh:mm a")}
+              {format(new Date(booking.eventDate), 'EEEE, MMMM do yyyy')} •{' '}
+              {format(new Date(booking.startTime), 'hh:mm a')} -{' '}
+              {format(new Date(booking.endTime), 'hh:mm a')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {booking.clientEmail} • {booking.customerPhone}
@@ -143,8 +134,8 @@ function BookingsList({ bookings }) {
           </>
         )}
       </Paper>
-    );
-  };
+    )
+  }
 
   return (
     <Box>
@@ -185,17 +176,13 @@ function BookingsList({ bookings }) {
           </Typography>
         </Paper>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
         <Alert severity={alertType} sx={{ width: '100%' }} onClose={() => setSnackbarOpen(false)}>
           {chosenAction}
         </Alert>
       </Snackbar>
     </Box>
-  );
+  )
 }
 
-export default BookingsList;
+export default BookingsList

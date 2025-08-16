@@ -1,12 +1,12 @@
-import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
+import { useAuth } from '../contexts/AuthContext'
 
 const PrivateRoute = ({ children, redirectTo = '/auth/login' }) => {
-  const { user, loading, initialized } = useSelector((state) => state.auth)
+  const { user, isLoading, initialized } = useAuth()
 
   // Show loading only during initial auth check and when we don't have a definitive user state
-  if (loading || (!initialized && user === null)) {
+  if (isLoading || (!initialized && user === null)) {
     return (
       <Box
         sx={{

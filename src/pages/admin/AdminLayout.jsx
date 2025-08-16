@@ -33,9 +33,7 @@ import {
   DarkMode as DarkModeIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { logout } from '../../redux/slices/authSlice'
-import axiosInstance from '../../api/axiosInstance'
+import { useAuth } from '../../contexts/AuthContext'
 
 const drawerWidth = 240
 
@@ -55,7 +53,7 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const dispatch = useDispatch()
+  const { logout } = useAuth()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -71,13 +69,11 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.post('/auth/logout')
-      dispatch(logout())
+      await logout()
       navigate('/auth/login')
     } catch (error) {
       console.error('Error logging out:', error)
       // Force logout even if API call fails
-      dispatch(logout())
       navigate('/auth/login')
     }
   }

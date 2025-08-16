@@ -27,7 +27,7 @@ import AppleIcon from '@mui/icons-material/Apple'
 import { useAuth } from '../hooks/useAuth'
 
 function LoginPage() {
-  const { formik, loading, error, LoginStatusModal } = useAuth()
+  const { formik } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -167,17 +167,11 @@ function LoginPage() {
               color="primary"
               size="large"
               sx={{ mt: 2, mb: 1 }}
-              disabled={loading}
-              startIcon={loading ? <CircularProgress color="inherit" size={18} /> : null}
+              disabled={false}
+              startIcon={null}
             >
-              {loading ? 'Logging in...' : 'Continue'}
+              Continue
             </Button>
-
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mb: 1 }}>
-                {error || 'Login failed. Please try again.'}
-              </Typography>
-            )}
           </Box>
 
           <Box sx={{ position: 'relative', my: 2 }}>
@@ -244,7 +238,6 @@ function LoginPage() {
           </Box>
         </Box>
       </Paper>
-      {LoginStatusModal}
     </Container>
   )
 }

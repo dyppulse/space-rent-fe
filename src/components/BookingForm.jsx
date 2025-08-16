@@ -19,15 +19,12 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
-import { createBooking } from '../redux/slices/bookingSlice'
+import { useCreateBooking } from '../api/queries/bookingQueries'
 import { differenceInMinutes } from 'date-fns'
 
 function BookingForm({ spaceId, price, priceUnit }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const dispatch = useDispatch()
-  const { loading: isBookingLoading } = useSelector((state) => state.bookings)
+  const { mutate: createBooking, isPending: isBookingLoading } = useCreateBooking()
 
   const formik = useFormik({
     initialValues: {
@@ -59,7 +56,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
       guests: Yup.number().min(1).max(50),
     }),
     onSubmit: async (values, { resetForm }) => {
-      await dispatch(createBooking({ ...values, spaceId })).unwrap()
+      createBooking({ ...values, spaceId })
       setSnackbarOpen(true)
       resetForm?.()
     },

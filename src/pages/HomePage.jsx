@@ -2,20 +2,15 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import SpaceGrid from '../components/SpaceGrid'
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchSpaces } from '../redux/slices/spaceSlice'
+
+import { useSpaces } from '../api/queries/spaceQueries'
+import { useAuth } from '../contexts/AuthContext'
 import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function HomePage() {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { list, loading } = useSelector((state) => state.spaces)
-  const { loading: authLoading } = useSelector((state) => state.auth)
-
-  useEffect(() => {
-    dispatch(fetchSpaces())
-  }, [dispatch])
+  const { data: spacesData, isLoading: loading } = useSpaces()
+  const { isLoading: authLoading } = useAuth()
 
   const handleListSpaceClick = () => {
     // Only wait if we're actively loading
@@ -101,8 +96,8 @@ function HomePage() {
           {/* Space Grid */}
           {loading ? (
             <ListSkeleton items={6} />
-          ) : list?.spaces?.length ? (
-            <SpaceGrid spaces={list.spaces} />
+          ) : spacesData?.spaces?.length ? (
+            <SpaceGrid spaces={spacesData?.spaces || []} />
           ) : (
             <SpaceGrid spaces={[]} />
           )}

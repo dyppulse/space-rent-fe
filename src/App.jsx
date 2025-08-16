@@ -1,11 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { Provider } from 'react-redux'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import store from './redux/store'
-import { useState, useEffect, createContext, useRef } from 'react'
-import { useDispatch } from 'react-redux'
-import { checkAuthStatus } from './redux/slices/authSlice'
+import { useState, useEffect } from 'react'
+import { QueryProvider } from './providers/QueryProvider'
+import { AuthProvider } from './contexts/AuthContext'
+import { ThemeContext } from './contexts/ThemeContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
@@ -99,35 +98,13 @@ const getDesignTokens = (mode) => ({
   },
 })
 
-// Create theme context
-export const ThemeContext = createContext()
-
 // Detect system preference
 const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
 
 // Component to conditionally render footer
 function AppContent({ toggleTheme, mode }) {
   const location = useLocation()
-  const dispatch = useDispatch()
   const isAdminRoute = location.pathname.startsWith('/admin')
-  const authInitializedRef = useRef(false)
-
-  // Initialize auth state to prevent flickering
-  useEffect(() => {
-    // Prevent multiple auth checks
-    if (authInitializedRef.current) {
-      return
-    }
-
-    // Add a small delay to allow the app to fully load before checking auth
-    const timer = setTimeout(() => {
-      // Check if user is already authenticated on app startup
-      dispatch(checkAuthStatus())
-      authInitializedRef.current = true
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [dispatch])
 
   return (
     <div className="App">
@@ -235,14 +212,16 @@ function App() {
     }
   }, [])
   return (
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <AppContent toggleTheme={toggleTheme} mode={mode} />
-        </Router>
-      </ThemeProvider>
-    </Provider>
+    <QueryProvider>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <AppContent toggleTheme={toggleTheme} mode={mode} />
+          </Router>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryProvider>
   )
 }
 

@@ -38,9 +38,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { postSpace } from '../redux/slices/spaceSlice'
-import { useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
+import { useCreateSpace } from '../api/queries/spaceQueries'
 import { DialogActions } from '@mui/material'
 
 function NewSpacePage() {
@@ -54,8 +52,7 @@ function NewSpacePage() {
   const [formSubmitted, setFormSubmitted] = useState(false)
   const navigate = useNavigate()
 
-  const dispatch = useDispatch()
-  const { loading, error } = useSelector((state) => state.spaces)
+  const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -129,7 +126,7 @@ function NewSpacePage() {
     validateOnMount: true,
     onSubmit: (values) => {
       setFormSubmitted(true)
-      dispatch(postSpace(values)) // formikValues includes images as File[]
+      createSpace(values) // formikValues includes images as File[]
     },
   })
 

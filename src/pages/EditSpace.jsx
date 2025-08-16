@@ -27,9 +27,7 @@ import AddIcon from '@mui/icons-material/Add'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { getSpace, updateSpace } from '../redux/slices/spaceSlice'
-import { useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
+import { useSpace, useUpdateSpace } from '../api/queries/spaceQueries'
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 
 function EditSpace() {
@@ -39,18 +37,14 @@ function EditSpace() {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const navigate = useNavigate()
 
-  const dispatch = useDispatch()
-  const { updating, error, selected } = useSelector((state) => state.spaces)
+  const { data: space } = useSpace(id)
+  const { mutate: updateSpace, isPending: updating, error } = useUpdateSpace()
 
   const handleClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
     }
   }
-
-  useEffect(() => {
-    dispatch(getSpace(id))
-  }, [dispatch, id])
 
   const amenities = [
     'WiFi',
@@ -92,7 +86,7 @@ function EditSpace() {
   })
 
   const formik = useFormik({
-    initialValues: { ...selected, imagesToremove: [] },
+    initialValues: { ...space, imagesToremove: [] },
     validationSchema,
     validateOnBlur: true,
     validateOnChange: true,
@@ -105,8 +99,7 @@ function EditSpace() {
         .map((image) => image.file)
       // console.log(newImages, "newImages")
       delete values.images
-      dispatch(updateSpace({ id, values: { ...values, newImages } }))
-      // dispatch(postSpace(values));
+      updateSpace({ id, values: { ...values, newImages } })
       // formikValues includes images as File[]
     },
   })

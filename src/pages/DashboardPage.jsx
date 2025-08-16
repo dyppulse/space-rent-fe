@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -20,11 +20,11 @@ import PeopleIcon from '@mui/icons-material/People'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import SpacesList from '../components/SpacesList'
 import BookingsList from '../components/BookingsList'
-import { mockSpaces } from '../data/mockData'
-import { useDispatch } from 'react-redux'
-import { fetchMySpaces } from '../redux/slices/spaceSlice.js'
-import { fetchOwnerBookings } from '../redux/slices/bookingSlice.js'
-import { useSelector } from 'react-redux'
+
+import { useMySpaces } from '../api/queries/spaceQueries'
+import { useOwnerBookings } from '../api/queries/bookingQueries'
+import { useAuth } from '../contexts/AuthContext'
+
 import DashboardSkeleton from '../components/ui/skeletons/DashboardSkeleton'
 
 function TabPanel(props) {
@@ -45,27 +45,51 @@ function TabPanel(props) {
 
 function DashboardPage() {
   const [tabValue, setTabValue] = useState(0)
+  const { isAuthenticated } = useAuth()
 
-  const dispatch = useDispatch()
-  const { list, loading: spacesLoading } = useSelector((state) => state.spaces)
-  const { list: userBookings, loading: bookingsLoading } = useSelector((state) => state.bookings)
-
-  // Filter spaces for the current user (in a real app, this would be based on the authenticated user)
-  const userSpaces = mockSpaces.filter((space) => space.ownerId === 'user-1')
+  const { data: userSpaces, isLoading: spacesLoading } = useMySpaces(isAuthenticated)
+  const { data: userBookings, isLoading: bookingsLoading } = useOwnerBookings(isAuthenticated)
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
   }
 
-  useEffect(() => {
-    dispatch(fetchMySpaces())
-    dispatch(fetchOwnerBookings())
-  }, [dispatch])
-
+  // Show loading state while data is being fetched
   if (spacesLoading || bookingsLoading) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <DashboardSkeleton />
+      </Container>
+    )
+  }
+
+  // Show loading if we don't have data yet (this handles the case where isLoading is false but data is still undefined)
+  if (userSpaces === undefined || userBookings === undefined) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <DashboardSkeleton />
+      </Container>
+    )
+  }
+
+  // If we have data but it's empty arrays, show appropriate message instead of skeleton
+  if (Array.isArray(userSpaces) && Array.isArray(userBookings)) {
+    // Data has been fetched, show dashboard (even if empty)
+    console.log('Data fetched successfully:', { userSpaces, userBookings })
+  }
+
+  // Show message if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h5" gutterBottom>
+            Please log in to view your dashboard
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            You need to be authenticated to access this page.
+          </Typography>
+        </Box>
       </Container>
     )
   }
@@ -123,9 +147,9 @@ function DashboardPage() {
                 </Typography>
                 <HomeIcon color="action" fontSize="small" />
               </Box>
-              <Typography variant="h4">{list?.spaces?.length}</Typography>
+              <Typography variant="h4">{userSpaces?.length || 0}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {userSpaces.length > 0 ? '+1 space this month' : 'Add your first space'}
+                {userSpaces?.length > 0 ? '+1 space this month' : 'Add your first space'}
               </Typography>
             </CardContent>
           </Paper>
@@ -147,10 +171,10 @@ function DashboardPage() {
                 <CalendarTodayIcon color="action" fontSize="small" />
               </Box>
               <Typography variant="h4">
-                {userBookings.filter((b) => b.status === 'confirmed').length}
+                {userBookings?.filter((b) => b.status === 'confirmed')?.length || 0}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {userBookings.filter((b) => b.status === 'pending').length} pending requests
+                {userBookings?.filter((b) => b.status === 'pending')?.length || 0} pending requests
               </Typography>
             </CardContent>
           </Paper>
@@ -173,7 +197,7 @@ function DashboardPage() {
               </Box>
               <Typography variant="h4">
                 UGX
-                {userBookings.reduce((sum, booking) => sum + booking.totalPrice, 0)}
+                {userBookings?.reduce((sum, booking) => sum + (booking?.totalPrice || 0), 0) || 0}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 + UGX 1,200 from last month
@@ -211,8 +235,8 @@ function DashboardPage() {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          {list?.spaces?.length > 0 ? (
-            <SpacesList spaces={list.spaces} />
+          {userSpaces?.length > 0 ? (
+            <SpacesList spaces={userSpaces || []} />
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>

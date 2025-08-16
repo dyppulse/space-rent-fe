@@ -20,9 +20,8 @@ import FacebookIcon from '@mui/icons-material/Facebook'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import PhoneInputFormik from '../components/PhoneInput'
-import { useDispatch, useSelector } from 'react-redux'
-import { signUp } from '../redux/slices/authSlice'
-import { useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+
 import { Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from '@mui/material'
 import { useState } from 'react'
 
@@ -31,10 +30,9 @@ function SignupPage() {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [hasAttemptedSignup, setHasAttemptedSignup] = useState(false)
+
   const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const { loading, signUpError } = useSelector((state) => state?.auth)
+  const { signup } = useAuth()
 
   const validationSchema = yup.object({
     fullName: yup.string().required('Required').min(5, 'At least 5 characters'),
@@ -77,48 +75,32 @@ function SignupPage() {
       country: null,
     },
     validationSchema,
-    onSubmit: (values) => {
-      setHasAttemptedSignup(true)
-      const dial = values?.country?.phone || ''
-      const local = (values?.phoneNumber || '').replace(/\D/g, '')
-      const combined = `${dial}${local}`
-      const e164 = combined.startsWith('+') ? combined : `+${combined}`
-      dispatch(
-        signUp({
+    onSubmit: async (values) => {
+      try {
+        const dial = values?.country?.phone || ''
+        const local = (values?.phoneNumber || '').replace(/\D/g, '')
+        const combined = `${dial}${local}`
+        const e164 = combined.startsWith('+') ? combined : `+${dial}${local}`
+
+        await signup({
           name: values?.fullName,
           email: values?.email,
           password: values?.password,
           phone: e164,
         })
-      )
-    },
-  })
 
-  useEffect(() => {
-    if (loading) {
-      setOpen(true)
-      return
-    }
-    setOpen(false)
-
-    // Only handle signup results if we actually attempted a signup
-    if (hasAttemptedSignup) {
-      if (signUpError) {
-        setToast({
-          open: true,
-          message: String(signUpError || 'Failed to create account'),
-          severity: 'error',
-        })
-      } else {
         // Success case
         navigate('/dashboard')
         setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
+      } catch (error) {
+        setToast({
+          open: true,
+          message: String(error?.message || 'Failed to create account'),
+          severity: 'error',
+        })
       }
-      // Reset the flag after handling
-      setHasAttemptedSignup(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, signUpError, hasAttemptedSignup])
+    },
+  })
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
@@ -244,8 +226,8 @@ function SignupPage() {
             color="primary"
             size="large"
             sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
-            startIcon={loading ? <CircularProgress color="inherit" size={18} /> : null}
+            disabled={false}
+            startIcon={null}
           >
             Create account
           </Button>
@@ -306,7 +288,7 @@ function SignupPage() {
           {toast.message}
         </Alert>
       </Snackbar>
-      <Dialog open={open && !signUpError} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Creating your account…</DialogTitle>
         <DialogContent>Please wait while we set things up.</DialogContent>
         <DialogActions></DialogActions>
