@@ -29,8 +29,8 @@ import {
   Visibility as ViewIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  CircularProgress,
-} from '@mui/material'
+} from '@mui/icons-material'
+import { CircularProgress } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../api/axiosInstance'
 
