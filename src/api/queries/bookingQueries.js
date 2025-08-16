@@ -81,7 +81,7 @@ export const useUpdateBookingStatus = () => {
       // Update in owner bookings cache
       queryClient.setQueryData(queryKeys.bookings.owner(), (oldData) => {
         if (!oldData) return oldData
-        return oldData.map((booking) => (booking._id === id ? { ...booking, ...data } : booking))
+        return oldData.map((booking) => (booking.id === id ? { ...booking, ...data } : booking))
       })
 
       // Invalidate booking stats to refetch with updated data

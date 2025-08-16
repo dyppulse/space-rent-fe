@@ -1,9 +1,8 @@
 import axiosInstance, { unProtectedAxiosInstance } from '../axiosInstance'
 
-// Helper function to transform MongoDB _id to id for frontend compatibility
-const transformSpace = (space) => ({
+// Helper function to ensure default values for optional fields
+const ensureDefaults = (space) => ({
   ...space,
-  id: space._id,
   location: space.location || {},
   price: space.price || {},
   images: space.images || [],
@@ -51,15 +50,15 @@ export const spaceService = {
 
     const response = await unProtectedAxiosInstance.get(`/spaces?${query.toString()}`)
 
-    // Transform MongoDB _id to id for frontend compatibility
-    const transformedSpaces = response.data.spaces.map(transformSpace)
-    return { ...response.data, spaces: transformedSpaces }
+    // Ensure default values for optional fields
+    const spacesWithDefaults = response.data.spaces.map(ensureDefaults)
+    return { ...response.data, spaces: spacesWithDefaults }
   },
 
   // Get space by ID
   getSpace: async (id) => {
     const response = await axiosInstance.get(`/spaces/${id}`)
-    return transformSpace(response.data.space)
+    return ensureDefaults(response.data.space)
   },
 
   // Get user's spaces
@@ -78,7 +77,7 @@ export const spaceService = {
         return []
       }
 
-      return spacesData.map(transformSpace)
+      return spacesData.map(ensureDefaults)
     } catch (error) {
       console.error('getMySpaces API error:', error)
       throw error

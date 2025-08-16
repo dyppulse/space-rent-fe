@@ -26,7 +26,7 @@ function BookingsList({ bookings }) {
 
   const renderBookingCard = (booking) => {
     return (
-      <Paper key={booking?._id} variant="outlined" sx={{ mb: 2, p: 3, borderRadius: 2 }}>
+      <Paper key={booking?.id} variant="outlined" sx={{ mb: 2, p: 3, borderRadius: 2 }}>
         <Box
           sx={{
             display: 'flex',
@@ -102,7 +102,7 @@ function BookingsList({ bookings }) {
                   color="error"
                   size="small"
                   startIcon={<CloseIcon />}
-                  onClick={() => handleBooking({ status: 'cancelled', bookingId: booking._id })}
+                  onClick={() => handleBooking({ status: 'cancelled', bookingId: booking.id })}
                   disabled={loading}
                 >
                   Decline
@@ -112,7 +112,7 @@ function BookingsList({ bookings }) {
                   color="success"
                   size="small"
                   startIcon={<CheckIcon />}
-                  onClick={() => handleBooking({ status: 'confirmed', bookingId: booking._id })}
+                  onClick={() => handleBooking({ status: 'confirmed', bookingId: booking.id })}
                   disabled={loading}
                 >
                   Accept
