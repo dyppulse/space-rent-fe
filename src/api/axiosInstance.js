@@ -32,11 +32,17 @@ const unProtectedAxiosInstance = axios.create({
 const handleUnauthorized = (error) => {
   const status = error?.response?.status
   const requestUrl = error?.config?.url || ''
+
+  // Log for debugging
+  console.log('Axios interceptor: 401 error on', requestUrl, 'status:', status)
+
   if (
     status === 401 &&
     !requestUrl.includes('/auth/login') &&
-    !requestUrl.includes('/auth/register')
+    !requestUrl.includes('/auth/register') &&
+    !requestUrl.includes('/auth/me') // Don't redirect on auth check failures
   ) {
+    console.log('Axios interceptor: Redirecting to login from', window.location.pathname)
     try {
       const lastPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
       localStorage.setItem('postLoginRedirect', lastPath)
@@ -46,6 +52,8 @@ const handleUnauthorized = (error) => {
     if (window.location.pathname !== '/auth/login') {
       window.location.replace('/auth/login')
     }
+  } else {
+    console.log('Axios interceptor: Not redirecting (excluded URL or not 401)')
   }
   return Promise.reject(error)
 }

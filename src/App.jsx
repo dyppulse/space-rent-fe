@@ -3,7 +3,9 @@ import { Provider } from 'react-redux'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import store from './redux/store'
-import { useState, useEffect, createContext } from 'react'
+import { useState, useEffect, createContext, useRef } from 'react'
+import { useDispatch } from 'react-redux'
+import { checkAuthStatus } from './redux/slices/authSlice'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
@@ -106,22 +108,34 @@ const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matche
 // Component to conditionally render footer
 function AppContent({ toggleTheme, mode }) {
   const location = useLocation()
+  const dispatch = useDispatch()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const authInitializedRef = useRef(false)
+
+  // Initialize auth state to prevent flickering
+  useEffect(() => {
+    // Prevent multiple auth checks
+    if (authInitializedRef.current) {
+      return
+    }
+
+    // Add a small delay to allow the app to fully load before checking auth
+    const timer = setTimeout(() => {
+      // Check if user is already authenticated on app startup
+      dispatch(checkAuthStatus())
+      authInitializedRef.current = true
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [dispatch])
 
   return (
     <div className="App">
       <Header onToggleTheme={toggleTheme} mode={mode} />
       <main>
         <Routes>
-          {/* Smart Routes - Redirect logged-in users */}
-          <Route
-            path="/"
-            element={
-              <SmartRoute>
-                <HomePage />
-              </SmartRoute>
-            }
-          />
+          {/* Public Routes - Available to all users */}
+          <Route path="/" element={<HomePage />} />
 
           {/* Public Routes - Available to all users */}
           <Route path="/spaces" element={<SpacesPage />} />
@@ -151,7 +165,7 @@ function AppContent({ toggleTheme, mode }) {
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <PrivateRoute redirectTo="/auth/signup">
                 <DashboardPage />
               </PrivateRoute>
             }
@@ -159,7 +173,7 @@ function AppContent({ toggleTheme, mode }) {
           <Route
             path="/dashboard/spaces/new"
             element={
-              <PrivateRoute>
+              <PrivateRoute redirectTo="/auth/signup">
                 <NewSpacePage />
               </PrivateRoute>
             }
@@ -167,7 +181,7 @@ function AppContent({ toggleTheme, mode }) {
           <Route
             path="/dashboard/spaces/:id/edit"
             element={
-              <PrivateRoute>
+              <PrivateRoute redirectTo="/auth/signup">
                 <EditSpace />
               </PrivateRoute>
             }
@@ -189,16 +203,6 @@ function AppContent({ toggleTheme, mode }) {
             <Route path="locations" element={<LocationsPage />} />
             <Route path="taxonomies" element={<TaxonomiesPage />} />
           </Route>
-
-          {/* Root redirect for logged-in users */}
-          <Route
-            path="/home"
-            element={
-              <SmartRoute>
-                <HomePage />
-              </SmartRoute>
-            }
-          />
 
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

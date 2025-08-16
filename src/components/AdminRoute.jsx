@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
-import axiosInstance from '../api/axiosInstance'
+import { Box, CircularProgress } from '@mui/material'
 
 const AdminRoute = ({ children }) => {
-  const [status, setStatus] = useState('checking') // 'checking' | 'allowed' | 'denied'
+  const { user, loading, initialized } = useSelector((state) => state.auth)
 
-  useEffect(() => {
-    let mounted = true
-    const check = async () => {
-      try {
-        const res = await axiosInstance.get('/auth/me')
-        const role = res?.data?.user?.role
-        if (mounted) setStatus(role === 'superadmin' ? 'allowed' : 'denied')
-      } catch {
-        if (mounted) setStatus('denied')
-      }
-    }
-    check()
-    return () => {
-      mounted = false
-    }
-  }, [])
+  // Show loading only during initial auth check
+  if (loading && !initialized) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '200px',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    )
+  }
 
-  if (status === 'checking') return null
-  return status === 'allowed' ? children : <Navigate to="/auth/login" replace />
+  // If user is admin, show the admin content
+  if (user && user.role === 'superadmin') {
+    return children
+  }
+
+  // If not admin, redirect to login
+  return <Navigate to="/auth/login" replace />
 }
 
 export default AdminRoute

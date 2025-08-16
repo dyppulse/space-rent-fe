@@ -1,8 +1,26 @@
 import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
+import { Box, CircularProgress } from '@mui/material'
 
 const SmartRoute = ({ children, redirectTo = '/dashboard' }) => {
-  const { user } = useSelector((state) => state.auth)
+  const { user, loading, initialized } = useSelector((state) => state.auth)
+
+  // Only show loading if we're actively loading AND haven't initialized yet
+  // This prevents flickering on subsequent route changes
+  if (loading && !initialized) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '200px',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    )
+  }
 
   // If user is logged in, redirect based on role
   if (user) {
@@ -13,7 +31,7 @@ const SmartRoute = ({ children, redirectTo = '/dashboard' }) => {
     }
   }
 
-  // If not logged in, show the intended component (usually home page)
+  // If not logged in, show the intended component
   return children
 }
 
