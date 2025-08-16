@@ -31,6 +31,7 @@ function SignupPage() {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [hasAttemptedSignup, setHasAttemptedSignup] = useState(false)
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { loading, signUpError } = useSelector((state) => state?.auth)
@@ -77,6 +78,7 @@ function SignupPage() {
     },
     validationSchema,
     onSubmit: (values) => {
+      setHasAttemptedSignup(true)
       const dial = values?.country?.phone || ''
       const local = (values?.phoneNumber || '').replace(/\D/g, '')
       const combined = `${dial}${local}`
@@ -98,18 +100,25 @@ function SignupPage() {
       return
     }
     setOpen(false)
-    if (signUpError) {
-      setToast({
-        open: true,
-        message: String(signUpError || 'Failed to create account'),
-        severity: 'error',
-      })
-    } else if (!signUpError) {
-      navigate('/dashboard')
-      setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
+
+    // Only handle signup results if we actually attempted a signup
+    if (hasAttemptedSignup) {
+      if (signUpError) {
+        setToast({
+          open: true,
+          message: String(signUpError || 'Failed to create account'),
+          severity: 'error',
+        })
+      } else {
+        // Success case
+        navigate('/dashboard')
+        setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
+      }
+      // Reset the flag after handling
+      setHasAttemptedSignup(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, signUpError])
+  }, [loading, signUpError, hasAttemptedSignup])
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>

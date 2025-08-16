@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import SpaceGrid from '../components/SpaceGrid'
@@ -9,11 +9,23 @@ import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function HomePage() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { list, loading } = useSelector((state) => state.spaces)
+  const { loading: authLoading } = useSelector((state) => state.auth)
 
   useEffect(() => {
     dispatch(fetchSpaces())
   }, [dispatch])
+
+  const handleListSpaceClick = () => {
+    // Only wait if we're actively loading
+    if (authLoading) {
+      return
+    }
+
+    // Navigate to new space page - PrivateRoute will handle auth and redirects
+    navigate('/dashboard/spaces/new')
+  }
   return (
     <Box>
       {/* Hero Section */}
@@ -107,14 +119,14 @@ function HomePage() {
             Join our community of space owners and start earning from your venue today.
           </Typography>
           <Button
-            component={Link}
-            to="/auth/signup"
+            onClick={handleListSpaceClick}
             variant="contained"
             color="primary"
             size="large"
+            disabled={authLoading}
             sx={{ px: 4, py: 1.5 }}
           >
-            List Your Space
+            {authLoading ? 'Loading...' : 'List Your Space'}
           </Button>
         </Container>
       </Box>

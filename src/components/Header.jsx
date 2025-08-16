@@ -21,8 +21,8 @@ import DarkModeIcon from '@mui/icons-material/DarkMode'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import ConfirmDialog from './ConfirmDialog'
 import { useDispatch, useSelector } from 'react-redux'
-import axiosInstance from '../api/axiosInstance'
-import { logout as authSliceLogout } from '../redux/slices/authSlice'
+
+import { logoutUser } from '../redux/slices/authSlice'
 
 function Header({ onToggleTheme, mode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -48,6 +48,19 @@ function Header({ onToggleTheme, mode }) {
 
   const handleLogout = async () => {
     setConfirm(true)
+  }
+
+  const confirmLogout = async () => {
+    try {
+      await dispatch(logoutUser())
+      setConfirm(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Even if logout fails, redirect to home
+      setConfirm(false)
+      navigate('/')
+    }
   }
 
   // Create navLinks dynamically based on auth state
@@ -234,12 +247,7 @@ function Header({ onToggleTheme, mode }) {
         content="Do you want to log out?"
         confirmText="Log out"
         onClose={() => setConfirm(false)}
-        onConfirm={async () => {
-          setConfirm(false)
-          await axiosInstance.post('/auth/logout')
-          dispatch(authSliceLogout())
-          navigate('/auth/login')
-        }}
+        onConfirm={confirmLogout}
       />
     </>
   )
