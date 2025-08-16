@@ -22,7 +22,18 @@ export const fetchSpaces = createAsyncThunk('spaces/fetchAll', async (filters = 
   if (filters.sort) query.append('sort', filters.sort)
 
   const res = await unProtectedAxiosInstance.get(`/spaces?${query.toString()}`)
-  return res.data.spaces // or return res.data if you want pagination metadata too
+
+  // Transform MongoDB _id to id for frontend compatibility
+  const transformedSpaces = res.data.spaces.map((space) => ({
+    ...space,
+    id: space._id,
+    // Ensure other fields are properly formatted
+    location: space.location || {},
+    price: space.price || {},
+    images: space.images || [],
+  }))
+
+  return { ...res.data, spaces: transformedSpaces }
 })
 
 // ---------- helpers ----------
@@ -59,7 +70,18 @@ const appendFormData = (formData, data, parentKey = '') => {
 export const getSpace = createAsyncThunk('spaces/getById', async (id, { rejectWithValue }) => {
   try {
     const res = await axiosInstance.get(`/spaces/${id}`)
-    return res.data.space
+
+    // Transform MongoDB _id to id for frontend compatibility
+    const transformedSpace = {
+      ...res.data.space,
+      id: res.data.space._id,
+      // Ensure other fields are properly formatted
+      location: res.data.space.location || {},
+      price: res.data.space.price || {},
+      images: res.data.space.images || [],
+    }
+
+    return transformedSpace
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message)
   }
@@ -70,7 +92,18 @@ export const fetchMySpaces = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get('/spaces/owner/my-spaces')
-      return res.data // assume it's an array of spaces
+
+      // Transform MongoDB _id to id for frontend compatibility
+      const transformedSpaces = res.data.map((space) => ({
+        ...space,
+        id: space._id,
+        // Ensure other fields are properly formatted
+        location: space.location || {},
+        price: space.price || {},
+        images: space.images || [],
+      }))
+
+      return transformedSpaces
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message)
     }
@@ -128,7 +161,6 @@ export const updateSpace = createAsyncThunk(
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
-      console.log(res, 'resesese')
       return res.data // newly created space object
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message)
