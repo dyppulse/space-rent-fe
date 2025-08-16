@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import LocationOnIcon from '@mui/icons-material/LocationOn'
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
-import FilterListIcon from '@mui/icons-material/FilterList'
 import SpaceGrid from '../components/SpaceGrid'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -85,32 +82,9 @@ function HomePage() {
       {/* Main Content */}
       <Box sx={{ py: 8, bgcolor: 'background.default' }}>
         <Container maxWidth="lg">
-          {/* Filters */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'space-between',
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              mb: 4,
-              gap: 2,
-            }}
-          >
-            <Typography variant="h4" component="h2" fontWeight="bold">
-              Available Spaces
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Button variant="outlined" startIcon={<LocationOnIcon />} size="medium">
-                Location
-              </Button>
-              <Button variant="outlined" startIcon={<CalendarTodayIcon />} size="medium">
-                Date
-              </Button>
-              <Button variant="outlined" startIcon={<FilterListIcon />} size="medium">
-                Filters
-              </Button>
-            </Box>
-          </Box>
+          <Typography variant="h4" component="h2" fontWeight="bold" sx={{ mb: 4 }}>
+            Available Spaces
+          </Typography>
 
           {/* Space Grid */}
           {loading ? (
