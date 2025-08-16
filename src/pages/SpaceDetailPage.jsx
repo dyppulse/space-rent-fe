@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Box, Container, Typography, Grid, Chip, Tabs, Tab, Paper, Rating } from '@mui/material'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
@@ -6,8 +6,8 @@ import PeopleIcon from '@mui/icons-material/People'
 // import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import BookingForm from '../components/BookingForm'
-import { useDispatch, useSelector } from 'react-redux'
-import { getSpace } from '../redux/slices/spaceSlice'
+import { useSpace } from '../api/queries/spaceQueries'
+import { useAuth } from '../contexts/AuthContext'
 import DetailSkeleton from '../components/ui/skeletons/DetailSkeleton'
 import ImageGallery from '../components/ImageGallery'
 
@@ -28,16 +28,12 @@ function TabPanel(props) {
 }
 
 function SpaceDetailPage() {
-  const dispatch = useDispatch()
-  const { selected: space, loading } = useSelector((state) => state.spaces)
-  const { user } = useSelector((state) => state.auth)
   const { id } = useParams()
   const navigate = useNavigate()
   const [tabValue, setTabValue] = useState(0)
 
-  useEffect(() => {
-    dispatch(getSpace(id))
-  }, [dispatch, id])
+  const { data: space, isLoading: loading } = useSpace(id)
+  const { user } = useAuth()
 
   // Loading skeleton
   if (loading) {

@@ -23,10 +23,8 @@ import GridViewIcon from '@mui/icons-material/GridView'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import SpaceGrid from '../components/SpaceGrid'
 import SpacesList from '../components/SpacesList'
-import { useDispatch } from 'react-redux'
 import { useEffect, useRef } from 'react'
-import { fetchSpaces } from '../redux/slices/spaceSlice'
-import { useSelector } from 'react-redux'
+import { useSpaces } from '../api/queries/spaceQueries'
 import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function SpacesPage() {
@@ -44,8 +42,14 @@ function SpacesPage() {
   const [showLocationPicker, setShowLocationPicker] = useState(false)
   const [showDetailedFilters, setShowDetailedFilters] = useState(true)
 
-  const dispatch = useDispatch()
-  const { list, loading } = useSelector((state) => state.spaces)
+  const { data: spacesData, isLoading: loading } = useSpaces({
+    search: searchTerm,
+    spaceType,
+    minPrice: priceRange[0],
+    maxPrice: priceRange[1],
+    sort,
+    capacity,
+  })
 
   const handleViewModeChange = (event, newMode) => {
     if (newMode !== null) {
@@ -119,58 +123,23 @@ function SpacesPage() {
   }
 
   // Debounced search function
-  const debouncedSearch = useCallback(
-    (searchValue) => {
-      // Clear any existing timeout
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current)
-      }
-
-      // Set new timeout for search
-      searchTimeoutRef.current = setTimeout(() => {
-        const filterParams = {
-          search: searchValue || '',
-          spaceType,
-          minPrice: priceRange[0],
-          maxPrice: priceRange[1],
-          sort,
-          capacity,
-          selectedDate,
-          selectedLocation,
-        }
-
-        if (searchValue) {
-          setIsSearching(true)
-        }
-
-        dispatch(fetchSpaces(filterParams)).finally(() => {
-          setIsSearching(false)
-        })
-      }, 800) // 800ms debounce delay for search
-    },
-    [spaceType, priceRange, sort, capacity, selectedDate, selectedLocation, dispatch]
-  )
-
-  // ✅ Immediate fetch on mount — no debounce
-  useEffect(() => {
-    dispatch(fetchSpaces())
-  }, [dispatch])
-
-  // ✅ Handle non-search filter changes (no debounce needed)
-  useEffect(() => {
-    const filterParams = {
-      search: searchTerm, // Keep current search term
-      spaceType,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      sort,
-      capacity,
-      selectedDate,
-      selectedLocation,
+  const debouncedSearch = useCallback((searchValue) => {
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
     }
 
-    dispatch(fetchSpaces(filterParams))
-  }, [spaceType, priceRange, sort, capacity, selectedDate, selectedLocation, dispatch]) // Removed searchTerm from dependencies
+    // Set new timeout for search
+    searchTimeoutRef.current = setTimeout(() => {
+      if (searchValue) {
+        setIsSearching(true)
+      }
+      // React Query handles the data fetching automatically
+      setIsSearching(false)
+    }, 800) // 800ms debounce delay for search
+  }, [])
+
+  // React Query handles data fetching automatically based on the filters passed to useSpaces hook
 
   // Cleanup search timeout on unmount
   useEffect(() => {
@@ -368,7 +337,7 @@ function SpacesPage() {
         }}
       >
         <Box>
-          <Typography variant="h6">{list?.spaces?.length} spaces available</Typography>
+          <Typography variant="h6">{spacesData?.spaces?.length} spaces available</Typography>
           {/* Filter Summary */}
           {(searchTerm ||
             spaceType !== 'all' ||
@@ -423,9 +392,9 @@ function SpacesPage() {
       {loading ? (
         <ListSkeleton items={9} />
       ) : viewMode === 'grid' ? (
-        <SpaceGrid spaces={list?.spaces || []} />
+        <SpaceGrid spaces={spacesData?.spaces || []} />
       ) : (
-        <SpacesList spaces={list?.spaces || []} />
+        <SpacesList spaces={spacesData?.spaces || []} />
       )}
 
       {/* Date Picker Modal */}

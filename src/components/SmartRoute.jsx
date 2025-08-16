@@ -1,13 +1,13 @@
-import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
+import { useAuth } from '../contexts/AuthContext'
 
 const SmartRoute = ({ children, redirectTo = '/dashboard' }) => {
-  const { user, loading, initialized } = useSelector((state) => state.auth)
+  const { user, isLoading, initialized } = useAuth()
 
   // Only show loading if we're actively loading AND haven't initialized yet
   // This prevents flickering on subsequent route changes
-  if (loading && !initialized) {
+  if (isLoading && !initialized) {
     return (
       <Box
         sx={{
