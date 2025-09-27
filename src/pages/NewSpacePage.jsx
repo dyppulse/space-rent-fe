@@ -40,6 +40,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useCreateSpace } from '../api/queries/spaceQueries'
 import { DialogActions } from '@mui/material'
+import axiosInstance from '../api/axiosInstance'
 
 function NewSpacePage() {
   const [activeStep, setActiveStep] = useState(0)
@@ -48,11 +49,125 @@ function NewSpacePage() {
 
   const fileInputRef = useRef(null)
   const [open, setOpen] = useState(false)
+
+  // Location hierarchy state
+  const [regions, setRegions] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [counties, setCounties] = useState([])
+  const [subcounties, setSubcounties] = useState([])
+  const [parishes, setParishes] = useState([])
+  const [villages, setVillages] = useState([])
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [formSubmitted, setFormSubmitted] = useState(false)
   const navigate = useNavigate()
 
   const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
+
+  // Fetch location data
+  useEffect(() => {
+    fetchRegions()
+  }, [])
+
+  const fetchRegions = async () => {
+    try {
+      const response = await axiosInstance.get('/locations/regions')
+      setRegions(response.data)
+    } catch (error) {
+      console.error('Error fetching regions:', error)
+    }
+  }
+
+  const fetchDistricts = async (regionId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/districts?parentId=${regionId}`)
+      setDistricts(response.data)
+    } catch (error) {
+      console.error('Error fetching districts:', error)
+    }
+  }
+
+  const fetchCounties = async (districtId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/counties?parentId=${districtId}`)
+      setCounties(response.data)
+    } catch (error) {
+      console.error('Error fetching counties:', error)
+    }
+  }
+
+  const fetchSubcounties = async (countyId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/subcounties?parentId=${countyId}`)
+      setSubcounties(response.data)
+    } catch (error) {
+      console.error('Error fetching subcounties:', error)
+    }
+  }
+
+  const fetchParishes = async (subcountyId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/parishes?parentId=${subcountyId}`)
+      setParishes(response.data)
+    } catch (error) {
+      console.error('Error fetching parishes:', error)
+    }
+  }
+
+  const fetchVillages = async (parishId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/villages?parentId=${parishId}`)
+      setVillages(response.data)
+    } catch (error) {
+      console.error('Error fetching villages:', error)
+    }
+  }
+
+  const handleLocationChange = (field, value) => {
+    formik.setFieldValue(`location.${field}`, value)
+
+    // Clear dependent fields and fetch new data
+    if (field === 'region') {
+      formik.setFieldValue('location.district', '')
+      formik.setFieldValue('location.county', '')
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setDistricts([])
+      setCounties([])
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchDistricts(value)
+    } else if (field === 'district') {
+      formik.setFieldValue('location.county', '')
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setCounties([])
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchCounties(value)
+    } else if (field === 'county') {
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchSubcounties(value)
+    } else if (field === 'subcounty') {
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setParishes([])
+      setVillages([])
+      if (value) fetchParishes(value)
+    } else if (field === 'parish') {
+      formik.setFieldValue('location.village', '')
+      setVillages([])
+      if (value) fetchVillages(value)
+    }
+  }
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -85,9 +200,12 @@ function NewSpacePage() {
     description: yup.string().required(),
     location: yup.object({
       address: yup.string().required('Required'),
-      city: yup.string().required('Required'),
-      state: yup.string().required('Required'),
-      zipCode: yup.string().notRequired(),
+      region: yup.string().notRequired(),
+      district: yup.string().notRequired(),
+      county: yup.string().notRequired(),
+      subcounty: yup.string().notRequired(),
+      parish: yup.string().notRequired(),
+      village: yup.string().notRequired(),
     }),
     images: yup.array().min(6, 'Atleast 6'),
     price: yup.object({
@@ -107,9 +225,12 @@ function NewSpacePage() {
       description: null,
       location: {
         address: '',
-        city: '',
-        state: '',
-        zipCode: '',
+        region: '',
+        district: '',
+        county: '',
+        subcounty: '',
+        parish: '',
+        village: '',
       },
       images: [],
       price: {
@@ -136,7 +257,15 @@ function NewSpacePage() {
     const e = errors || formik.errors
     if (activeStep === 0) return !!(e.name || e.spaceType || e.capacity || e.description)
     if (activeStep === 1)
-      return !!(e.location?.address || e.location?.city || e.location?.state || e.location?.zipCode)
+      return !!(
+        e.location?.address ||
+        e.location?.region ||
+        e.location?.district ||
+        e.location?.county ||
+        e.location?.subcounty ||
+        e.location?.parish ||
+        e.location?.village
+      )
     if (activeStep === 2) return !!e.images
     if (activeStep === 3) return !!(e.price?.amount || e.price?.unit)
     if (activeStep === 4) return !!e.amenities
@@ -151,7 +280,15 @@ function NewSpacePage() {
         spaceType: true,
         capacity: true,
         description: true,
-        location: { address: true, city: true, state: true, zipCode: true },
+        location: {
+          address: true,
+          region: true,
+          district: true,
+          county: true,
+          subcounty: true,
+          parish: true,
+          village: true,
+        },
         images: true,
         price: { amount: true, unit: true },
         amenities: true,
@@ -346,30 +483,124 @@ function NewSpacePage() {
                       {...formik.getFieldProps('location.address')}
                     />
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="City"
-                      fullWidth
-                      error={formik.errors.location?.city}
-                      helperText={formik.errors.location?.city}
-                      {...formik.getFieldProps('location.city')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.region}>
+                      <InputLabel>Region</InputLabel>
+                      <Select
+                        value={formik.values.location.region}
+                        onChange={(e) => handleLocationChange('region', e.target.value)}
+                        label="Region"
+                      >
+                        {regions.map((region) => (
+                          <MenuItem key={region.id} value={region.id}>
+                            {region.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.region && (
+                        <FormHelperText>{formik.errors.location.region}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="state"
-                      fullWidth
-                      error={formik.errors.location?.state}
-                      helperText={formik.errors.location?.state}
-                      {...formik.getFieldProps('location.state')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.district}>
+                      <InputLabel>District</InputLabel>
+                      <Select
+                        value={formik.values.location.district}
+                        onChange={(e) => handleLocationChange('district', e.target.value)}
+                        label="District"
+                        disabled={!formik.values.location.region}
+                      >
+                        {districts.map((district) => (
+                          <MenuItem key={district.id} value={district.id}>
+                            {district.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.district && (
+                        <FormHelperText>{formik.errors.location.district}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="Zip/Postal Code"
-                      fullWidth
-                      {...formik.getFieldProps('location.zipCode')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.county}>
+                      <InputLabel>County</InputLabel>
+                      <Select
+                        value={formik.values.location.county}
+                        onChange={(e) => handleLocationChange('county', e.target.value)}
+                        label="County"
+                        disabled={!formik.values.location.district}
+                      >
+                        {counties.map((county) => (
+                          <MenuItem key={county.id} value={county.id}>
+                            {county.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.county && (
+                        <FormHelperText>{formik.errors.location.county}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.subcounty}>
+                      <InputLabel>Sub County</InputLabel>
+                      <Select
+                        value={formik.values.location.subcounty}
+                        onChange={(e) => handleLocationChange('subcounty', e.target.value)}
+                        label="Sub County"
+                        disabled={!formik.values.location.county}
+                      >
+                        {subcounties.map((subcounty) => (
+                          <MenuItem key={subcounty.id} value={subcounty.id}>
+                            {subcounty.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.subcounty && (
+                        <FormHelperText>{formik.errors.location.subcounty}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.parish}>
+                      <InputLabel>Parish</InputLabel>
+                      <Select
+                        value={formik.values.location.parish}
+                        onChange={(e) => handleLocationChange('parish', e.target.value)}
+                        label="Parish"
+                        disabled={!formik.values.location.subcounty}
+                      >
+                        {parishes.map((parish) => (
+                          <MenuItem key={parish.id} value={parish.id}>
+                            {parish.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.parish && (
+                        <FormHelperText>{formik.errors.location.parish}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.village}>
+                      <InputLabel>Village</InputLabel>
+                      <Select
+                        value={formik.values.location.village}
+                        onChange={(e) => handleLocationChange('village', e.target.value)}
+                        label="Village"
+                        disabled={!formik.values.location.parish}
+                      >
+                        {villages.map((village) => (
+                          <MenuItem key={village.id} value={village.id}>
+                            {village.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.village && (
+                        <FormHelperText>{formik.errors.location.village}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
                 </Grid>
               </Paper>
@@ -600,10 +831,7 @@ function NewSpacePage() {
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2">Address</Typography>
-                    <Typography>
-                      {formik.values.location.address}, {formik.values.location.city},{' '}
-                      {formik.values.location.state}
-                    </Typography>
+                    <Typography>{formik.values.location.address}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Price</Typography>
