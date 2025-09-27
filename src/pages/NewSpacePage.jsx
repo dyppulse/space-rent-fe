@@ -30,6 +30,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  StepContent,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -41,6 +42,7 @@ import * as yup from 'yup'
 import { useCreateSpace } from '../api/queries/spaceQueries'
 import { DialogActions } from '@mui/material'
 import axiosInstance from '../api/axiosInstance'
+import PhotoWizard from '../components/PhotoWizard'
 
 function NewSpacePage() {
   const [activeStep, setActiveStep] = useState(0)
@@ -59,6 +61,7 @@ function NewSpacePage() {
   const [villages, setVillages] = useState([])
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [photoWizardOpen, setPhotoWizardOpen] = useState(false)
   const navigate = useNavigate()
 
   const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
@@ -246,6 +249,15 @@ function NewSpacePage() {
     validateOnChange: true,
     validateOnMount: true,
     onSubmit: (values) => {
+      if (!formik.isValid) {
+        setToast({
+          open: true,
+          message: 'Please fix all form errors before submitting',
+          severity: 'error',
+        })
+        return
+      }
+
       setFormSubmitted(true)
       createSpace(values) // formikValues includes images as File[]
     },
@@ -270,6 +282,26 @@ function NewSpacePage() {
     if (activeStep === 3) return !!(e.price?.amount || e.price?.unit)
     if (activeStep === 4) return !!e.amenities
     return false
+  }
+
+  const isStepCompleted = (stepIndex) => {
+    const values = formik.values
+    switch (stepIndex) {
+      case 0: // Basic Info
+        return !!(values.name && values.spaceType && values.capacity && values.description)
+      case 1: // Location
+        return !!values.location?.address
+      case 2: // Photos
+        return !!(values.images && values.images.length >= 6)
+      case 3: // Pricing
+        return !!(values.price?.amount && values.price?.unit)
+      case 4: // Amenities
+        return !!(values.amenities && values.amenities.length >= 1)
+      case 5: // Review
+        return false // Review step is never "completed" until form is submitted
+      default:
+        return false
+    }
   }
 
   const handleNext = async () => {
@@ -329,6 +361,15 @@ function NewSpacePage() {
     formik.setFieldValue('images', next)
   }
 
+  const handlePhotoWizardSave = (images) => {
+    formik.setFieldValue('images', images)
+    setPhotoWizardOpen(false)
+  }
+
+  const handleOpenPhotoWizard = () => {
+    setPhotoWizardOpen(true)
+  }
+
   useEffect(() => {
     if (loading) {
       setOpen(true)
@@ -337,9 +378,26 @@ function NewSpacePage() {
     // request finished
     setOpen(false)
     if (error) {
+      let errorMessage = 'Failed to create space'
+
+      if (error?.response?.data?.error) {
+        // Handle multer errors and other backend errors
+        errorMessage = error.response.data.error
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+
+      console.error('Create space error details:', {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      })
+
       setToast({
         open: true,
-        message: String(error || 'Failed to create space'),
+        message: errorMessage,
         severity: 'error',
       })
     } else if (!error && !loading && formSubmitted) {
@@ -382,9 +440,34 @@ function NewSpacePage() {
             <Paper elevation={1} sx={{ p: 2, borderRadius: 2, position: 'sticky', top: 16 }}>
               <Stepper activeStep={activeStep} orientation="vertical" nonLinear>
                 {steps.map((label, idx) => (
-                  <Step key={label}>
+                  <Step key={label} completed={isStepCompleted(idx)}>
                     <StepButton onClick={() => setActiveStep(idx)}>
-                      <StepLabel>{label}</StepLabel>
+                      <StepLabel
+                        StepIconComponent={({ completed, active }) => (
+                          <Box
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: completed
+                                ? 'success.main'
+                                : active
+                                  ? 'primary.main'
+                                  : 'grey.300',
+                              color: completed || active ? 'white' : 'grey.600',
+                              fontSize: '0.75rem',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {completed ? '✓' : idx + 1}
+                          </Box>
+                        )}
+                      >
+                        {label}
+                      </StepLabel>
                     </StepButton>
                   </Step>
                 ))}
@@ -608,13 +691,57 @@ function NewSpacePage() {
 
             {activeStep === 2 && (
               <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Photos
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Upload high-quality photos of your space (minimum 3 photos)
-                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Photos
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Upload high-quality photos of your space (minimum 6 photos)
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'block', mt: 1 }}
+                    >
+                      Supported formats: JPG, PNG, WebP, AVIF, GIF, BMP, TIFF
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={handleOpenPhotoWizard}
+                    sx={{ minWidth: 200 }}
+                  >
+                    Open Photo Wizard
+                  </Button>
+                </Box>
                 <Divider sx={{ mb: 3 }} />
+
+                {/* Wizard Info */}
+                <Box
+                  sx={{
+                    bgcolor: 'primary.50',
+                    border: 1,
+                    borderColor: 'primary.200',
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 3,
+                  }}
+                >
+                  <Typography variant="body2" color="primary.dark">
+                    💡 <strong>Tip:</strong> Use the Photo Wizard above to organize your photos by
+                    category (Space Overview, Amenities, Facilities, etc.) for better presentation
+                    to potential renters.
+                  </Typography>
+                </Box>
 
                 <input
                   key={formik.values.images?.length || 0}
@@ -899,6 +1026,14 @@ function NewSpacePage() {
         <DialogContent>Please wait while we save your space.</DialogContent>
         <DialogActions></DialogActions>
       </Dialog>
+
+      {/* Photo Wizard */}
+      <PhotoWizard
+        open={photoWizardOpen}
+        onClose={() => setPhotoWizardOpen(false)}
+        onSave={handlePhotoWizardSave}
+        initialImages={formik.values.images || []}
+      />
     </Container>
   )
 }

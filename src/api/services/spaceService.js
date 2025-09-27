@@ -99,6 +99,7 @@ export const spaceService = {
 
     const response = await axiosInstance.post('/spaces', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000, // 60 second timeout
     })
 
     return response.data

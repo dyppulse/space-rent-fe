@@ -28,14 +28,15 @@ const unProtectedAxiosInstance = axios.create({
   withCredentials: true,
 })
 
-// Auto-logout on 401 and remember last page
-const handleUnauthorized = (error) => {
+// Handle errors including 401 and other server errors
+const handleError = (error) => {
   const status = error?.response?.status
   const requestUrl = error?.config?.url || ''
 
   // Log for debugging
-  console.log('Axios interceptor: 401 error on', requestUrl, 'status:', status)
+  console.log('Axios interceptor: Error on', requestUrl, 'status:', status, error?.response?.data)
 
+  // Handle 401 errors (unauthorized)
   if (
     status === 401 &&
     !requestUrl.includes('/auth/login') &&
@@ -55,17 +56,19 @@ const handleUnauthorized = (error) => {
   } else {
     console.log('Axios interceptor: Not redirecting (excluded URL or not 401)')
   }
+
+  // Always reject the promise so the calling code can handle the error
   return Promise.reject(error)
 }
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => handleUnauthorized(error)
+  (error) => handleError(error)
 )
 
 unProtectedAxiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => handleUnauthorized(error)
+  (error) => handleError(error)
 )
 
 export default axiosInstance
