@@ -1,12 +1,13 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth as useAuthContext } from '../contexts/AuthContext'
 import * as Yup from 'yup'
 
 export const useAuth = () => {
   const navigate = useNavigate()
-  const { login, user } = useAuthContext()
+  const { login, user, isLoginLoading } = useAuthContext()
+  const [loginError, setLoginError] = useState(null)
 
   const formik = useFormik({
     initialValues: {
@@ -20,10 +21,18 @@ export const useAuth = () => {
 
     onSubmit: async (values) => {
       try {
+        setLoginError(null) // Clear any previous errors
         await login(values)
         // Navigation will be handled by the auth context
       } catch (error) {
         console.error('Login failed:', error)
+        // Extract error message from backend response
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'Login failed. Please try again.'
+        setLoginError(errorMessage)
       }
     },
   })
@@ -45,5 +54,8 @@ export const useAuth = () => {
 
   return {
     formik,
+    isLoginLoading,
+    loginError,
+    clearLoginError: () => setLoginError(null),
   }
 }

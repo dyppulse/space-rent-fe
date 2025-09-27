@@ -16,6 +16,7 @@ import {
   ListItemIcon,
   ListItemText,
   Box as MuiBox,
+  Alert,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import GoogleIcon from '@mui/icons-material/Google'
@@ -24,10 +25,11 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import EmailIcon from '@mui/icons-material/Email'
 import AppleIcon from '@mui/icons-material/Apple'
+import AutorenewIcon from '@mui/icons-material/Autorenew'
 import { useAuth } from '../hooks/useAuth'
 
 function LoginPage() {
-  const { formik } = useAuth()
+  const { formik, isLoginLoading, loginError, clearLoginError } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -150,6 +152,12 @@ function LoginPage() {
               </Typography>
             ) : null}
 
+            {loginError && (
+              <Alert severity="error" sx={{ mt: 1 }} onClose={clearLoginError}>
+                {loginError}
+              </Alert>
+            )}
+
             <MuiBox
               sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}
             >
@@ -167,10 +175,14 @@ function LoginPage() {
               color="primary"
               size="large"
               sx={{ mt: 2, mb: 1 }}
-              disabled={false}
-              startIcon={null}
+              disabled={isLoginLoading}
+              startIcon={
+                isLoginLoading ? (
+                  <AutorenewIcon sx={{ animation: 'spin 1s linear infinite' }} />
+                ) : null
+              }
             >
-              Continue
+              {isLoginLoading ? 'Signing in...' : 'Continue'}
             </Button>
           </Box>
 

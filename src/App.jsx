@@ -25,6 +25,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import UsersPage from './pages/admin/UsersPage'
 import AdminSpacesPage from './pages/admin/SpacesPage'
+import SpaceTypesPage from './pages/admin/SpaceTypesPage'
 import TaxonomiesPage from './pages/admin/TaxonomiesPage'
 import LocationsPage from './pages/admin/LocationsPage'
 import BookingsPage from './pages/admin/BookingsPage'
@@ -176,6 +177,7 @@ function AppContent({ toggleTheme, mode }) {
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="spaces" element={<AdminSpacesPage />} />
+            <Route path="space-types" element={<SpaceTypesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="locations" element={<LocationsPage />} />
             <Route path="taxonomies" element={<TaxonomiesPage />} />

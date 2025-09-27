@@ -28,6 +28,8 @@ import {
   Grid,
   Card,
   CardContent,
+  Tabs,
+  Tab,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -41,28 +43,36 @@ import * as Yup from 'yup'
 import axiosInstance from '../../api/axiosInstance'
 
 const LOCATION_LEVELS = [
-  { value: 'district', label: 'District' },
-  { value: 'county', label: 'County' },
-  { value: 'subCounty', label: 'Sub County' },
-  { value: 'parish', label: 'Parish' },
-  { value: 'village', label: 'Village' },
+  { value: 'region', label: 'Region', endpoint: 'regions' },
+  { value: 'district', label: 'District', endpoint: 'districts' },
+  { value: 'county', label: 'County', endpoint: 'counties' },
+  { value: 'subcounty', label: 'Sub County', endpoint: 'subcounties' },
+  { value: 'parish', label: 'Parish', endpoint: 'parishes' },
+  { value: 'village', label: 'Village', endpoint: 'villages' },
 ]
 
-const LocationForm = ({ open, onClose, onSubmit, initialValues, isEditing, locations }) => {
+const LocationForm = ({
+  open,
+  onClose,
+  onSubmit,
+  initialValues,
+  isEditing,
+  currentLevel,
+  parentOptions,
+}) => {
   const formik = useFormik({
     initialValues: initialValues || {
-      level: 'district',
       name: '',
+      code: '',
+      description: '',
       parent: '',
     },
     validationSchema: Yup.object({
-      level: Yup.string().oneOf(
-        LOCATION_LEVELS.map((l) => l.value),
-        'Invalid level'
-      ),
       name: Yup.string().required('Name is required'),
+      code: Yup.string().required('Code is required'),
+      description: Yup.string(),
       parent: Yup.string().when('level', {
-        is: 'district',
+        is: 'region',
         then: () => Yup.string().nullable(),
         otherwise: () => Yup.string().required('Parent location is required'),
       }),
@@ -76,48 +86,22 @@ const LocationForm = ({ open, onClose, onSubmit, initialValues, isEditing, locat
     if (open && initialValues) {
       formik.setValues(initialValues)
     }
-  }, [open, initialValues])
-
-  const getParentOptions = () => {
-    if (formik.values.level === 'district') return []
-
-    const parentLevel = LOCATION_LEVELS.findIndex((l) => l.value === formik.values.level) - 1
-    if (parentLevel < 0) return []
-
-    const parentLevelValue = LOCATION_LEVELS[parentLevel]?.value
-    return locations.filter((l) => l.level === parentLevelValue)
-  }
+  }, [open, initialValues, formik])
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{isEditing ? 'Edit Location' : 'Create New Location'}</DialogTitle>
+      <DialogTitle>
+        {isEditing ? 'Edit' : 'Create'}{' '}
+        {LOCATION_LEVELS.find((l) => l.value === currentLevel)?.label}
+      </DialogTitle>
       <DialogContent>
         <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
-              <FormControl fullWidth>
-                <InputLabel>Level</InputLabel>
-                <Select
-                  name="level"
-                  value={formik.values.level}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  label="Level"
-                  error={formik.touched.level && Boolean(formik.errors.level)}
-                >
-                  {LOCATION_LEVELS.map((level) => (
-                    <MenuItem key={level.value} value={level.value}>
-                      {level.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 name="name"
-                label="Location Name"
+                label="Name"
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -125,7 +109,33 @@ const LocationForm = ({ open, onClose, onSubmit, initialValues, isEditing, locat
                 helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
-            {formik.values.level !== 'district' && (
+            <Grid size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                name="code"
+                label="Code"
+                value={formik.values.code}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.code && Boolean(formik.errors.code)}
+                helperText={formik.touched.code && formik.errors.code}
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                name="description"
+                label="Description"
+                multiline
+                rows={3}
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.description && Boolean(formik.errors.description)}
+                helperText={formik.touched.description && formik.errors.description}
+              />
+            </Grid>
+            {currentLevel !== 'region' && (
               <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth>
                   <InputLabel>Parent Location</InputLabel>
@@ -137,9 +147,9 @@ const LocationForm = ({ open, onClose, onSubmit, initialValues, isEditing, locat
                     label="Parent Location"
                     error={formik.touched.parent && Boolean(formik.errors.parent)}
                   >
-                    {getParentOptions().map((location) => (
+                    {parentOptions.map((location) => (
                       <MenuItem key={location.id} value={location.id}>
-                        {location.name} ({location.level})
+                        {location.name} ({location.code})
                       </MenuItem>
                     ))}
                   </Select>
@@ -166,29 +176,25 @@ const LocationsPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(50)
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
-  const [levelFilter, setLevelFilter] = useState('')
+  const [currentLevel, setCurrentLevel] = useState('region')
   const [formOpen, setFormOpen] = useState(false)
   const [editingLocation, setEditingLocation] = useState(null)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
+  const [parentOptions, setParentOptions] = useState([])
 
   useEffect(() => {
     fetchLocations()
+    fetchParentOptions()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, search, levelFilter])
+  }, [page, rowsPerPage, search, currentLevel])
 
   const fetchLocations = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({
-        page: page + 1,
-        limit: rowsPerPage,
-      })
-      if (search) params.append('search', search)
-      if (levelFilter) params.append('level', levelFilter)
-
-      const response = await axiosInstance.get(`/admin/locations?${params}`)
-      setLocations(response.data.locations)
-      setTotal(response.data.pagination.total)
+      const level = LOCATION_LEVELS.find((l) => l.value === currentLevel)
+      const response = await axiosInstance.get(`/locations/${level.endpoint}`)
+      setLocations(response.data)
+      setTotal(response.data.length)
     } catch (error) {
       console.error('Error fetching locations:', error)
       showSnackbar('Error fetching locations', 'error')
@@ -197,9 +203,25 @@ const LocationsPage = () => {
     }
   }
 
+  const fetchParentOptions = async () => {
+    try {
+      const currentIndex = LOCATION_LEVELS.findIndex((l) => l.value === currentLevel)
+      if (currentIndex > 0) {
+        const parentLevel = LOCATION_LEVELS[currentIndex - 1]
+        const response = await axiosInstance.get(`/locations/${parentLevel.endpoint}`)
+        setParentOptions(response.data)
+      } else {
+        setParentOptions([])
+      }
+    } catch (error) {
+      console.error('Error fetching parent options:', error)
+    }
+  }
+
   const handleCreateLocation = async (locationData) => {
     try {
-      await axiosInstance.post('/admin/locations', locationData)
+      const level = LOCATION_LEVELS.find((l) => l.value === currentLevel)
+      await axiosInstance.post(`/locations/${level.endpoint}`, locationData)
       setFormOpen(false)
       showSnackbar('Location created successfully', 'success')
       fetchLocations()
@@ -211,7 +233,8 @@ const LocationsPage = () => {
 
   const handleUpdateLocation = async (locationData) => {
     try {
-      await axiosInstance.patch(`/admin/locations/${editingLocation.id}`, locationData)
+      const level = LOCATION_LEVELS.find((l) => l.value === currentLevel)
+      await axiosInstance.put(`/locations/${level.endpoint}/${editingLocation.id}`, locationData)
       setFormOpen(false)
       setEditingLocation(null)
       showSnackbar('Location updated successfully', 'success')
@@ -232,7 +255,8 @@ const LocationsPage = () => {
     }
 
     try {
-      await axiosInstance.delete(`/admin/locations/${locationId}`)
+      const level = LOCATION_LEVELS.find((l) => l.value === currentLevel)
+      await axiosInstance.delete(`/locations/${level.endpoint}/${locationId}`)
       showSnackbar('Location deleted successfully', 'success')
       fetchLocations()
     } catch (error) {
@@ -266,35 +290,24 @@ const LocationsPage = () => {
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 'district':
+      case 'region':
         return 'primary'
-      case 'county':
+      case 'district':
         return 'secondary'
-      case 'subCounty':
+      case 'county':
         return 'success'
-      case 'parish':
+      case 'subcounty':
         return 'warning'
-      case 'village':
+      case 'parish':
         return 'info'
+      case 'village':
+        return 'error'
       default:
         return 'default'
     }
   }
 
-  if (loading && locations.length === 0) {
-    return (
-      <Box p={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Skeleton variant="rectangular" height={60} />
-          </Grid>
-          <Grid item xs={12}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-        </Grid>
-      </Box>
-    )
-  }
+  // Remove the early return that causes the flash
 
   return (
     <Box p={3}>
@@ -310,9 +323,23 @@ const LocationsPage = () => {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-          Add Location
+          Add {LOCATION_LEVELS.find((l) => l.value === currentLevel)?.label}
         </Button>
       </Box>
+
+      {/* Level Tabs */}
+      <Paper sx={{ mb: 3 }}>
+        <Tabs
+          value={currentLevel}
+          onChange={(e, newValue) => setCurrentLevel(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {LOCATION_LEVELS.map((level) => (
+            <Tab key={level.value} label={level.label} value={level.value} />
+          ))}
+        </Tabs>
+      </Paper>
 
       {/* Stats Cards */}
       <Grid container spacing={3} mb={3}>
@@ -320,45 +347,9 @@ const LocationsPage = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Total Locations
+                Total {LOCATION_LEVELS.find((l) => l.value === currentLevel)?.label}s
               </Typography>
               <Typography variant="h4">{total}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Districts
-              </Typography>
-              <Typography variant="h4">
-                {locations.filter((l) => l.level === 'district').length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Counties
-              </Typography>
-              <Typography variant="h4">
-                {locations.filter((l) => l.level === 'county').length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Sub Counties
-              </Typography>
-              <Typography variant="h4">
-                {locations.filter((l) => l.level === 'subCounty').length}
-              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -370,30 +361,13 @@ const LocationsPage = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               fullWidth
-              placeholder="Search locations..."
+              placeholder={`Search ${LOCATION_LEVELS.find((l) => l.value === currentLevel)?.label.toLowerCase()}s...`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               InputProps={{
                 startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
               }}
             />
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>Level</InputLabel>
-              <Select
-                value={levelFilter}
-                onChange={(e) => setLevelFilter(e.target.value)}
-                label="Level"
-              >
-                <MenuItem value="">All Levels</MenuItem>
-                {LOCATION_LEVELS.map((level) => (
-                  <MenuItem key={level.value} value={level.value}>
-                    {level.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           </Grid>
         </Grid>
       </Paper>
@@ -404,59 +378,104 @@ const LocationsPage = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Level</TableCell>
                 <TableCell>Name</TableCell>
+                <TableCell>Code</TableCell>
+                <TableCell>Description</TableCell>
                 <TableCell>Parent</TableCell>
                 <TableCell>Created</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {locations.map((location) => (
-                <TableRow key={location.id}>
-                  <TableCell>
-                    <Chip
-                      label={
-                        LOCATION_LEVELS.find((l) => l.value === location.level)?.label ||
-                        location.level
-                      }
-                      color={getLevelColor(location.level)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="subtitle2">{location.name}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    {location.parent ? (
-                      <Typography variant="body2">
-                        {location.parent.name} ({location.parent.level})
-                      </Typography>
-                    ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        Root Level
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>{new Date(location.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditLocation(location)}
-                      color="primary"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteLocation(location.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+              {loading ? (
+                // Show skeleton rows while loading
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={`skeleton-${index}`}>
+                    <TableCell>
+                      <Skeleton variant="text" width="60%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="text" width="40%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="text" width="80%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="text" width="50%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="text" width="30%" />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Skeleton variant="circular" width={32} height={32} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : locations.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography variant="body2" color="textSecondary" sx={{ py: 4 }}>
+                      No{' '}
+                      {LOCATION_LEVELS.find((l) => l.value === currentLevel)?.label.toLowerCase()}s
+                      found
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                locations.map((location) => (
+                  <TableRow key={location.id}>
+                    <TableCell>
+                      <Typography variant="subtitle2">{location.name}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={location.code}
+                        color={getLevelColor(currentLevel)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="textSecondary">
+                        {location.description || 'No description'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {location.region ? (
+                        <Typography variant="body2">{location.region.name}</Typography>
+                      ) : location.district ? (
+                        <Typography variant="body2">{location.district.name}</Typography>
+                      ) : location.county ? (
+                        <Typography variant="body2">{location.county.name}</Typography>
+                      ) : location.subcounty ? (
+                        <Typography variant="body2">{location.subcounty.name}</Typography>
+                      ) : location.parish ? (
+                        <Typography variant="body2">{location.parish.name}</Typography>
+                      ) : (
+                        <Typography variant="body2" color="textSecondary">
+                          Root Level
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>{new Date(location.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditLocation(location)}
+                        color="primary"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteLocation(location.id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -478,7 +497,8 @@ const LocationsPage = () => {
         onSubmit={editingLocation ? handleUpdateLocation : handleCreateLocation}
         initialValues={editingLocation}
         isEditing={!!editingLocation}
-        locations={locations}
+        currentLevel={currentLevel}
+        parentOptions={parentOptions}
       />
 
       {/* Snackbar */}

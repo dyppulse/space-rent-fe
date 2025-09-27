@@ -30,6 +30,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  StepContent,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -39,7 +40,10 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useCreateSpace } from '../api/queries/spaceQueries'
+import { useSpaceTypes } from '../api/queries/spaceTypeQueries'
 import { DialogActions } from '@mui/material'
+import axiosInstance from '../api/axiosInstance'
+import PhotoWizard from '../components/PhotoWizard'
 
 function NewSpacePage() {
   const [activeStep, setActiveStep] = useState(0)
@@ -48,11 +52,128 @@ function NewSpacePage() {
 
   const fileInputRef = useRef(null)
   const [open, setOpen] = useState(false)
+
+  // Location hierarchy state
+  const [regions, setRegions] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [counties, setCounties] = useState([])
+  const [subcounties, setSubcounties] = useState([])
+  const [parishes, setParishes] = useState([])
+  const [villages, setVillages] = useState([])
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [photoWizardOpen, setPhotoWizardOpen] = useState(false)
   const navigate = useNavigate()
 
   const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
+  const { data: spaceTypesData, isLoading: loadingSpaceTypes } = useSpaceTypes(true) // Get only active space types
+  const spaceTypes = spaceTypesData?.spaceTypes || []
+
+  // Fetch location data
+  useEffect(() => {
+    fetchRegions()
+  }, [])
+
+  const fetchRegions = async () => {
+    try {
+      const response = await axiosInstance.get('/locations/regions')
+      setRegions(response.data)
+    } catch (error) {
+      console.error('Error fetching regions:', error)
+    }
+  }
+
+  const fetchDistricts = async (regionId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/districts?parentId=${regionId}`)
+      setDistricts(response.data)
+    } catch (error) {
+      console.error('Error fetching districts:', error)
+    }
+  }
+
+  const fetchCounties = async (districtId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/counties?parentId=${districtId}`)
+      setCounties(response.data)
+    } catch (error) {
+      console.error('Error fetching counties:', error)
+    }
+  }
+
+  const fetchSubcounties = async (countyId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/subcounties?parentId=${countyId}`)
+      setSubcounties(response.data)
+    } catch (error) {
+      console.error('Error fetching subcounties:', error)
+    }
+  }
+
+  const fetchParishes = async (subcountyId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/parishes?parentId=${subcountyId}`)
+      setParishes(response.data)
+    } catch (error) {
+      console.error('Error fetching parishes:', error)
+    }
+  }
+
+  const fetchVillages = async (parishId) => {
+    try {
+      const response = await axiosInstance.get(`/locations/villages?parentId=${parishId}`)
+      setVillages(response.data)
+    } catch (error) {
+      console.error('Error fetching villages:', error)
+    }
+  }
+
+  const handleLocationChange = (field, value) => {
+    formik.setFieldValue(`location.${field}`, value)
+
+    // Clear dependent fields and fetch new data
+    if (field === 'region') {
+      formik.setFieldValue('location.district', '')
+      formik.setFieldValue('location.county', '')
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setDistricts([])
+      setCounties([])
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchDistricts(value)
+    } else if (field === 'district') {
+      formik.setFieldValue('location.county', '')
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setCounties([])
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchCounties(value)
+    } else if (field === 'county') {
+      formik.setFieldValue('location.subcounty', '')
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setSubcounties([])
+      setParishes([])
+      setVillages([])
+      if (value) fetchSubcounties(value)
+    } else if (field === 'subcounty') {
+      formik.setFieldValue('location.parish', '')
+      formik.setFieldValue('location.village', '')
+      setParishes([])
+      setVillages([])
+      if (value) fetchParishes(value)
+    } else if (field === 'parish') {
+      formik.setFieldValue('location.village', '')
+      setVillages([])
+      if (value) fetchVillages(value)
+    }
+  }
 
   const handleClick = () => {
     if (fileInputRef.current) {
@@ -85,9 +206,12 @@ function NewSpacePage() {
     description: yup.string().required(),
     location: yup.object({
       address: yup.string().required('Required'),
-      city: yup.string().required('Required'),
-      state: yup.string().required('Required'),
-      zipCode: yup.string().notRequired(),
+      region: yup.string().notRequired(),
+      district: yup.string().notRequired(),
+      county: yup.string().notRequired(),
+      subcounty: yup.string().notRequired(),
+      parish: yup.string().notRequired(),
+      village: yup.string().notRequired(),
     }),
     images: yup.array().min(6, 'Atleast 6'),
     price: yup.object({
@@ -107,9 +231,12 @@ function NewSpacePage() {
       description: null,
       location: {
         address: '',
-        city: '',
-        state: '',
-        zipCode: '',
+        region: '',
+        district: '',
+        county: '',
+        subcounty: '',
+        parish: '',
+        village: '',
       },
       images: [],
       price: {
@@ -125,6 +252,15 @@ function NewSpacePage() {
     validateOnChange: true,
     validateOnMount: true,
     onSubmit: (values) => {
+      if (!formik.isValid) {
+        setToast({
+          open: true,
+          message: 'Please fix all form errors before submitting',
+          severity: 'error',
+        })
+        return
+      }
+
       setFormSubmitted(true)
       createSpace(values) // formikValues includes images as File[]
     },
@@ -136,11 +272,39 @@ function NewSpacePage() {
     const e = errors || formik.errors
     if (activeStep === 0) return !!(e.name || e.spaceType || e.capacity || e.description)
     if (activeStep === 1)
-      return !!(e.location?.address || e.location?.city || e.location?.state || e.location?.zipCode)
+      return !!(
+        e.location?.address ||
+        e.location?.region ||
+        e.location?.district ||
+        e.location?.county ||
+        e.location?.subcounty ||
+        e.location?.parish ||
+        e.location?.village
+      )
     if (activeStep === 2) return !!e.images
     if (activeStep === 3) return !!(e.price?.amount || e.price?.unit)
     if (activeStep === 4) return !!e.amenities
     return false
+  }
+
+  const isStepCompleted = (stepIndex) => {
+    const values = formik.values
+    switch (stepIndex) {
+      case 0: // Basic Info
+        return !!(values.name && values.spaceType && values.capacity && values.description)
+      case 1: // Location
+        return !!values.location?.address
+      case 2: // Photos
+        return !!(values.images && values.images.length >= 6)
+      case 3: // Pricing
+        return !!(values.price?.amount && values.price?.unit)
+      case 4: // Amenities
+        return !!(values.amenities && values.amenities.length >= 1)
+      case 5: // Review
+        return false // Review step is never "completed" until form is submitted
+      default:
+        return false
+    }
   }
 
   const handleNext = async () => {
@@ -151,7 +315,15 @@ function NewSpacePage() {
         spaceType: true,
         capacity: true,
         description: true,
-        location: { address: true, city: true, state: true, zipCode: true },
+        location: {
+          address: true,
+          region: true,
+          district: true,
+          county: true,
+          subcounty: true,
+          parish: true,
+          village: true,
+        },
         images: true,
         price: { amount: true, unit: true },
         amenities: true,
@@ -192,6 +364,15 @@ function NewSpacePage() {
     formik.setFieldValue('images', next)
   }
 
+  const handlePhotoWizardSave = (images) => {
+    formik.setFieldValue('images', images)
+    setPhotoWizardOpen(false)
+  }
+
+  const handleOpenPhotoWizard = () => {
+    setPhotoWizardOpen(true)
+  }
+
   useEffect(() => {
     if (loading) {
       setOpen(true)
@@ -200,9 +381,26 @@ function NewSpacePage() {
     // request finished
     setOpen(false)
     if (error) {
+      let errorMessage = 'Failed to create space'
+
+      if (error?.response?.data?.error) {
+        // Handle multer errors and other backend errors
+        errorMessage = error.response.data.error
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+
+      console.error('Create space error details:', {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      })
+
       setToast({
         open: true,
-        message: String(error || 'Failed to create space'),
+        message: errorMessage,
         severity: 'error',
       })
     } else if (!error && !loading && formSubmitted) {
@@ -245,9 +443,34 @@ function NewSpacePage() {
             <Paper elevation={1} sx={{ p: 2, borderRadius: 2, position: 'sticky', top: 16 }}>
               <Stepper activeStep={activeStep} orientation="vertical" nonLinear>
                 {steps.map((label, idx) => (
-                  <Step key={label}>
+                  <Step key={label} completed={isStepCompleted(idx)}>
                     <StepButton onClick={() => setActiveStep(idx)}>
-                      <StepLabel>{label}</StepLabel>
+                      <StepLabel
+                        StepIconComponent={({ completed, active }) => (
+                          <Box
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: completed
+                                ? 'success.main'
+                                : active
+                                  ? 'primary.main'
+                                  : 'grey.300',
+                              color: completed || active ? 'white' : 'grey.600',
+                              fontSize: '0.75rem',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {completed ? '✓' : idx + 1}
+                          </Box>
+                        )}
+                      >
+                        {label}
+                      </StepLabel>
                     </StepButton>
                   </Step>
                 ))}
@@ -286,15 +509,17 @@ function NewSpacePage() {
                         label="Space Type"
                         defaultValue=""
                         error={formik.errors.spaceType}
+                        disabled={loadingSpaceTypes}
                         {...formik.getFieldProps('spaceType')}
                       >
-                        <MenuItem value="event-venue">Event Venue</MenuItem>
-                        <MenuItem value="wedding-venue">Wedding Venue</MenuItem>
-                        <MenuItem value="conference-room">Conference Room</MenuItem>
-                        <MenuItem value="studio">Studio</MenuItem>
-                        <MenuItem value="other">Other</MenuItem>
+                        {spaceTypes.map((spaceType) => (
+                          <MenuItem key={spaceType.id} value={spaceType.id}>
+                            {spaceType.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                       <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
+                      {loadingSpaceTypes && <FormHelperText>Loading space types...</FormHelperText>}
                     </FormControl>
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
@@ -346,30 +571,124 @@ function NewSpacePage() {
                       {...formik.getFieldProps('location.address')}
                     />
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="City"
-                      fullWidth
-                      error={formik.errors.location?.city}
-                      helperText={formik.errors.location?.city}
-                      {...formik.getFieldProps('location.city')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.region}>
+                      <InputLabel>Region</InputLabel>
+                      <Select
+                        value={formik.values.location.region}
+                        onChange={(e) => handleLocationChange('region', e.target.value)}
+                        label="Region"
+                      >
+                        {regions.map((region) => (
+                          <MenuItem key={region.id} value={region.id}>
+                            {region.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.region && (
+                        <FormHelperText>{formik.errors.location.region}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="state"
-                      fullWidth
-                      error={formik.errors.location?.state}
-                      helperText={formik.errors.location?.state}
-                      {...formik.getFieldProps('location.state')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.district}>
+                      <InputLabel>District</InputLabel>
+                      <Select
+                        value={formik.values.location.district}
+                        onChange={(e) => handleLocationChange('district', e.target.value)}
+                        label="District"
+                        disabled={!formik.values.location.region}
+                      >
+                        {districts.map((district) => (
+                          <MenuItem key={district.id} value={district.id}>
+                            {district.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.district && (
+                        <FormHelperText>{formik.errors.location.district}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      label="Zip/Postal Code"
-                      fullWidth
-                      {...formik.getFieldProps('location.zipCode')}
-                    />
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.county}>
+                      <InputLabel>County</InputLabel>
+                      <Select
+                        value={formik.values.location.county}
+                        onChange={(e) => handleLocationChange('county', e.target.value)}
+                        label="County"
+                        disabled={!formik.values.location.district}
+                      >
+                        {counties.map((county) => (
+                          <MenuItem key={county.id} value={county.id}>
+                            {county.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.county && (
+                        <FormHelperText>{formik.errors.location.county}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.subcounty}>
+                      <InputLabel>Sub County</InputLabel>
+                      <Select
+                        value={formik.values.location.subcounty}
+                        onChange={(e) => handleLocationChange('subcounty', e.target.value)}
+                        label="Sub County"
+                        disabled={!formik.values.location.county}
+                      >
+                        {subcounties.map((subcounty) => (
+                          <MenuItem key={subcounty.id} value={subcounty.id}>
+                            {subcounty.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.subcounty && (
+                        <FormHelperText>{formik.errors.location.subcounty}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.parish}>
+                      <InputLabel>Parish</InputLabel>
+                      <Select
+                        value={formik.values.location.parish}
+                        onChange={(e) => handleLocationChange('parish', e.target.value)}
+                        label="Parish"
+                        disabled={!formik.values.location.subcounty}
+                      >
+                        {parishes.map((parish) => (
+                          <MenuItem key={parish.id} value={parish.id}>
+                            {parish.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.parish && (
+                        <FormHelperText>{formik.errors.location.parish}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <FormControl fullWidth error={formik.errors.location?.village}>
+                      <InputLabel>Village</InputLabel>
+                      <Select
+                        value={formik.values.location.village}
+                        onChange={(e) => handleLocationChange('village', e.target.value)}
+                        label="Village"
+                        disabled={!formik.values.location.parish}
+                      >
+                        {villages.map((village) => (
+                          <MenuItem key={village.id} value={village.id}>
+                            {village.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formik.errors.location?.village && (
+                        <FormHelperText>{formik.errors.location.village}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
                 </Grid>
               </Paper>
@@ -377,13 +696,57 @@ function NewSpacePage() {
 
             {activeStep === 2 && (
               <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Photos
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Upload high-quality photos of your space (minimum 3 photos)
-                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Photos
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Upload high-quality photos of your space (minimum 6 photos)
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: 'block', mt: 1 }}
+                    >
+                      Supported formats: JPG, PNG, WebP, AVIF, GIF, BMP, TIFF
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={handleOpenPhotoWizard}
+                    sx={{ minWidth: 200 }}
+                  >
+                    Open Photo Wizard
+                  </Button>
+                </Box>
                 <Divider sx={{ mb: 3 }} />
+
+                {/* Wizard Info */}
+                <Box
+                  sx={{
+                    bgcolor: 'primary.50',
+                    border: 1,
+                    borderColor: 'primary.200',
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 3,
+                  }}
+                >
+                  <Typography variant="body2" color="primary.dark">
+                    💡 <strong>Tip:</strong> Use the Photo Wizard above to organize your photos by
+                    category (Space Overview, Amenities, Facilities, etc.) for better presentation
+                    to potential renters.
+                  </Typography>
+                </Box>
 
                 <input
                   key={formik.values.images?.length || 0}
@@ -592,7 +955,11 @@ function NewSpacePage() {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Type</Typography>
-                    <Typography>{formik.values.spaceType || '-'}</Typography>
+                    <Typography>
+                      {spaceTypes.find((st) => st.id === formik.values.spaceType)?.name ||
+                        formik.values.spaceType ||
+                        '-'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Capacity</Typography>
@@ -600,10 +967,7 @@ function NewSpacePage() {
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2">Address</Typography>
-                    <Typography>
-                      {formik.values.location.address}, {formik.values.location.city},{' '}
-                      {formik.values.location.state}
-                    </Typography>
+                    <Typography>{formik.values.location.address}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Price</Typography>
@@ -671,6 +1035,14 @@ function NewSpacePage() {
         <DialogContent>Please wait while we save your space.</DialogContent>
         <DialogActions></DialogActions>
       </Dialog>
+
+      {/* Photo Wizard */}
+      <PhotoWizard
+        open={photoWizardOpen}
+        onClose={() => setPhotoWizardOpen(false)}
+        onSave={handlePhotoWizardSave}
+        initialImages={formik.values.images || []}
+      />
     </Container>
   )
 }

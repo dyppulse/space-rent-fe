@@ -17,6 +17,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import CircularProgress from '@mui/material/CircularProgress'
 import GoogleIcon from '@mui/icons-material/Google'
 import FacebookIcon from '@mui/icons-material/Facebook'
+import AutorenewIcon from '@mui/icons-material/Autorenew'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import PhoneInputFormik from '../components/PhoneInput'
@@ -32,7 +33,7 @@ function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const navigate = useNavigate()
-  const { signup } = useAuth()
+  const { signup, isSignupLoading } = useAuth()
 
   const validationSchema = yup.object({
     fullName: yup.string().required('Required').min(5, 'At least 5 characters'),
@@ -63,6 +64,38 @@ function SignupPage() {
       }),
   })
 
+  const handleSignup = async (values) => {
+    try {
+      const dial = values?.country?.phone || ''
+      const local = (values?.phoneNumber || '').replace(/\D/g, '')
+      const combined = `${dial}${local}`
+      const e164 = combined.startsWith('+') ? combined : `+${dial}${local}`
+
+      await signup({
+        name: values?.fullName,
+        email: values?.email,
+        password: values?.password,
+        phone: e164,
+      })
+
+      // Success case
+      navigate('/dashboard')
+      setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
+    } catch (error) {
+      // Extract error message from backend response
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Failed to create account'
+      setToast({
+        open: true,
+        message: errorMessage,
+        severity: 'error',
+      })
+    }
+  }
+
   const formik = useFormik({
     validateOnChange: true,
     validateOnMount: true,
@@ -75,31 +108,7 @@ function SignupPage() {
       country: null,
     },
     validationSchema,
-    onSubmit: async (values) => {
-      try {
-        const dial = values?.country?.phone || ''
-        const local = (values?.phoneNumber || '').replace(/\D/g, '')
-        const combined = `${dial}${local}`
-        const e164 = combined.startsWith('+') ? combined : `+${dial}${local}`
-
-        await signup({
-          name: values?.fullName,
-          email: values?.email,
-          password: values?.password,
-          phone: e164,
-        })
-
-        // Success case
-        navigate('/dashboard')
-        setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
-      } catch (error) {
-        setToast({
-          open: true,
-          message: String(error?.message || 'Failed to create account'),
-          severity: 'error',
-        })
-      }
-    },
+    onSubmit: handleSignup,
   })
 
   return (
@@ -226,10 +235,14 @@ function SignupPage() {
             color="primary"
             size="large"
             sx={{ mt: 3, mb: 2 }}
-            disabled={false}
-            startIcon={null}
+            disabled={isSignupLoading}
+            startIcon={
+              isSignupLoading ? (
+                <AutorenewIcon sx={{ animation: 'spin 1s linear infinite' }} />
+              ) : null
+            }
           >
-            Create account
+            {isSignupLoading ? 'Creating account...' : 'Create account'}
           </Button>
 
           <Box sx={{ position: 'relative', my: 3 }}>

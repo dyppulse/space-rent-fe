@@ -81,6 +81,10 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     initialized,
+    // Loading states for mutations
+    isLoginLoading: loginMutation.isPending,
+    isSignupLoading: signupMutation.isPending,
+    isLogoutLoading: logoutMutation.isPending,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

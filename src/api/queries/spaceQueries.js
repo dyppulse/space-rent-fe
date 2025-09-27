@@ -62,6 +62,7 @@ export const useCreateSpace = () => {
     },
     onError: (error) => {
       console.error('Failed to create space:', error)
+      // The error will be available in the component via the mutation's error state
     },
   })
 }
