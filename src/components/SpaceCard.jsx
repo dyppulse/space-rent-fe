@@ -148,7 +148,11 @@ function SpaceCard({ space }) {
             </Typography>
           </Box>
           <Chip
-            label={space.spaceType?.name || space.spaceTypeName}
+            label={
+              space.spaceTypes?.length > 0
+                ? space.spaceTypes.map((st) => st.name).join(', ')
+                : space.spaceType?.name || space.spaceTypeName
+            }
             size="small"
             sx={{
               bgcolor: 'rgba(13, 148, 136, 0.1)',

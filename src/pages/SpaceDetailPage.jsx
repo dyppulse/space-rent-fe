@@ -105,7 +105,11 @@ function SpaceDetailPage() {
                     </Typography>
                   </Box> */}
                   <Chip
-                    label={space?.spaceType?.name || space?.spaceTypeName}
+                    label={
+                      space?.spaceTypes?.length > 0
+                        ? space.spaceTypes.map((st) => st.name).join(', ')
+                        : space?.spaceType?.name || space?.spaceTypeName
+                    }
                     color="primary"
                     sx={{
                       bgcolor: 'rgba(13, 148, 136, 0.1)',
@@ -123,13 +127,18 @@ function SpaceDetailPage() {
                   Space Details
                 </Typography>
                 <Typography paragraph>
-                  This {space?.spaceType?.name?.toLowerCase()} is available for bookings. Perfect
-                  for
-                  {space?.spaceType?.name === 'Event Venue'
-                    ? ' events, parties, and gatherings'
-                    : space?.spaceType?.name === 'Conference Room'
-                      ? ' meetings, workshops, and presentations'
-                      : ' creative work, photoshoots, and productions'}
+                  This{' '}
+                  {space?.spaceTypes?.length > 0
+                    ? space.spaceTypes.map((st) => st.name.toLowerCase()).join(' and ')
+                    : space?.spaceType?.name?.toLowerCase()}{' '}
+                  is available for bookings. Perfect for
+                  {space?.spaceTypes?.length > 0
+                    ? ' multiple types of events and activities'
+                    : space?.spaceType?.name === 'Event Venue'
+                      ? ' events, parties, and gatherings'
+                      : space?.spaceType?.name === 'Conference Room'
+                        ? ' meetings, workshops, and presentations'
+                        : ' creative work, photoshoots, and productions'}
                   .
                 </Typography>
               </Box>

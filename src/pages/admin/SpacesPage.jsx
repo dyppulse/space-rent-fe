@@ -552,7 +552,11 @@ const SpacesPage = () => {
                       {space.owner?.email || 'N/A'}
                     </Typography>
                   </TableCell>
-                  <TableCell>{space.spaceType?.name || space.spaceTypeName}</TableCell>
+                  <TableCell>
+                    {space.spaceTypes?.length > 0
+                      ? space.spaceTypes.map((st) => st.name).join(', ')
+                      : space.spaceType?.name || space.spaceTypeName}
+                  </TableCell>
                   <TableCell>
                     <Typography variant="body2">
                       {space.location?.district || 'N/A'}, {space.location?.city || 'N/A'}
