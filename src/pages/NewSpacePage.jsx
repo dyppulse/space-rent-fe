@@ -186,7 +186,8 @@ function NewSpacePage() {
 
   const validationSchema = yup.object({
     name: yup.string().required('Required').min(5, 'Atleast 5 characters'),
-    spaceType: yup.string().required('Required'),
+    spaceTypes: yup.array().min(1, 'Select at least one space type').required('Required'),
+    spaceType: yup.string().notRequired(), // Keep for backward compatibility
     capacity: yup.number().required('Required'),
     description: yup.string().required(),
     location: yup.object({
@@ -211,7 +212,8 @@ function NewSpacePage() {
   const formik = useFormik({
     initialValues: {
       name: '',
-      spaceType: '',
+      spaceTypes: [], // Changed to array for multiple selection
+      spaceType: '', // Keep for backward compatibility
       capacity: null,
       description: null,
       location: {
@@ -255,7 +257,7 @@ function NewSpacePage() {
 
   const stepHasErrors = (errors) => {
     const e = errors || formik.errors
-    if (activeStep === 0) return !!(e.name || e.spaceType || e.capacity || e.description)
+    if (activeStep === 0) return !!(e.name || e.spaceTypes || e.capacity || e.description)
     if (activeStep === 1)
       return !!(
         e.location?.address ||
@@ -276,7 +278,12 @@ function NewSpacePage() {
     const values = formik.values
     switch (stepIndex) {
       case 0: // Basic Info
-        return !!(values.name && values.spaceType && values.capacity && values.description)
+        return !!(
+          values.name &&
+          values.spaceTypes?.length > 0 &&
+          values.capacity &&
+          values.description
+        )
       case 1: // Location
         return !!values.location?.address
       case 2: // Photos
@@ -487,15 +494,30 @@ function NewSpacePage() {
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
                     <FormControl fullWidth required>
-                      <InputLabel id="space-type-label">Space Type</InputLabel>
+                      <InputLabel id="space-types-label">Space Types</InputLabel>
                       <Select
-                        labelId="space-type-label"
-                        id="space-type"
-                        label="Space Type"
-                        defaultValue=""
-                        error={formik.errors.spaceType}
+                        labelId="space-types-label"
+                        id="space-types"
+                        label="Space Types"
+                        multiple
+                        value={formik.values.spaceTypes}
+                        onChange={(e) => {
+                          const selectedTypes = e.target.value
+                          formik.setFieldValue('spaceTypes', selectedTypes)
+                          // Set first selected as primary for backward compatibility
+                          if (selectedTypes.length > 0) {
+                            formik.setFieldValue('spaceType', selectedTypes[0])
+                          }
+                        }}
+                        error={!!formik.errors.spaceTypes}
                         disabled={loadingSpaceTypes || loadingAmenities}
-                        {...formik.getFieldProps('spaceType')}
+                        renderValue={(selected) => {
+                          if (selected.length === 0) return ''
+                          const selectedNames = selected
+                            .map((id) => spaceTypes.find((st) => st.id === id)?.name)
+                            .filter(Boolean)
+                          return selectedNames.join(', ')
+                        }}
                       >
                         {spaceTypes.map((spaceType) => (
                           <MenuItem key={spaceType.id} value={spaceType.id}>
@@ -503,7 +525,7 @@ function NewSpacePage() {
                           </MenuItem>
                         ))}
                       </Select>
-                      <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
+                      <FormHelperText error>{formik.errors.spaceTypes}</FormHelperText>
                       {(loadingSpaceTypes || loadingAmenities) && (
                         <FormHelperText>Loading space types and amenities...</FormHelperText>
                       )}
@@ -942,11 +964,17 @@ function NewSpacePage() {
                     <Typography>{formik.values.name || '-'}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Type</Typography>
+                    <Typography variant="subtitle2">Types</Typography>
                     <Typography>
-                      {spaceTypes.find((st) => st.id === formik.values.spaceType)?.name ||
-                        formik.values.spaceType ||
-                        '-'}
+                      {formik.values.spaceTypes?.length > 0
+                        ? formik.values.spaceTypes
+                            .map((id) => spaceTypes.find((st) => st.id === id)?.name)
+                            .filter(Boolean)
+                            .join(', ')
+                        : formik.values.spaceType
+                          ? spaceTypes.find((st) => st.id === formik.values.spaceType)?.name ||
+                            formik.values.spaceType
+                          : '-'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
