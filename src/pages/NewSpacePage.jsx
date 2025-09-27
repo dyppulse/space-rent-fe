@@ -40,6 +40,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useCreateSpace } from '../api/queries/spaceQueries'
+import { useSpaceTypes } from '../api/queries/spaceTypeQueries'
 import { DialogActions } from '@mui/material'
 import axiosInstance from '../api/axiosInstance'
 import PhotoWizard from '../components/PhotoWizard'
@@ -65,6 +66,8 @@ function NewSpacePage() {
   const navigate = useNavigate()
 
   const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
+  const { data: spaceTypesData, isLoading: loadingSpaceTypes } = useSpaceTypes(true) // Get only active space types
+  const spaceTypes = spaceTypesData?.spaceTypes || []
 
   // Fetch location data
   useEffect(() => {
@@ -506,15 +509,17 @@ function NewSpacePage() {
                         label="Space Type"
                         defaultValue=""
                         error={formik.errors.spaceType}
+                        disabled={loadingSpaceTypes}
                         {...formik.getFieldProps('spaceType')}
                       >
-                        <MenuItem value="event-venue">Event Venue</MenuItem>
-                        <MenuItem value="wedding-venue">Wedding Venue</MenuItem>
-                        <MenuItem value="conference-room">Conference Room</MenuItem>
-                        <MenuItem value="studio">Studio</MenuItem>
-                        <MenuItem value="other">Other</MenuItem>
+                        {spaceTypes.map((spaceType) => (
+                          <MenuItem key={spaceType.id} value={spaceType.id}>
+                            {spaceType.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                       <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
+                      {loadingSpaceTypes && <FormHelperText>Loading space types...</FormHelperText>}
                     </FormControl>
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
@@ -950,7 +955,11 @@ function NewSpacePage() {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Type</Typography>
-                    <Typography>{formik.values.spaceType || '-'}</Typography>
+                    <Typography>
+                      {spaceTypes.find((st) => st.id === formik.values.spaceType)?.name ||
+                        formik.values.spaceType ||
+                        '-'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Capacity</Typography>

@@ -8,8 +8,10 @@ export const useAuthStatus = () => {
     queryKey: queryKeys.auth.status(),
     queryFn: authService.checkAuth,
     retry: false, // Don't retry auth checks
-    staleTime: Infinity, // Auth status doesn't change frequently
-    gcTime: Infinity, // Keep auth status in cache
+    staleTime: 5 * 60 * 1000, // Check auth status every 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep auth status in cache for 10 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes to check for session expiry
+    refetchIntervalInBackground: true, // Continue checking even when tab is not active
     // Enable the query to run on mount
     enabled: true,
     // Handle errors gracefully - if checkAuth fails, user is not authenticated
