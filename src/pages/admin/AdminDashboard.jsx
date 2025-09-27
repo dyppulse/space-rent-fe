@@ -262,9 +262,6 @@ const AdminDashboard = () => {
       case 'locations':
         navigate('/admin/locations')
         break
-      case 'taxonomies':
-        navigate('/admin/taxonomies')
-        break
       default:
         break
     }
@@ -482,11 +479,6 @@ const AdminDashboard = () => {
           <Grid>
             <Button variant="outlined" onClick={() => handleQuickAction('locations')}>
               Manage Locations
-            </Button>
-          </Grid>
-          <Grid>
-            <Button variant="outlined" onClick={() => handleQuickAction('taxonomies')}>
-              Manage Taxonomies
             </Button>
           </Grid>
         </Grid>

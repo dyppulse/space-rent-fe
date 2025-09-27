@@ -35,6 +35,13 @@ export const queryKeys = {
     spaces: () => [...queryKeys.admin.all, 'spaces'],
     bookings: () => [...queryKeys.admin.all, 'bookings'],
     locations: () => [...queryKeys.admin.all, 'locations'],
-    taxonomies: () => [...queryKeys.admin.all, 'taxonomies'],
+    amenities: () => [...queryKeys.admin.all, 'amenities'],
+  },
+
+  // Amenities related queries
+  amenities: {
+    all: ['amenities'],
+    lists: () => [...queryKeys.amenities.all, 'list'],
+    list: (filters) => [...queryKeys.amenities.lists(), filters],
   },
 }

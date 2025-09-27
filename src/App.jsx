@@ -26,8 +26,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import UsersPage from './pages/admin/UsersPage'
 import AdminSpacesPage from './pages/admin/SpacesPage'
 import SpaceTypesPage from './pages/admin/SpaceTypesPage'
-import TaxonomiesPage from './pages/admin/TaxonomiesPage'
 import LocationsPage from './pages/admin/LocationsPage'
+import AmenitiesPage from './pages/admin/AmenitiesPage'
 import BookingsPage from './pages/admin/BookingsPage'
 import './App.css'
 
@@ -141,17 +141,9 @@ function AppContent({ toggleTheme, mode }) {
 
           {/* Protected Owner Routes */}
           <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute redirectTo="/auth/signup">
-                <DashboardPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/dashboard/spaces/new"
             element={
-              <PrivateRoute redirectTo="/auth/signup">
+              <PrivateRoute redirectTo="/auth/login">
                 <NewSpacePage />
               </PrivateRoute>
             }
@@ -159,8 +151,16 @@ function AppContent({ toggleTheme, mode }) {
           <Route
             path="/dashboard/spaces/:id/edit"
             element={
-              <PrivateRoute redirectTo="/auth/signup">
+              <PrivateRoute redirectTo="/auth/login">
                 <EditSpace />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute redirectTo="/auth/login">
+                <DashboardPage />
               </PrivateRoute>
             }
           />
@@ -178,9 +178,9 @@ function AppContent({ toggleTheme, mode }) {
             <Route path="users" element={<UsersPage />} />
             <Route path="spaces" element={<AdminSpacesPage />} />
             <Route path="space-types" element={<SpaceTypesPage />} />
+            <Route path="amenities" element={<AmenitiesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="locations" element={<LocationsPage />} />
-            <Route path="taxonomies" element={<TaxonomiesPage />} />
           </Route>
 
           {/* 404 Route */}

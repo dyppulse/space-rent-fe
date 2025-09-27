@@ -41,6 +41,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useCreateSpace } from '../api/queries/spaceQueries'
 import { useSpaceTypes } from '../api/queries/spaceTypeQueries'
+import { useAmenities } from '../api/queries/amenityQueries'
 import { DialogActions } from '@mui/material'
 import axiosInstance from '../api/axiosInstance'
 import PhotoWizard from '../components/PhotoWizard'
@@ -67,7 +68,9 @@ function NewSpacePage() {
 
   const { mutate: createSpace, isPending: loading, error } = useCreateSpace()
   const { data: spaceTypesData, isLoading: loadingSpaceTypes } = useSpaceTypes(true) // Get only active space types
+  const { data: amenitiesData, isLoading: loadingAmenities } = useAmenities(true) // Get only active amenities
   const spaceTypes = spaceTypesData?.spaceTypes || []
+  const amenities = amenitiesData?.amenities || []
 
   // Fetch location data
   useEffect(() => {
@@ -180,24 +183,6 @@ function NewSpacePage() {
       fileInputRef.current.click()
     }
   }
-
-  const amenities = [
-    'WiFi',
-    'Sound System',
-    'Projector',
-    'Kitchen',
-    'Restrooms',
-    'Heating/AC',
-    'Furniture',
-    'Parking',
-    'Wheelchair Accessible',
-    'Catering',
-    'Lighting Equipment',
-    'Stage',
-    'Tables/Chairs',
-    'Dressing Room',
-    'Outdoor Space',
-  ]
 
   const validationSchema = yup.object({
     name: yup.string().required('Required').min(5, 'Atleast 5 characters'),
@@ -509,7 +494,7 @@ function NewSpacePage() {
                         label="Space Type"
                         defaultValue=""
                         error={formik.errors.spaceType}
-                        disabled={loadingSpaceTypes}
+                        disabled={loadingSpaceTypes || loadingAmenities}
                         {...formik.getFieldProps('spaceType')}
                       >
                         {spaceTypes.map((spaceType) => (
@@ -519,7 +504,9 @@ function NewSpacePage() {
                         ))}
                       </Select>
                       <FormHelperText error>{formik.errors.spaceType}</FormHelperText>
-                      {loadingSpaceTypes && <FormHelperText>Loading space types...</FormHelperText>}
+                      {(loadingSpaceTypes || loadingAmenities) && (
+                        <FormHelperText>Loading space types and amenities...</FormHelperText>
+                      )}
                     </FormControl>
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
@@ -908,25 +895,26 @@ function NewSpacePage() {
                 <Divider sx={{ mb: 3 }} />
                 <Grid container spacing={2}>
                   {amenities.map((amenity) => (
-                    <Grid item xs={6} sm={4} key={amenity}>
+                    <Grid item xs={6} sm={4} key={amenity.id}>
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={formik.values.amenities.includes(amenity)}
+                            checked={formik.values.amenities.includes(amenity.name)}
                             onChange={(e) => {
                               const { checked } = e.target
                               const prev = formik.values.amenities
-                              if (checked) formik.setFieldValue('amenities', [...prev, amenity])
+                              if (checked)
+                                formik.setFieldValue('amenities', [...prev, amenity.name])
                               else
                                 formik.setFieldValue(
                                   'amenities',
-                                  prev.filter((a) => a !== amenity)
+                                  prev.filter((a) => a !== amenity.name)
                                 )
                             }}
                             name="amenities"
                           />
                         }
-                        label={amenity}
+                        label={amenity.name}
                       />
                     </Grid>
                   ))}

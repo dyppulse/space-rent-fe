@@ -26,8 +26,8 @@ import {
   Business as BusinessIcon,
   Event as EventIcon,
   LocationOn as LocationIcon,
-  Category as CategoryIcon,
   EventNote as EventNoteIcon,
+  Star as StarIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
   LightMode as LightModeIcon,
@@ -43,9 +43,9 @@ const menuItems = [
   { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
   { text: 'Spaces', icon: <BusinessIcon />, path: '/admin/spaces' },
   { text: 'Space Types', icon: <EventNoteIcon />, path: '/admin/space-types' },
+  { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
-  { text: 'Taxonomies', icon: <CategoryIcon />, path: '/admin/taxonomies' },
 ]
 
 const AdminLayout = ({ onToggleTheme, mode }) => {

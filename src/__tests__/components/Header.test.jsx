@@ -62,7 +62,7 @@ describe('Header', () => {
     expect(onToggleTheme).toHaveBeenCalled()
   })
 
-  it('confirms logout and navigates home', async () => {
+  it('confirms logout and navigates to login page', async () => {
     authState.user = { role: 'user' }
     authState.logout = vi.fn().mockResolvedValueOnce()
     renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
@@ -73,10 +73,10 @@ describe('Header', () => {
     const confirmBtn = await screen.findByText('Confirm')
     fireEvent.click(confirmBtn)
     await waitFor(() => expect(authState.logout).toHaveBeenCalled())
-    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/'))
+    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/auth/login'))
   })
 
-  it('handles logout failure and still navigates', async () => {
+  it('handles logout failure and still navigates to login page', async () => {
     authState.user = { role: 'user' }
     authState.logout = vi.fn().mockRejectedValueOnce(new Error('fail'))
     renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
@@ -84,7 +84,7 @@ describe('Header', () => {
     const confirmBtn = await screen.findByText('Confirm')
     fireEvent.click(confirmBtn)
     await waitFor(() => expect(authState.logout).toHaveBeenCalled())
-    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/'))
+    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/auth/login'))
   })
 
   it('toggles mobile drawer', () => {

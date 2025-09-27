@@ -61,12 +61,12 @@ function Header({ onToggleTheme, mode }) {
     try {
       await logout()
       setConfirm(false)
-      navigate('/')
+      navigate('/auth/login')
     } catch (error) {
       console.error('Logout failed:', error)
-      // Even if logout fails, redirect to home
+      // Even if logout fails, redirect to login page
       setConfirm(false)
-      navigate('/')
+      navigate('/auth/login')
     }
   }
 
