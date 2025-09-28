@@ -44,4 +44,13 @@ export const queryKeys = {
     lists: () => [...queryKeys.amenities.all, 'list'],
     list: (filters) => [...queryKeys.amenities.lists(), filters],
   },
+
+  // Feature flags related queries
+  featureFlags: {
+    all: ['featureFlags'],
+    lists: () => [...queryKeys.featureFlags.all, 'list'],
+    list: (filters) => [...queryKeys.featureFlags.lists(), filters],
+    details: () => [...queryKeys.featureFlags.all, 'detail'],
+    detail: (id) => [...queryKeys.featureFlags.details(), id],
+  },
 }

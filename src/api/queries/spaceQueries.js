@@ -16,7 +16,17 @@ export const useSpaces = (filters = {}) => {
 export const useSpace = (id) => {
   return useQuery({
     queryKey: queryKeys.spaces.detail(id),
-    queryFn: () => spaceService.getSpace(id),
+    queryFn: async () => {
+      console.log('useSpace: Fetching space with ID:', id)
+      try {
+        const result = await spaceService.getSpace(id)
+        console.log('useSpace: API response:', result)
+        return result
+      } catch (error) {
+        console.error('useSpace: API error:', error)
+        throw error
+      }
+    },
     enabled: !!id, // Only run query if ID exists
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

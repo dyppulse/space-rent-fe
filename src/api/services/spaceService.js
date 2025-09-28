@@ -57,8 +57,17 @@ export const spaceService = {
 
   // Get space by ID
   getSpace: async (id) => {
-    const response = await axiosInstance.get(`/spaces/${id}`)
-    return ensureDefaults(response.data.space)
+    console.log('spaceService.getSpace: Fetching space with ID:', id)
+    try {
+      const response = await unProtectedAxiosInstance.get(`/spaces/${id}`)
+      console.log('spaceService.getSpace: Raw response:', response.data)
+      const processedSpace = ensureDefaults(response.data.space)
+      console.log('spaceService.getSpace: Processed space:', processedSpace)
+      return processedSpace
+    } catch (error) {
+      console.error('spaceService.getSpace: Error:', error)
+      throw error
+    }
   },
 
   // Get user's spaces
