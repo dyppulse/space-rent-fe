@@ -28,6 +28,7 @@ import {
   LocationOn as LocationIcon,
   EventNote as EventNoteIcon,
   Star as StarIcon,
+  Settings as SettingsIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
   LightMode as LightModeIcon,
@@ -46,6 +47,7 @@ const menuItems = [
   { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
+  { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
 ]
 
 const AdminLayout = ({ onToggleTheme, mode }) => {

@@ -5,7 +5,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn'
 import PeopleIcon from '@mui/icons-material/People'
 // import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import BookingForm from '../components/BookingForm'
+import { Button } from '@mui/material'
 import { useSpace } from '../api/queries/spaceQueries'
 import { useAuth } from '../contexts/AuthContext'
 import DetailSkeleton from '../components/ui/skeletons/DetailSkeleton'
@@ -202,11 +202,18 @@ function SpaceDetailPage() {
                 <Typography variant="h5" gutterBottom>
                   Book this space
                 </Typography>
-                <BookingForm
-                  spaceId={space?.id}
-                  price={space?.price?.amount}
-                  priceUnit={space?.price?.unit}
-                />
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  Ready to book this amazing space? Click below to start the booking process.
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  onClick={() => navigate(`/spaces/${space?.id}/book`)}
+                  sx={{ py: 1.5 }}
+                >
+                  Start Booking Process
+                </Button>
               </Paper>
             </Box>
           </Grid>

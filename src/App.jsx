@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import SpacesPage from './pages/SpacesPage'
 import SpaceDetailPage from './pages/SpaceDetailPage'
+import BookingWizard from './pages/BookingWizard'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
@@ -29,6 +30,7 @@ import SpaceTypesPage from './pages/admin/SpaceTypesPage'
 import LocationsPage from './pages/admin/LocationsPage'
 import AmenitiesPage from './pages/admin/AmenitiesPage'
 import BookingsPage from './pages/admin/BookingsPage'
+import FeatureFlagsPage from './pages/admin/FeatureFlagsPage'
 import './App.css'
 
 // Create theme with system preference detection
@@ -118,6 +120,7 @@ function AppContent({ toggleTheme, mode }) {
           {/* Public Routes - Available to all users */}
           <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+          <Route path="/spaces/:id/book" element={<BookingWizard />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/work-in-progress" element={<WorkInProgress />} />
 
@@ -181,6 +184,7 @@ function AppContent({ toggleTheme, mode }) {
             <Route path="amenities" element={<AmenitiesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="locations" element={<LocationsPage />} />
+            <Route path="feature-flags" element={<FeatureFlagsPage />} />
           </Route>
 
           {/* 404 Route */}
