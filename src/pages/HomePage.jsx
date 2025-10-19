@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Box, Container, Typography, Button, TextField, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
@@ -7,10 +8,30 @@ import { useSpaces } from '../api/queries/spaceQueries'
 import { useAuth } from '../contexts/AuthContext'
 import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
+// Background images array
+const backgroundImages = [
+  '/images/conference-center-lively.jpg',
+  '/images/outdoor-party-space.jpg',
+  '/images/outdoor-party-space-2.jpg',
+  '/images/outdoor-party-space-3.jpg',
+  '/images/outdoor-party-space-4.jpg',
+  '/images/outdoor-party-space-5.jpg',
+]
+
 function HomePage() {
   const navigate = useNavigate()
   const { data: spacesData, isLoading: loading } = useSpaces()
   const { isLoading: authLoading } = useAuth()
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  // Rotate background images every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length)
+    }, 8000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleListSpaceClick = () => {
     // Only wait if we're actively loading
@@ -28,19 +49,34 @@ function HomePage() {
         sx={(theme) => ({
           position: 'relative',
           py: 10,
-          color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.text.primary,
-          backgroundImage:
-            theme.palette.mode === 'dark'
-              ? 'radial-gradient(1000px 500px at 20% 0%, rgba(255,56,92,0.15), transparent 60%), linear-gradient(180deg, #0F0F10 0%, #151516 100%)'
-              : 'radial-gradient(1000px 500px at 20% 0%, rgba(255,56,92,0.08), transparent 60%), linear-gradient(180deg, #FFF8FA 0%, #FFFFFF 100%)',
+          minHeight: '70vh',
+          display: 'flex',
+          alignItems: 'center',
+          color: '#fff',
+          backgroundImage: `url("${backgroundImages[currentImageIndex]}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          transition: 'background-image 1s ease-in-out',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor:
+              theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1,
+          },
         })}
       >
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Box sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto' }}>
-            <Typography variant="h2" component="h1" gutterBottom>
+            <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
               Find the perfect space for your next event
             </Typography>
-            <Typography variant="h5" sx={{ mb: 5, opacity: 0.9 }}>
+            <Typography variant="h5" sx={{ mb: 5, opacity: 0.95, fontWeight: 400 }}>
               Discover and book unique venues, studios, and meeting spaces without the hassle.
             </Typography>
 
