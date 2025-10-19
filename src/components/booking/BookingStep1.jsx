@@ -202,6 +202,19 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
               }}
               error={!!formik.errors.guests}
               helperText={formik.errors.guests || 'Minimum 1 guest required'}
+              sx={{
+                '& input[type=number]': {
+                  MozAppearance: 'textfield',
+                },
+                '& input[type=number]::-webkit-outer-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+                '& input[type=number]::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
