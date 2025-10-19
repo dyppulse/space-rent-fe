@@ -44,19 +44,21 @@ function BookingForm({ spaceId, price, priceUnit }) {
       clientEmail: Yup.string().email('Invalid email').required('Required'),
       clientPhone: Yup.string().required('Required'),
       eventDate:
-        priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
+        priceUnit === 'hour' || priceUnit === 'day'
+          ? Yup.date().required('Required').nullable()
+          : Yup.date().nullable(),
       startTime:
         priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
       endTime:
         priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
-      checkInDate:
-        priceUnit === 'day' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
-      checkOutDate:
-        priceUnit === 'day' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
       guests: Yup.number().min(1).max(50),
     }),
     onSubmit: async (values, { resetForm }) => {
-      createBooking({ ...values, spaceId })
+      createBooking({
+        ...values,
+        spaceId,
+        bookingType: 'single', // Single day booking
+      })
       setSnackbarOpen(true)
       resetForm?.()
     },
@@ -83,28 +85,18 @@ function BookingForm({ spaceId, price, priceUnit }) {
         days = Math.ceil(hours / 24)
       }
     } else if (priceUnit === 'day') {
-      const inD = formik.values.checkInDate ? new Date(formik.values.checkInDate) : null
-      const outD = formik.values.checkOutDate ? new Date(formik.values.checkOutDate) : null
-      if (inD && outD && !isNaN(inD) && !isNaN(outD)) {
-        const diffMs = Math.max(0, outD.setHours(0, 0, 0, 0) - inD.setHours(0, 0, 0, 0))
-        days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
-        hours = days * 24
+      // For single day booking, just count 1 day if eventDate is set
+      if (formik.values.eventDate) {
+        days = 1
+        hours = 24
       }
     }
     let total = 0
     if (priceUnit === 'hour') total = Math.max(1, hours) * (price || 0)
-    else if (priceUnit === 'day') total = Math.max(1, days) * (price || 0)
+    else if (priceUnit === 'day') total = days * (price || 0)
     else total = price || 0
     return { durationHours: hours, durationDays: days, totalPrice: total }
-  }, [
-    formik.values.eventDate,
-    formik.values.startTime,
-    formik.values.endTime,
-    formik.values.checkInDate,
-    formik.values.checkOutDate,
-    price,
-    priceUnit,
-  ])
+  }, [formik.values.eventDate, formik.values.startTime, formik.values.endTime, price, priceUnit])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -153,7 +145,7 @@ function BookingForm({ spaceId, price, priceUnit }) {
 
         <Box sx={{ mb: 3 }}>
           <DatePicker
-            label="Event Date"
+            label={priceUnit === 'day' ? 'Booking Date' : 'Event Date'}
             value={formik.values.eventDate}
             onChange={(value) => formik.setFieldValue('eventDate', value)}
             renderInput={(params) => (
@@ -169,53 +161,63 @@ function BookingForm({ spaceId, price, priceUnit }) {
             disablePast
           />
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <TimePicker
-              label="Start Time"
-              value={formik.values.startTime}
-              onChange={(value) => formik.setFieldValue('startTime', value)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  size="small"
-                  error={formik.touched.startTime && Boolean(formik.errors.startTime)}
-                  helperText={formik.touched.startTime && formik.errors.startTime}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <AccessTimeIcon />
-                      </InputAdornment>
-                    ),
-                  }}
+          {priceUnit === 'hour' && (
+            <>
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <TimePicker
+                  label="Start Time"
+                  value={formik.values.startTime}
+                  onChange={(value) => formik.setFieldValue('startTime', value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      size="small"
+                      error={formik.touched.startTime && Boolean(formik.errors.startTime)}
+                      helperText={formik.touched.startTime && formik.errors.startTime}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccessTimeIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
-            <TimePicker
-              label="End Time"
-              value={formik.values.endTime}
-              onChange={(value) => formik.setFieldValue('endTime', value)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  size="small"
-                  error={formik.touched.endTime && Boolean(formik.errors.endTime)}
-                  helperText={formik.touched.endTime && formik.errors.endTime}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <AccessTimeIcon />
-                      </InputAdornment>
-                    ),
-                  }}
+                <TimePicker
+                  label="End Time"
+                  value={formik.values.endTime}
+                  onChange={(value) => formik.setFieldValue('endTime', value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      size="small"
+                      error={formik.touched.endTime && Boolean(formik.errors.endTime)}
+                      helperText={formik.touched.endTime && formik.errors.endTime}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccessTimeIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
                 />
+              </Box>
+              {formik.values.startTime && formik.values.endTime && durationHours <= 0 && (
+                <Typography variant="caption" color="error">
+                  End time must be after start time
+                </Typography>
               )}
-            />
-          </Box>
-          {formik.values.startTime && formik.values.endTime && durationHours <= 0 && (
-            <Typography variant="caption" color="error">
-              End time must be after start time
+            </>
+          )}
+
+          {priceUnit === 'day' && formik.values.eventDate && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Full day booking - {new Date(formik.values.eventDate).toLocaleDateString()}
             </Typography>
           )}
         </Box>
@@ -267,7 +269,11 @@ function BookingForm({ spaceId, price, priceUnit }) {
             color="primary"
             fullWidth
             size="large"
-            disabled={isBookingLoading || (priceUnit !== 'event' && durationHours <= 0)}
+            disabled={
+              isBookingLoading ||
+              (priceUnit === 'hour' && durationHours <= 0) ||
+              (priceUnit === 'day' && !formik.values.eventDate)
+            }
             startIcon={isBookingLoading ? <CircularProgress color="inherit" size={18} /> : null}
           >
             {isBookingLoading ? 'Submitting...' : 'Request to Book'}

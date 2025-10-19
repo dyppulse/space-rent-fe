@@ -31,6 +31,7 @@ function BookingWizard() {
   const { id: spaceId } = useParams()
   const navigate = useNavigate()
   const [activeStep, setActiveStep] = useState(0)
+  const [completedSteps, setCompletedSteps] = useState({})
   // Snackbar state for future use
   // const [snackbarOpen, setSnackbarOpen] = useState(false)
   // const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -81,16 +82,8 @@ function BookingWizard() {
         then: (schema) => schema.required('Event date is required'),
         otherwise: (schema) => schema.nullable(),
       }),
-      startTime: Yup.date().when('bookingType', {
-        is: 'single',
-        then: (schema) => schema.required('Start time is required'),
-        otherwise: (schema) => schema.nullable(),
-      }),
-      endTime: Yup.date().when('bookingType', {
-        is: 'single',
-        then: (schema) => schema.required('End time is required'),
-        otherwise: (schema) => schema.nullable(),
-      }),
+      startTime: Yup.date().nullable(),
+      endTime: Yup.date().nullable(),
       checkInDate: Yup.date().when('bookingType', {
         is: 'multi',
         then: (schema) => schema.required('Check-in date is required'),
@@ -156,27 +149,33 @@ function BookingWizard() {
 
     if (bookingType === 'single') {
       // Single day booking
-      if (!eventDate || !startTime || !endTime) return { durationHours: 0, totalPrice: 0 }
-
-      const start = combineDateAndTime(eventDate, startTime)
-      const end = combineDateAndTime(eventDate, endTime)
-
-      if (!start || !end) return { durationHours: 0, totalPrice: 0 }
-
-      const durationMs = end - start
-      const durationHours = Math.max(0, durationMs / (1000 * 60 * 60))
-
-      let totalPrice = 0
       if (space.price.unit === 'hour') {
-        totalPrice = space.price.amount * Math.ceil(durationHours)
-      } else if (space.price.unit === 'day') {
-        const days = Math.ceil(durationHours / 24)
-        totalPrice = space.price.amount * days
-      } else {
-        totalPrice = space.price.amount
-      }
+        // For hourly pricing, require start and end times
+        if (!eventDate || !startTime || !endTime) return { durationHours: 0, totalPrice: 0 }
 
-      return { durationHours, totalPrice }
+        const start = combineDateAndTime(eventDate, startTime)
+        const end = combineDateAndTime(eventDate, endTime)
+
+        if (!start || !end) return { durationHours: 0, totalPrice: 0 }
+
+        const durationMs = end - start
+        const durationHours = Math.max(0, durationMs / (1000 * 60 * 60))
+
+        const totalPrice = space.price.amount * Math.ceil(durationHours)
+        return { durationHours, totalPrice }
+      } else if (space.price.unit === 'day') {
+        // For daily pricing, just need the date - it's a full day booking
+        if (!eventDate) return { durationHours: 0, totalPrice: 0 }
+
+        const durationHours = 24 // Full day
+        const totalPrice = space.price.amount // Fixed price for the day
+
+        return { durationHours, totalPrice }
+      } else {
+        // Event pricing
+        const totalPrice = space.price.amount
+        return { durationHours: 24, totalPrice }
+      }
     } else {
       // Multi-day booking
       if (!checkInDate || !checkOutDate) return { durationHours: 0, totalPrice: 0 }
@@ -212,11 +211,20 @@ function BookingWizard() {
       formik.setTouched(getStepTouchedFields(activeStep))
       return
     }
+    // Mark current step as completed
+    setCompletedSteps((prev) => ({ ...prev, [activeStep]: true }))
     setActiveStep((prevActiveStep) => prevActiveStep + 1)
   }
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
+
+  const handleStepClick = (step) => {
+    // Allow clicking on current step or completed steps
+    if (step <= activeStep || completedSteps[step - 1]) {
+      setActiveStep(step)
+    }
   }
 
   const getStepErrors = (step) => {
@@ -231,8 +239,11 @@ function BookingWizard() {
 
         if (values.bookingType === 'single') {
           if (!values.eventDate) errors.eventDate = 'Required'
-          if (!values.startTime) errors.startTime = 'Required'
-          if (!values.endTime) errors.endTime = 'Required'
+          // Only require start/end times for hourly priced spaces
+          if (space?.price?.unit === 'hour') {
+            if (!values.startTime) errors.startTime = 'Required'
+            if (!values.endTime) errors.endTime = 'Required'
+          }
         } else if (values.bookingType === 'multi') {
           if (!values.checkInDate) errors.checkInDate = 'Required'
           if (!values.checkOutDate) errors.checkOutDate = 'Required'
@@ -261,8 +272,11 @@ function BookingWizard() {
 
         if (formik.values.bookingType === 'single') {
           touched.eventDate = true
-          touched.startTime = true
-          touched.endTime = true
+          // Only touch start/end times for hourly priced spaces
+          if (space?.price?.unit === 'hour') {
+            touched.startTime = true
+            touched.endTime = true
+          }
         } else if (formik.values.bookingType === 'multi') {
           touched.checkInDate = true
           touched.checkOutDate = true
@@ -403,11 +417,14 @@ function BookingWizard() {
               top: 100,
             }}
           >
-            <Stepper activeStep={activeStep} orientation="vertical" nonLinear>
+            <Stepper activeStep={activeStep} orientation="vertical">
               {steps.map((label, idx) => (
-                <Step key={label} completed={isStepValid(idx)}>
-                  <StepButton onClick={() => setActiveStep(idx)}>
-                    <StepLabel>{label}</StepLabel>
+                <Step key={label} completed={completedSteps[idx]}>
+                  <StepButton
+                    onClick={() => handleStepClick(idx)}
+                    disabled={idx > activeStep && !completedSteps[idx - 1]}
+                  >
+                    <StepLabel error={idx === activeStep && !isStepValid(idx)}>{label}</StepLabel>
                   </StepButton>
                 </Step>
               ))}
@@ -443,7 +460,7 @@ function BookingWizard() {
             </Button>
 
             {activeStep < steps.length - 1 ? (
-              <Button variant="contained" onClick={handleNext} disabled={!isStepValid(activeStep)}>
+              <Button variant="contained" onClick={handleNext} color="primary">
                 Next
               </Button>
             ) : (
@@ -452,6 +469,7 @@ function BookingWizard() {
                 onClick={formik.handleSubmit}
                 disabled={isBookingLoading}
                 startIcon={isBookingLoading ? <CircularProgress size={18} /> : null}
+                color="success"
               >
                 {isBookingLoading ? 'Creating Booking...' : 'Complete Booking'}
               </Button>
