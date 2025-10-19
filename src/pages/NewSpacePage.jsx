@@ -35,6 +35,7 @@ import {
 import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useFormik } from 'formik'
@@ -541,6 +542,61 @@ function NewSpacePage() {
                       error={formik.errors.capacity}
                       helperText={formik.errors.capacity}
                       {...formik.getFieldProps('capacity')}
+                      sx={{
+                        '& input[type=number]': {
+                          MozAppearance: 'textfield',
+                        },
+                        '& input[type=number]::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                const currentValue = formik.values.capacity || 0
+                                if (currentValue > 0) {
+                                  formik.setFieldValue('capacity', currentValue - 1)
+                                }
+                              }}
+                              disabled={!formik.values.capacity || formik.values.capacity <= 0}
+                              sx={{
+                                bgcolor: 'action.hover',
+                                '&:hover': { bgcolor: 'action.selected' },
+                              }}
+                            >
+                              <RemoveIcon fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                const currentValue = formik.values.capacity || 0
+                                formik.setFieldValue('capacity', currentValue + 1)
+                              }}
+                              sx={{
+                                bgcolor: 'action.hover',
+                                '&:hover': { bgcolor: 'action.selected' },
+                              }}
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      inputProps={{
+                        min: 0,
+                      }}
                     />
                   </Grid>
                   <Grid item size={{ xs: 12 }}>
