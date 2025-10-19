@@ -931,13 +931,75 @@ function NewSpacePage() {
                       label="Price"
                       type="number"
                       fullWidth
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">Shs</InputAdornment>,
-                      }}
                       placeholder="0.00"
                       error={formik.errors.price?.amount}
                       helperText={formik.errors.price?.amount}
                       {...formik.getFieldProps('price.amount')}
+                      sx={{
+                        '& input[type=number]': {
+                          MozAppearance: 'textfield',
+                        },
+                        '& input[type=number]::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Typography variant="body2" sx={{ mr: 0.5 }}>
+                                UGX
+                              </Typography>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const currentValue = parseFloat(formik.values.price.amount) || 0
+                                  if (currentValue > 0) {
+                                    formik.setFieldValue(
+                                      'price.amount',
+                                      Math.max(0, currentValue - 1000)
+                                    )
+                                  }
+                                }}
+                                disabled={
+                                  !formik.values.price.amount || formik.values.price.amount <= 0
+                                }
+                                sx={{
+                                  bgcolor: 'action.hover',
+                                  '&:hover': { bgcolor: 'action.selected' },
+                                }}
+                              >
+                                <RemoveIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                const currentValue = parseFloat(formik.values.price.amount) || 0
+                                formik.setFieldValue('price.amount', currentValue + 1000)
+                              }}
+                              sx={{
+                                bgcolor: 'action.hover',
+                                '&:hover': { bgcolor: 'action.selected' },
+                              }}
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      inputProps={{
+                        min: 0,
+                      }}
                     />
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
