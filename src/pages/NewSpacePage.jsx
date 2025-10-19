@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogContent,
   StepContent,
+  Chip,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -430,45 +431,59 @@ function NewSpacePage() {
         </Box>
       </Box>
 
-      <Box component="form" onSubmit={formik.handleSubmit}>
+      <Box
+        component="form"
+        onSubmit={(e) => {
+          // Prevent all form submissions - we handle it manually via button onClick
+          e.preventDefault()
+        }}
+        onKeyDown={(e) => {
+          // Prevent Enter key from submitting the form
+          if (e.key === 'Enter') {
+            e.preventDefault()
+          }
+        }}
+      >
         <Grid container spacing={3}>
           <Grid item size={{ xs: 12, md: 3 }} sx={{ order: { xs: 2, md: 2 } }}>
-            <Paper elevation={1} sx={{ p: 2, borderRadius: 2, position: 'sticky', top: 16 }}>
-              <Stepper activeStep={activeStep} orientation="vertical" nonLinear>
-                {steps.map((label, idx) => (
-                  <Step key={label} completed={isStepCompleted(idx)}>
-                    <StepButton onClick={() => setActiveStep(idx)}>
-                      <StepLabel
-                        StepIconComponent={({ completed, active }) => (
-                          <Box
-                            sx={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: completed
-                                ? 'success.main'
-                                : active
-                                  ? 'primary.main'
-                                  : 'grey.300',
-                              color: completed || active ? 'white' : 'grey.600',
-                              fontSize: '0.75rem',
-                              fontWeight: 'bold',
-                            }}
-                          >
-                            {completed ? '✓' : idx + 1}
-                          </Box>
-                        )}
-                      >
-                        {label}
-                      </StepLabel>
-                    </StepButton>
-                  </Step>
-                ))}
-              </Stepper>
-            </Paper>
+            <Box sx={{ position: 'sticky', top: 80, alignSelf: 'flex-start' }}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Stepper activeStep={activeStep} orientation="vertical" nonLinear>
+                  {steps.map((label, idx) => (
+                    <Step key={label} completed={isStepCompleted(idx)}>
+                      <StepButton onClick={() => setActiveStep(idx)}>
+                        <StepLabel
+                          StepIconComponent={({ completed, active }) => (
+                            <Box
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: completed
+                                  ? 'success.main'
+                                  : active
+                                    ? 'primary.main'
+                                    : 'grey.300',
+                                color: completed || active ? 'white' : 'grey.600',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              {completed ? '✓' : idx + 1}
+                            </Box>
+                          )}
+                        >
+                          {label}
+                        </StepLabel>
+                      </StepButton>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Paper>
+            </Box>
           </Grid>
 
           <Grid item size={{ xs: 12, md: 9 }} sx={{ order: { xs: 1, md: 1 } }}>
@@ -1068,53 +1083,316 @@ function NewSpacePage() {
             )}
 
             {activeStep === 5 && (
-              <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
+              <Box>
+                <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 1 }}>
                   Review & Submit
                 </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
+                <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 3 }}>
                   Please review your information before submitting.
                 </Typography>
-                <Divider sx={{ mb: 3 }} />
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2">Name</Typography>
-                    <Typography>{formik.values.name || '-'}</Typography>
+
+                <Grid container spacing={3}>
+                  {/* Basic Information Card */}
+                  <Grid item size={{ xs: 12, md: 6 }}>
+                    <Paper elevation={2} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
+                        📋 Basic Information
+                      </Typography>
+                      <Divider sx={{ mb: 2 }} />
+                      <Grid container spacing={2}>
+                        <Grid item size={{ xs: 12 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Space Name
+                          </Typography>
+                          <Typography variant="body1" fontWeight="500">
+                            {formik.values.name || '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12, sm: 6 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Space Types
+                          </Typography>
+                          <Typography variant="body1" fontWeight="500">
+                            {formik.values.spaceTypes?.length > 0
+                              ? formik.values.spaceTypes
+                                  .map((id) => spaceTypes.find((st) => st.id === id)?.name)
+                                  .filter(Boolean)
+                                  .join(', ')
+                              : '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12, sm: 6 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Capacity
+                          </Typography>
+                          <Typography variant="body1" fontWeight="500">
+                            {formik.values.capacity || '-'} people
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Description
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.primary"
+                            sx={{ whiteSpace: 'pre-wrap' }}
+                          >
+                            {formik.values.description || '-'}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Paper>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Types</Typography>
-                    <Typography>
-                      {formik.values.spaceTypes?.length > 0
-                        ? formik.values.spaceTypes
-                            .map((id) => spaceTypes.find((st) => st.id === id)?.name)
-                            .filter(Boolean)
-                            .join(', ')
-                        : formik.values.spaceType
-                          ? spaceTypes.find((st) => st.id === formik.values.spaceType)?.name ||
-                            formik.values.spaceType
-                          : '-'}
-                    </Typography>
+
+                  {/* Location Card */}
+                  <Grid item size={{ xs: 12, md: 6 }}>
+                    <Paper elevation={2} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
+                        📍 Location
+                      </Typography>
+                      <Divider sx={{ mb: 2 }} />
+                      <Grid container spacing={2}>
+                        <Grid item size={{ xs: 12 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Address
+                          </Typography>
+                          <Typography variant="body1" fontWeight="500">
+                            {formik.values.location?.address || '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12, sm: 6 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Region
+                          </Typography>
+                          <Typography variant="body2">
+                            {regions.find((r) => r.id === formik.values.location?.region)?.name ||
+                              '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12, sm: 6 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            District
+                          </Typography>
+                          <Typography variant="body2">
+                            {districts.find((d) => d.id === formik.values.location?.district)
+                              ?.name || '-'}
+                          </Typography>
+                        </Grid>
+                        <Grid item size={{ xs: 12 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                          >
+                            Full Location
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {[
+                              counties.find((c) => c.id === formik.values.location?.county)?.name,
+                              subcounties.find((s) => s.id === formik.values.location?.subcounty)
+                                ?.name,
+                              parishes.find((p) => p.id === formik.values.location?.parish)?.name,
+                              villages.find((v) => v.id === formik.values.location?.village)?.name,
+                            ]
+                              .filter(Boolean)
+                              .join(', ') || '-'}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Paper>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Capacity</Typography>
-                    <Typography>{formik.values.capacity || '-'}</Typography>
+
+                  {/* Amenities Card */}
+                  <Grid item size={{ xs: 12 }}>
+                    <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                      <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
+                        ✨ Amenities ({formik.values.amenities?.length || 0})
+                      </Typography>
+                      <Divider sx={{ mb: 2 }} />
+                      {formik.values.amenities?.length > 0 ? (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {formik.values.amenities.map((amenityId, idx) => (
+                            <Chip
+                              key={idx}
+                              label={amenities.find((a) => a.id === amenityId)?.name || amenityId}
+                              color="secondary"
+                              size="medium"
+                              variant="outlined"
+                              sx={{ fontWeight: 500 }}
+                            />
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No amenities selected
+                        </Typography>
+                      )}
+                    </Paper>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2">Address</Typography>
-                    <Typography>{formik.values.location.address}</Typography>
+
+                  {/* Photos Card - Full Width Row */}
+                  <Grid item size={{ xs: 12 }}>
+                    <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                      <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
+                        📸 Photos ({formik.values.images?.length || 0} / {MAX_IMAGES})
+                      </Typography>
+                      <Divider sx={{ mb: 2 }} />
+                      {formik.values.images?.length > 0 ? (
+                        <Grid container spacing={2}>
+                          {formik.values.images.map((img, idx) => (
+                            <Grid item size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={idx}>
+                              <Box
+                                sx={{
+                                  position: 'relative',
+                                  paddingTop: '100%',
+                                  borderRadius: 2,
+                                  overflow: 'hidden',
+                                  cursor: 'pointer',
+                                  border: 2,
+                                  borderColor: idx === 0 ? 'primary.main' : 'divider',
+                                  boxShadow: idx === 0 ? 3 : 1,
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    transform: 'scale(1.05)',
+                                    boxShadow: 4,
+                                    borderColor: 'primary.main',
+                                  },
+                                }}
+                                onClick={() => setPreview(URL.createObjectURL(img))}
+                              >
+                                <Box
+                                  component="img"
+                                  src={URL.createObjectURL(img)}
+                                  alt={`Space photo ${idx + 1}`}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                                {idx === 0 && (
+                                  <Chip
+                                    label="Cover"
+                                    color="primary"
+                                    size="small"
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 8,
+                                      left: 8,
+                                      fontWeight: 700,
+                                      fontSize: '0.7rem',
+                                    }}
+                                  />
+                                )}
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bgcolor: 'rgba(0,0,0,0.7)',
+                                    color: 'white',
+                                    py: 0.5,
+                                    px: 1,
+                                    textAlign: 'center',
+                                  }}
+                                >
+                                  <Typography variant="caption" fontWeight="600">
+                                    {idx + 1} / {formik.values.images.length}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      ) : (
+                        <Box
+                          sx={{
+                            textAlign: 'center',
+                            py: 4,
+                            bgcolor: 'action.hover',
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            No photos added yet
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Price</Typography>
-                    <Typography>
-                      {formik.values.price.amount} / {formik.values.price.unit}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Amenities</Typography>
-                    <Typography>{(formik.values.amenities || []).join(', ') || '-'}</Typography>
+
+                  {/* Pricing Card */}
+                  <Grid item size={{ xs: 12 }}>
+                    <Paper elevation={2} sx={{ p: 3, borderRadius: 2, mb: 4 }}>
+                      <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
+                        💰 Pricing
+                      </Typography>
+                      <Divider sx={{ mb: 2 }} />
+                      <Box sx={{ textAlign: 'center', py: 2 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            textTransform: 'uppercase',
+                            letterSpacing: 0.5,
+                            display: 'block',
+                            mb: 1,
+                          }}
+                        >
+                          Price
+                        </Typography>
+                        <Typography
+                          variant="h3"
+                          fontWeight="700"
+                          color="success.main"
+                          sx={{ mb: 1 }}
+                        >
+                          UGX {Number(formik.values.price?.amount || 0).toLocaleString()}
+                        </Typography>
+                        <Chip
+                          label={`per ${formik.values.price?.unit || '-'}`}
+                          color="primary"
+                          size="medium"
+                          sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+                        />
+                      </Box>
+                    </Paper>
                   </Grid>
                 </Grid>
-              </Paper>
+              </Box>
             )}
 
             <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
@@ -1126,20 +1404,26 @@ function NewSpacePage() {
                   gap: 2,
                 }}
               >
-                <Button variant="outlined" onClick={handleBack} disabled={activeStep === 0}>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
                   Back
                 </Button>
-                {activeStep < steps.length - 1 ? (
-                  <Button variant="contained" color="primary" onClick={handleNext}>
+                {activeStep < 5 ? (
+                  <Button type="button" variant="contained" color="primary" onClick={handleNext}>
                     Next
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type="button"
                     variant="contained"
-                    color="primary"
+                    color="success"
                     size="large"
                     disabled={!formik.isValid || loading}
+                    onClick={() => formik.handleSubmit()}
                   >
                     {loading && <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />}
                     {loading ? 'Creating...' : 'Create Listing'}
