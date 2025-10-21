@@ -1,3 +1,5 @@
+// Payment Step Component - Currently hidden in MVP
+// This component will be enabled when payment feature is ready for production
 import {
   Box,
   Typography,

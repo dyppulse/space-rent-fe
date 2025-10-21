@@ -92,3 +92,6 @@ export const useUpdateBookingStatus = () => {
     },
   })
 }
+
+// Alias for useOwnerBookings - for bookings management page
+export const useBookings = useOwnerBookings

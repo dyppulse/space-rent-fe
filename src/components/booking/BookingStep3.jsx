@@ -9,6 +9,11 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  Stack,
 } from '@mui/material'
 import EventIcon from '@mui/icons-material/Event'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
@@ -18,6 +23,10 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import PersonIcon from '@mui/icons-material/Person'
 import EmailIcon from '@mui/icons-material/Email'
 import PhoneIcon from '@mui/icons-material/Phone'
+import BusinessIcon from '@mui/icons-material/Business'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import ContactMailIcon from '@mui/icons-material/ContactMail'
+import ReceiptIcon from '@mui/icons-material/Receipt'
 
 function BookingStep3({ formik, space, durationHours, totalPrice }) {
   const formatDate = (date) => {
@@ -40,185 +49,267 @@ function BookingStep3({ formik, space, durationHours, totalPrice }) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Review Your Booking
-      </Typography>
-      <Typography variant="body2" color="text.secondary" paragraph>
-        Please review all the details before proceeding to payment.
-      </Typography>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Review Your Booking
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Please review all the details before proceeding to payment
+        </Typography>
+      </Box>
 
       <Grid container spacing={3}>
         {/* Space Information */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Space Details
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h5" color="primary" gutterBottom>
-                {space?.name}
-              </Typography>
-              <Chip
-                label={
-                  space?.spaceTypes?.length > 0
-                    ? space.spaceTypes.map((st) => st.name).join(', ')
-                    : space?.spaceType?.name || space?.spaceTypeName
-                }
-                color="primary"
-                size="small"
-                sx={{ mb: 2 }}
-              />
-            </Box>
+          <Card elevation={2} sx={{ height: '100%' }}>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                  <BusinessIcon />
+                </Avatar>
+              }
+              title="Space Details"
+              titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+            />
+            <CardContent>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h5" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
+                  {space?.name}
+                </Typography>
+                <Chip
+                  label={
+                    space?.spaceTypes?.length > 0
+                      ? space.spaceTypes.map((st) => st.name).join(', ')
+                      : space?.spaceType?.name || space?.spaceTypeName
+                  }
+                  color="primary"
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
+              </Box>
 
-            <List dense>
-              <ListItem>
-                <ListItemIcon>
-                  <LocationOnIcon color="action" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Location"
-                  secondary={space?.location?.address || 'Address not available'}
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <AttachMoneyIcon color="action" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Rate"
-                  secondary={`$${space?.price?.amount}/${space?.price?.unit}`}
-                />
-              </ListItem>
-            </List>
-          </Paper>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <LocationOnIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Location
+                    </Typography>
+                    <Typography variant="body1">
+                      {space?.location?.address || 'Address not available'}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <AttachMoneyIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Rate
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      ${space?.price?.amount}/{space?.price?.unit}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Event Information */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Event Details
-            </Typography>
+          <Card elevation={2} sx={{ height: '100%' }}>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                  <CalendarTodayIcon />
+                </Avatar>
+              }
+              title="Event Details"
+              titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+            />
+            <CardContent>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <EventIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Event Date
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {formatDate(formik.values.eventDate)}
+                    </Typography>
+                  </Box>
+                </Box>
 
-            <List dense>
-              <ListItem>
-                <ListItemIcon>
-                  <EventIcon color="action" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Event Date"
-                  secondary={formatDate(formik.values.eventDate)}
-                />
-              </ListItem>
+                {formik.values.startTime && formik.values.endTime && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <AccessTimeIcon color="primary" />
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Time
+                      </Typography>
+                      <Typography variant="body1">
+                        {formatTime(formik.values.startTime)} - {formatTime(formik.values.endTime)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
 
-              <ListItem>
-                <ListItemIcon>
-                  <AccessTimeIcon color="action" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Time"
-                  secondary={`${formatTime(formik.values.startTime)} - ${formatTime(formik.values.endTime)}`}
-                />
-              </ListItem>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <PeopleIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Guests
+                    </Typography>
+                    <Typography variant="body1">{formik.values.guests} people</Typography>
+                  </Box>
+                </Box>
 
-              <ListItem>
-                <ListItemIcon>
-                  <PeopleIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primary="Guests" secondary={`${formik.values.guests} people`} />
-              </ListItem>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <EventIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Event Type
+                    </Typography>
+                    <Typography variant="body1">
+                      {formik.values.eventType || 'Not specified'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Stack>
 
-              <ListItem>
-                <ListItemIcon>
-                  <EventIcon color="action" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Event Type"
-                  secondary={formik.values.eventType || 'Not specified'}
-                />
-              </ListItem>
-            </List>
-
-            {formik.values.specialRequests && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Special Requests:
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formik.values.specialRequests}
-                </Typography>
-              </Box>
-            )}
-          </Paper>
+              {formik.values.specialRequests && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    p: 2,
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+                    Special Requests:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formik.values.specialRequests}
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Contact Information */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Contact Information
-            </Typography>
+          <Card elevation={2} sx={{ height: '100%' }}>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: 'success.main' }}>
+                  <ContactMailIcon />
+                </Avatar>
+              }
+              title="Contact Information"
+              titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+            />
+            <CardContent>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <PersonIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Name
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {formik.values.clientName}
+                    </Typography>
+                  </Box>
+                </Box>
 
-            <List dense>
-              <ListItem>
-                <ListItemIcon>
-                  <PersonIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primary="Name" secondary={formik.values.clientName} />
-              </ListItem>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <EmailIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Email
+                    </Typography>
+                    <Typography variant="body1">{formik.values.clientEmail}</Typography>
+                  </Box>
+                </Box>
 
-              <ListItem>
-                <ListItemIcon>
-                  <EmailIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primary="Email" secondary={formik.values.clientEmail} />
-              </ListItem>
-
-              <ListItem>
-                <ListItemIcon>
-                  <PhoneIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primary="Phone" secondary={formik.values.clientPhone} />
-              </ListItem>
-            </List>
-          </Paper>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <PhoneIcon color="primary" />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Phone
+                    </Typography>
+                    <Typography variant="body1">{formik.values.clientPhone}</Typography>
+                  </Box>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Pricing Summary */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Pricing Summary
-            </Typography>
+          <Card
+            elevation={2}
+            sx={{ height: '100%', border: '2px solid', borderColor: 'primary.main' }}
+          >
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: 'warning.main' }}>
+                  <ReceiptIcon />
+                </Avatar>
+              }
+              title="Pricing Summary"
+              titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+            />
+            <CardContent>
+              <Stack spacing={2}>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <Typography variant="body1">Duration:</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    {durationHours > 0 ? `${durationHours.toFixed(1)} hours` : 'Full day'}
+                  </Typography>
+                </Box>
 
-            <Box sx={{ mb: 2 }}>
-              <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2">Duration:</Typography>
-                <Typography variant="body2">
-                  {durationHours > 0 ? `${durationHours.toFixed(1)} hours` : '0 hours'}
-                </Typography>
-              </Box>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <Typography variant="body1">Rate:</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                    ${space?.price?.amount}/{space?.price?.unit}
+                  </Typography>
+                </Box>
 
-              <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2">Rate:</Typography>
-                <Typography variant="body2">
-                  ${space?.price?.amount}/{space?.price?.unit}
-                </Typography>
-              </Box>
-            </Box>
+                <Divider sx={{ my: 1 }} />
 
-            <Divider sx={{ my: 2 }} />
-
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6">Total:</Typography>
-              <Chip
-                label={`$${totalPrice.toFixed(2)}`}
-                color="primary"
-                size="large"
-                sx={{ fontWeight: 'bold' }}
-              />
-            </Box>
-          </Paper>
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    Total:
+                  </Typography>
+                  <Chip
+                    label={`$${totalPrice.toFixed(2)}`}
+                    color="primary"
+                    size="large"
+                    sx={{
+                      fontWeight: 'bold',
+                      fontSize: '1.1rem',
+                      px: 2,
+                      py: 1,
+                    }}
+                  />
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

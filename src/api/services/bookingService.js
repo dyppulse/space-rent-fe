@@ -26,8 +26,8 @@ export const bookingService = {
   },
 
   // Update booking status
-  updateBookingStatus: async ({ id, status }) => {
-    const response = await axiosInstance.patch(`/bookings/${id}/status`, { status })
-    return response.data.updatedBooking
+  updateBookingStatus: async ({ id, status, reason }) => {
+    const response = await axiosInstance.patch(`/bookings/${id}/status`, { status, reason })
+    return response.data.booking
   },
 }

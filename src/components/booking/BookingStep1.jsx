@@ -264,15 +264,49 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
           </Grid>
 
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Special Requests"
-              multiline
-              rows={3}
-              value={formik.values.specialRequests}
-              onChange={(e) => formik.setFieldValue('specialRequests', e.target.value)}
-              placeholder="Any special requirements or requests for your event..."
-            />
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: 'background.default',
+              }}
+            >
+              <Typography variant="subtitle2" gutterBottom fontWeight="600" sx={{ mb: 1 }}>
+                Special Requests (Optional)
+              </Typography>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                Let us know about any special requirements, accessibility needs, setup preferences,
+                or additional services you'd like for your event.
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={formik.values.specialRequests}
+                onChange={(e) => formik.setFieldValue('specialRequests', e.target.value)}
+                placeholder="Example: Need tables arranged in U-shape, require projector and screen, need catering space setup, wheelchair accessibility required..."
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: 'background.paper',
+                  },
+                }}
+                helperText={
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Be as detailed as possible to help us prepare
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {formik.values.specialRequests?.length || 0} / 500 characters
+                    </Typography>
+                  </Box>
+                }
+                inputProps={{
+                  maxLength: 500,
+                }}
+              />
+            </Paper>
           </Grid>
         </Grid>
 
