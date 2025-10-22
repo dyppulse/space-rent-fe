@@ -27,6 +27,7 @@ import EmailIcon from '@mui/icons-material/Email'
 import AppleIcon from '@mui/icons-material/Apple'
 import AutorenewIcon from '@mui/icons-material/Autorenew'
 import { useAuth } from '../hooks/useAuth'
+import GoogleSignInButton from '../components/GoogleSignInButton'
 
 function LoginPage() {
   const { formik, isLoginLoading, loginError, clearLoginError } = useAuth()
@@ -204,35 +205,9 @@ function LoginPage() {
             </Typography>
           </Box>
 
-          <List disablePadding sx={{ mb: 2 }}>
-            <ListItemButton
-              dense
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <GoogleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Continue with Google" />
-            </ListItemButton>
-            <ListItemButton
-              dense
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <AppleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Continue with Apple" />
-            </ListItemButton>
-            <ListItemButton
-              dense
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 1 }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <FacebookIcon />
-              </ListItemIcon>
-              <ListItemText primary="Continue with Facebook" />
-            </ListItemButton>
-          </List>
+          <Box sx={{ mb: 2 }}>
+            <GoogleSignInButton />
+          </Box>
 
           <Divider sx={{ my: 2 }} />
           <Typography variant="caption" color="text.secondary">

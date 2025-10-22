@@ -13,6 +13,12 @@ export const authService = {
     return response.data
   },
 
+  // Google OAuth login
+  googleLogin: async (credential) => {
+    const response = await unProtectedAxiosInstance.post('/auth/google', { credential })
+    return response.data
+  },
+
   // Check authentication status
   checkAuth: async () => {
     const response = await axiosInstance.get('/auth/me')
