@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -11,13 +11,14 @@ import {
   Tabs,
   Tab,
   Divider,
+  TextField,
+  InputAdornment,
 } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import HomeIcon from '@mui/icons-material/Home'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
-import SettingsIcon from '@mui/icons-material/Settings'
-import PeopleIcon from '@mui/icons-material/People'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import SearchIcon from '@mui/icons-material/Search'
 import SpacesList from '../components/SpacesList'
 import BookingsList from '../components/BookingsList'
 
@@ -45,6 +46,7 @@ function TabPanel(props) {
 
 function DashboardPage() {
   const [tabValue, setTabValue] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
   const { isAuthenticated } = useAuth()
 
   const { data: userSpaces, isLoading: spacesLoading } = useMySpaces(isAuthenticated)
@@ -53,6 +55,47 @@ function DashboardPage() {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
   }
+
+  // Filter spaces based on search query
+  const filteredSpaces = useMemo(() => {
+    if (!searchQuery.trim() || !userSpaces) return userSpaces
+
+    const query = searchQuery.toLowerCase().trim()
+
+    return userSpaces.filter((space) => {
+      // Search in space name
+      if (space.name?.toLowerCase().includes(query)) return true
+
+      // Search in space description
+      if (space.description?.toLowerCase().includes(query)) return true
+
+      // Search in location address
+      if (space.location?.address?.toLowerCase().includes(query)) return true
+
+      // Search in region
+      if (space.location?.region?.toLowerCase().includes(query)) return true
+
+      // Search in district
+      if (space.location?.district?.toLowerCase().includes(query)) return true
+
+      // Search in space types
+      if (space.spaceTypes?.some((st) => st.name?.toLowerCase().includes(query))) return true
+      if (space.spaceType?.name?.toLowerCase().includes(query)) return true
+      if (space.spaceTypeName?.toLowerCase().includes(query)) return true
+
+      // Search in amenities
+      if (space.amenities?.some((amenity) => amenity?.toLowerCase().includes(query))) return true
+
+      // Search in capacity
+      if (space.capacity?.toString().includes(query)) return true
+
+      // Search in price
+      if (space.price?.amount?.toString().includes(query)) return true
+      if (space.price?.unit?.toLowerCase().includes(query)) return true
+
+      return false
+    })
+  }, [userSpaces, searchQuery])
 
   // Show loading state while data is being fetched
   if (spacesLoading || bookingsLoading) {
@@ -173,9 +216,21 @@ function DashboardPage() {
               <Typography variant="h4">
                 {userBookings?.filter((b) => b.status === 'confirmed')?.length || 0}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {userBookings?.filter((b) => b.status === 'pending')?.length || 0} pending requests
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">
+                  {userBookings?.filter((b) => b.status === 'pending')?.length || 0} pending
+                  requests
+                </Typography>
+                <Button
+                  component={Link}
+                  to="/dashboard/bookings"
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                >
+                  Manage Bookings
+                </Button>
+              </Box>
             </CardContent>
           </Paper>
         </Grid>
@@ -224,19 +279,63 @@ function DashboardPage() {
               label="Bookings"
               id="dashboard-tab-1"
             />
-            <Tab icon={<PeopleIcon />} iconPosition="start" label="Clients" id="dashboard-tab-2" />
-            <Tab
-              icon={<SettingsIcon />}
-              iconPosition="start"
-              label="Settings"
-              id="dashboard-tab-3"
-            />
           </Tabs>
         </Box>
 
         <TabPanel value={tabValue} index={0}>
           {userSpaces?.length > 0 ? (
-            <SpacesList spaces={userSpaces || []} />
+            <Box>
+              {/* Search Input */}
+              <Box sx={{ mb: 3 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Search spaces by name, location, type, amenities, capacity, price..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'background.paper',
+                    },
+                  }}
+                />
+              </Box>
+
+              {/* Results info */}
+              {searchQuery && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Found {filteredSpaces?.length || 0} space
+                    {filteredSpaces?.length !== 1 ? 's' : ''} matching "{searchQuery}"
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Spaces List */}
+              {filteredSpaces?.length > 0 ? (
+                <SpacesList spaces={filteredSpaces} />
+              ) : (
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="h6" gutterBottom>
+                    No spaces found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    No spaces match your search criteria. Try adjusting your search.
+                  </Typography>
+                  {searchQuery && (
+                    <Button variant="outlined" onClick={() => setSearchQuery('')} sx={{ mt: 1 }}>
+                      Clear Search
+                    </Button>
+                  )}
+                </Paper>
+              )}
+            </Box>
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>
@@ -260,47 +359,95 @@ function DashboardPage() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          {userBookings?.length > 0 ? (
-            <BookingsList bookings={userBookings} spaces={userSpaces} />
-          ) : (
-            <Paper sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h6" gutterBottom>
-                No bookings yet
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                You don't have any bookings for your spaces yet.
-              </Typography>
-            </Paper>
-          )}
-        </TabPanel>
+          {/* Bookings Management Card */}
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <CalendarTodayIcon color="primary" sx={{ fontSize: 32 }} />
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Bookings Management
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage all your space bookings, accept/decline requests, and track status
+                </Typography>
+              </Box>
+            </Box>
 
-        <TabPanel value={tabValue} index={2}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Client Management
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              View and manage your clients.
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body1">
-              Client management features will be available in the next update.
-            </Typography>
-          </Paper>
-        </TabPanel>
+            {/* Quick Stats */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={6} sm={3}>
+                <Box
+                  sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                    {userBookings?.filter((b) => b.status === 'pending')?.length || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Pending
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box
+                  sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                    {userBookings?.filter((b) => b.status === 'confirmed')?.length || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Confirmed
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box
+                  sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                    {userBookings?.filter((b) => b.status === 'completed')?.length || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Completed
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Box
+                  sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    {userBookings?.length || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Total
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
 
-        <TabPanel value={tabValue} index={3}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Account Settings
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage your account settings and preferences.
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body1">
-              Account settings will be available in the next update.
-            </Typography>
+            {/* Action Buttons */}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Button
+                component={Link}
+                to="/dashboard/bookings"
+                variant="contained"
+                color="primary"
+                size="large"
+                sx={{ px: 3 }}
+              >
+                Manage All Bookings
+              </Button>
+              <Button
+                component={Link}
+                to="/dashboard/bookings?filter=pending"
+                variant="outlined"
+                color="warning"
+                size="large"
+                disabled={!userBookings?.filter((b) => b.status === 'pending')?.length}
+              >
+                Review Pending ({userBookings?.filter((b) => b.status === 'pending')?.length || 0})
+              </Button>
+            </Box>
           </Paper>
         </TabPanel>
       </Box>

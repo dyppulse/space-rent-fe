@@ -29,6 +29,7 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
+import BookOnlineIcon from '@mui/icons-material/BookOnline'
 import ConfirmDialog from './ConfirmDialog'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -93,6 +94,7 @@ function Header({ onToggleTheme, mode }) {
   // Create navLinks dynamically based on auth state
   const navLinks = [
     { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
+    ...(isLoggedIn && !isAdmin ? [{ name: 'Bookings', path: '/dashboard/bookings' }] : []),
     { name: 'Explore', path: '/spaces' },
     { name: 'How It Works', path: '/how-it-works' },
   ]
@@ -515,6 +517,17 @@ function Header({ onToggleTheme, mode }) {
         >
           <DashboardIcon fontSize="small" />
           Dashboard
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            handleMenuClose()
+            navigate('/dashboard/bookings')
+          }}
+          sx={{ py: 1.5, gap: 1.5 }}
+        >
+          <BookOnlineIcon fontSize="small" />
+          Bookings
         </MenuItem>
 
         {isAdmin && (

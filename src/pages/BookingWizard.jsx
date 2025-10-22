@@ -22,16 +22,24 @@ import BookingStep1 from '../components/booking/BookingStep1'
 import BookingStep2 from '../components/booking/BookingStep2'
 import BookingStep3 from '../components/booking/BookingStep3'
 import BookingStep4 from '../components/booking/BookingStep4'
+import BookingSuccessModal from '../components/booking/BookingSuccessModal'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 
-const steps = ['Event Details', 'Contact Information', 'Review & Confirm', 'Payment']
+// MVP: Hide payment step for now, will be enabled in future release
+// TODO: Set PAYMENT_STEP_ENABLED = true when payment feature is ready for production
+const PAYMENT_STEP_ENABLED = false
+
+const allSteps = ['Event Details', 'Contact Information', 'Review & Confirm', 'Payment']
+const steps = PAYMENT_STEP_ENABLED ? allSteps : allSteps.slice(0, -1) // Remove 'Payment' step for MVP
 
 function BookingWizard() {
   const { id: spaceId } = useParams()
   const navigate = useNavigate()
   const [activeStep, setActiveStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState({})
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [bookingData, setBookingData] = useState(null)
   // Snackbar state for future use
   // const [snackbarOpen, setSnackbarOpen] = useState(false)
   // const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -117,10 +125,8 @@ function BookingWizard() {
         createBooking(bookingData, {
           onSuccess: () => {
             console.log('Booking created successfully!')
-            // Navigate to success page or back to space
-            setTimeout(() => {
-              navigate(`/spaces/${spaceId}`)
-            }, 2000)
+            setBookingData({ ...values, totalPrice })
+            setShowSuccessModal(true)
           },
           onError: (error) => {
             console.error('Failed to create booking:', error)
@@ -298,6 +304,12 @@ function BookingWizard() {
     return Object.keys(getStepErrors(step)).length === 0
   }
 
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false)
+    setBookingData(null)
+    navigate('/dashboard')
+  }
+
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
@@ -321,7 +333,10 @@ function BookingWizard() {
           />
         )
       case 3:
-        return <BookingStep4 formik={formik} space={space} totalPrice={totalPrice} />
+        // Payment step - only render if enabled
+        return PAYMENT_STEP_ENABLED ? (
+          <BookingStep4 formik={formik} space={space} totalPrice={totalPrice} />
+        ) : null
       default:
         return null
     }
@@ -477,6 +492,14 @@ function BookingWizard() {
           </Box>
         </Container>
       </Box>
+
+      {/* Success Modal */}
+      <BookingSuccessModal
+        open={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        bookingData={bookingData}
+        spaceData={space}
+      />
     </Dialog>
   )
 }

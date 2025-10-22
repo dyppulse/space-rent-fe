@@ -2,6 +2,7 @@ import { Box, Grid, TextField, Typography, InputAdornment } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import EmailIcon from '@mui/icons-material/Email'
 import PhoneIcon from '@mui/icons-material/Phone'
+// Updated to make each field take its own row
 
 function BookingStep2({ formik }) {
   return (
@@ -13,62 +14,56 @@ function BookingStep2({ formik }) {
         We'll use this information to confirm your booking and send you updates.
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Full Name"
-            value={formik.values.clientName}
-            onChange={(e) => formik.setFieldValue('clientName', e.target.value)}
-            error={!!formik.errors.clientName}
-            helperText={formik.errors.clientName}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <TextField
+          fullWidth
+          label="Full Name"
+          value={formik.values.clientName}
+          onChange={(e) => formik.setFieldValue('clientName', e.target.value)}
+          error={!!formik.errors.clientName}
+          helperText={formik.errors.clientName}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <PersonIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Email Address"
-            type="email"
-            value={formik.values.clientEmail}
-            onChange={(e) => formik.setFieldValue('clientEmail', e.target.value)}
-            error={!!formik.errors.clientEmail}
-            helperText={formik.errors.clientEmail}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+        <TextField
+          fullWidth
+          label="Email Address"
+          type="email"
+          value={formik.values.clientEmail}
+          onChange={(e) => formik.setFieldValue('clientEmail', e.target.value)}
+          error={!!formik.errors.clientEmail}
+          helperText={formik.errors.clientEmail}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <EmailIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Phone Number"
-            value={formik.values.clientPhone}
-            onChange={(e) => formik.setFieldValue('clientPhone', e.target.value)}
-            error={!!formik.errors.clientPhone}
-            helperText={formik.errors.clientPhone}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PhoneIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-      </Grid>
+        <TextField
+          fullWidth
+          label="Phone Number"
+          value={formik.values.clientPhone}
+          onChange={(e) => formik.setFieldValue('clientPhone', e.target.value)}
+          error={!!formik.errors.clientPhone}
+          helperText={formik.errors.clientPhone}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <PhoneIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
     </Box>
   )
 }

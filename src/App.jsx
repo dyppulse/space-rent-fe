@@ -16,6 +16,7 @@ import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import NewSpacePage from './pages/NewSpacePage'
 import EditSpace from './pages/EditSpace'
+import BookingsManagementPage from './pages/BookingsManagementPage'
 import HowItWorksPage from './pages/HowItWorksPage'
 import NotFound from './pages/NotFound'
 import WorkInProgress from './pages/WorkInProgress'
@@ -164,6 +165,14 @@ function AppContent({ toggleTheme, mode }) {
             element={
               <PrivateRoute redirectTo="/auth/login">
                 <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/bookings"
+            element={
+              <PrivateRoute redirectTo="/auth/login">
+                <BookingsManagementPage />
               </PrivateRoute>
             }
           />
