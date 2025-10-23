@@ -112,8 +112,8 @@ function AppContent({ toggleTheme, mode }) {
 
   return (
     <div className="App">
-      <Header onToggleTheme={toggleTheme} mode={mode} />
-      <main>
+      {!isAdminRoute && <Header onToggleTheme={toggleTheme} mode={mode} />}
+      <main style={{ marginTop: isAdminRoute ? 0 : 'auto' }}>
         <Routes>
           {/* Public Routes - Available to all users */}
           <Route path="/" element={<HomePage />} />

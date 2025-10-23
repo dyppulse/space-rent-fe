@@ -201,7 +201,12 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
                 }
               }}
               error={!!formik.errors.guests}
-              helperText={formik.errors.guests || 'Minimum 1 guest required'}
+              helperText={
+                formik.errors.guests ||
+                (formik.values.guests > (space?.capacity || 1000)
+                  ? `⚠️ This venue can only accommodate ${space?.capacity || 1000} guests. Please reduce the number of guests.`
+                  : `Minimum 1 guest, maximum ${space?.capacity || 1000} guests (venue capacity)`)
+              }
               sx={{
                 '& input[type=number]': {
                   MozAppearance: 'textfield',
@@ -213,6 +218,26 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
                 '& input[type=number]::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
+                },
+                '& .MuiInputBase-input': {
+                  textAlign: 'center',
+                },
+                '& .MuiFormHelperText-root': {
+                  color:
+                    formik.values.guests > (space?.capacity || 1000) ? 'warning.main' : 'inherit',
+                  fontWeight: formik.values.guests > (space?.capacity || 1000) ? 600 : 'inherit',
+                },
+                '& .MuiOutlinedInput-root': {
+                  borderColor:
+                    formik.values.guests > (space?.capacity || 1000) ? 'warning.main' : 'inherit',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      formik.values.guests > (space?.capacity || 1000) ? 'warning.main' : 'inherit',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      formik.values.guests > (space?.capacity || 1000) ? 'warning.main' : 'inherit',
+                  },
                 },
               }}
               InputProps={{
@@ -247,8 +272,16 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
                           formik.setFieldValue('guests', currentValue + 1)
                         }}
                         sx={{
-                          bgcolor: 'action.hover',
-                          '&:hover': { bgcolor: 'action.selected' },
+                          bgcolor:
+                            formik.values.guests >= (space?.capacity || 1000)
+                              ? 'warning.light'
+                              : 'action.hover',
+                          '&:hover': {
+                            bgcolor:
+                              formik.values.guests >= (space?.capacity || 1000)
+                                ? 'warning.main'
+                                : 'action.selected',
+                          },
                         }}
                       >
                         <AddIcon fontSize="small" />
@@ -353,6 +386,16 @@ function BookingStep1({ formik, space, durationHours, totalPrice }) {
                   {space?.spaceTypes?.length > 0
                     ? space.spaceTypes.map((st) => st.name).join(', ')
                     : space?.spaceType?.name || 'N/A'}
+                </Typography>
+              </Box>
+
+              {/* Venue Capacity */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Venue Capacity
+                </Typography>
+                <Typography variant="body2" fontWeight="500">
+                  {space?.capacity || 'N/A'} {space?.capacity === 1 ? 'person' : 'people'}
                 </Typography>
               </Box>
 

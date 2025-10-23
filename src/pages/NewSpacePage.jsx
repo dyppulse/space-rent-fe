@@ -569,6 +569,9 @@ function NewSpacePage() {
                           WebkitAppearance: 'none',
                           margin: 0,
                         },
+                        '& .MuiInputBase-input': {
+                          textAlign: 'center',
+                        },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -961,6 +964,9 @@ function NewSpacePage() {
                         '& input[type=number]::-webkit-inner-spin-button': {
                           WebkitAppearance: 'none',
                           margin: 0,
+                        },
+                        '& .MuiInputBase-input': {
+                          textAlign: 'center',
                         },
                       }}
                       InputProps={{

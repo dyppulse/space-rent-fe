@@ -104,7 +104,7 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
               sx={{
                 '&.Mui-selected': {
                   backgroundColor: 'primary.main',
-                  color: 'white',
+                  color: 'black',
                   '&:hover': {
                     backgroundColor: 'primary.dark',
                   },
@@ -113,7 +113,7 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
             >
               <ListItemIcon
                 sx={{
-                  color: location.pathname === item.path ? 'white' : 'inherit',
+                  color: location.pathname === item.path ? 'black' : 'inherit',
                 }}
               >
                 {item.icon}

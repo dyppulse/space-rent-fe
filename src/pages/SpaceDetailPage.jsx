@@ -197,7 +197,7 @@ function SpaceDetailPage() {
         {/* Right column - Booking form */}
         {space?.owner !== user?.userId && (
           <Grid item size={{ xs: 12, md: 4 }}>
-            <Box sx={{ position: { md: 'sticky' }, top: 24 }}>
+            <Box sx={{ position: { md: 'sticky' }, top: 88 }}>
               <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h5" gutterBottom>
                   Book this space

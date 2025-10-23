@@ -387,6 +387,11 @@ function EditSpace() {
                 error={formik.errors.price?.amount}
                 helperText={formik.errors.price?.amount}
                 {...formik.getFieldProps('price.amount')}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'center',
+                  },
+                }}
               />
             </Grid>
 
