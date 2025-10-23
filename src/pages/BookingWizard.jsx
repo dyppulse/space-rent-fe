@@ -60,6 +60,49 @@ function BookingWizard() {
     spaceKeys: space ? Object.keys(space) : 'no space object',
   })
 
+  // Create validation schema with dynamic capacity
+  const validationSchema = useMemo(
+    () =>
+      Yup.object({
+        // Event details validation
+        bookingType: Yup.string().required('Booking type is required'),
+        eventDate: Yup.date().when('bookingType', {
+          is: 'single',
+          then: (schema) => schema.required('Event date is required'),
+          otherwise: (schema) => schema.nullable(),
+        }),
+        startTime: Yup.date().nullable(),
+        endTime: Yup.date().nullable(),
+        checkInDate: Yup.date().when('bookingType', {
+          is: 'multi',
+          then: (schema) => schema.required('Check-in date is required'),
+          otherwise: (schema) => schema.nullable(),
+        }),
+        checkOutDate: Yup.date().when('bookingType', {
+          is: 'multi',
+          then: (schema) => schema.required('Check-out date is required'),
+          otherwise: (schema) => schema.nullable(),
+        }),
+        guests: Yup.number()
+          .min(1, 'At least 1 guest required')
+          .test(
+            'capacity-check',
+            `This venue can only accommodate ${space?.capacity || 1000} guests`,
+            function (value) {
+              return !value || value <= (space?.capacity || 1000)
+            }
+          )
+          .required('Number of guests is required'),
+        eventType: Yup.string().required('Event type is required'),
+
+        // Contact validation
+        clientName: Yup.string().required('Full name is required'),
+        clientEmail: Yup.string().email('Invalid email').required('Email is required'),
+        clientPhone: Yup.string().required('Phone number is required'),
+      }),
+    [space?.capacity]
+  )
+
   const formik = useFormik({
     initialValues: {
       // Event details
@@ -82,36 +125,7 @@ function BookingWizard() {
       paymentMethod: 'cash', // Default to cash for now
       mobileMoneyPhone: '', // For mobile money payments
     },
-    validationSchema: Yup.object({
-      // Event details validation
-      bookingType: Yup.string().required('Booking type is required'),
-      eventDate: Yup.date().when('bookingType', {
-        is: 'single',
-        then: (schema) => schema.required('Event date is required'),
-        otherwise: (schema) => schema.nullable(),
-      }),
-      startTime: Yup.date().nullable(),
-      endTime: Yup.date().nullable(),
-      checkInDate: Yup.date().when('bookingType', {
-        is: 'multi',
-        then: (schema) => schema.required('Check-in date is required'),
-        otherwise: (schema) => schema.nullable(),
-      }),
-      checkOutDate: Yup.date().when('bookingType', {
-        is: 'multi',
-        then: (schema) => schema.required('Check-out date is required'),
-        otherwise: (schema) => schema.nullable(),
-      }),
-      guests: Yup.number()
-        .min(1, 'At least 1 guest required')
-        .required('Number of guests is required'),
-      eventType: Yup.string().required('Event type is required'),
-
-      // Contact validation
-      clientName: Yup.string().required('Full name is required'),
-      clientEmail: Yup.string().email('Invalid email').required('Email is required'),
-      clientPhone: Yup.string().required('Phone number is required'),
-    }),
+    validationSchema,
     onSubmit: async (values) => {
       try {
         const bookingData = {
@@ -242,6 +256,8 @@ function BookingWizard() {
         if (!values.bookingType) errors.bookingType = 'Required'
         if (!values.eventType) errors.eventType = 'Required'
         if (values.guests < 1) errors.guests = 'At least 1 guest required'
+        if (values.guests > (space?.capacity || 1000))
+          errors.guests = `Maximum ${space?.capacity || 1000} guests allowed for this venue`
 
         if (values.bookingType === 'single') {
           if (!values.eventDate) errors.eventDate = 'Required'

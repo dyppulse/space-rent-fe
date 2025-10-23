@@ -375,7 +375,7 @@ function DashboardPage() {
 
             {/* Quick Stats */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={2.4}>
                 <Box
                   sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
                 >
@@ -387,7 +387,7 @@ function DashboardPage() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={2.4}>
                 <Box
                   sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
                 >
@@ -399,7 +399,7 @@ function DashboardPage() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={2.4}>
                 <Box
                   sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
                 >
@@ -411,7 +411,19 @@ function DashboardPage() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={2.4}>
+                <Box
+                  sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                    {userBookings?.filter((b) => b.status === 'declined')?.length || 0}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Declined
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={2.4}>
                 <Box
                   sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
                 >

@@ -22,7 +22,7 @@ import * as Yup from 'yup'
 import { useCreateBooking } from '../api/queries/bookingQueries'
 import { differenceInMinutes } from 'date-fns'
 
-function BookingForm({ spaceId, price, priceUnit }) {
+function BookingForm({ spaceId, price, priceUnit, capacity }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const { mutate: createBooking, isPending: isBookingLoading } = useCreateBooking()
 
@@ -51,7 +51,15 @@ function BookingForm({ spaceId, price, priceUnit }) {
         priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
       endTime:
         priceUnit === 'hour' ? Yup.date().required('Required').nullable() : Yup.date().nullable(),
-      guests: Yup.number().min(1).max(50),
+      guests: Yup.number()
+        .min(1, 'At least 1 guest required')
+        .test(
+          'capacity-check',
+          `This venue can only accommodate ${capacity || 50} guests`,
+          function (value) {
+            return !value || value <= (capacity || 50)
+          }
+        ),
     }),
     onSubmit: async (values, { resetForm }) => {
       createBooking({
