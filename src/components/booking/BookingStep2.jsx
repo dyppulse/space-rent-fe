@@ -1,7 +1,7 @@
 import { Box, Grid, TextField, Typography, InputAdornment } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import EmailIcon from '@mui/icons-material/Email'
-import PhoneInputFormik from '../../PhoneInput'
+import PhoneInputFormik from '../PhoneInput'
 
 function BookingStep2({ formik }) {
   return (
