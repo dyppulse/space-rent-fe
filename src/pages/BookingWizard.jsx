@@ -98,7 +98,12 @@ function BookingWizard() {
         // Contact validation
         clientName: Yup.string().required('Full name is required'),
         clientEmail: Yup.string().email('Invalid email').required('Email is required'),
-        clientPhone: Yup.string().required('Phone number is required'),
+        clientPhone: Yup.string()
+          .required('Phone number is required')
+          .test('is-valid-phone', 'Please enter a valid phone number', (value) => {
+            if (!value) return false
+            return value.startsWith('+') && value.length > 10
+          }),
       }),
     [space?.capacity]
   )

@@ -21,6 +21,7 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useCreateBooking } from '../api/queries/bookingQueries'
 import { differenceInMinutes } from 'date-fns'
+import PhoneInputFormik from './PhoneInput'
 
 function BookingForm({ spaceId, price, priceUnit, capacity }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -136,18 +137,15 @@ function BookingForm({ spaceId, price, priceUnit, capacity }) {
               error={formik.touched.clientEmail && Boolean(formik.errors.clientEmail)}
               helperText={formik.touched.clientEmail && formik.errors.clientEmail}
             />
-            <TextField
-              size="small"
-              label="Phone"
-              name="clientPhone"
-              fullWidth
-              placeholder="0700000000"
-              value={formik.values.clientPhone}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.clientPhone && Boolean(formik.errors.clientPhone)}
-              helperText={formik.touched.clientPhone && formik.errors.clientPhone}
-            />
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{ mb: 1, color: 'text.secondary', fontSize: '0.875rem' }}
+              >
+                Phone
+              </Typography>
+              <PhoneInputFormik formik={formik} formikValue="clientPhone" defaultCountry="UG" />
+            </Box>
           </Box>
         </Box>
 

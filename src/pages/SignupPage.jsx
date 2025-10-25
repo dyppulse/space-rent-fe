@@ -138,7 +138,7 @@ function SignupPage() {
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
-          <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} />
+          <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} size="small" />
           <TextField
             margin="normal"
             size="small"
