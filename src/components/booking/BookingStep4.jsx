@@ -20,6 +20,7 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '../../api/axiosInstance'
+import PhoneInputFormik from '../PhoneInput'
 
 function BookingStep4({ formik, space, totalPrice }) {
   // Fetch available payment methods from backend
@@ -145,21 +146,21 @@ function BookingStep4({ formik, space, totalPrice }) {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                placeholder="256XXXXXXXXX or 0XXXXXXXXX"
-                value={formik.values.mobileMoneyPhone || ''}
-                onChange={(e) => formik.setFieldValue('mobileMoneyPhone', e.target.value)}
-                helperText="Enter your mobile money registered phone number"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneAndroidIcon />
-                    </InputAdornment>
-                  ),
-                }}
+              <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                Phone Number
+              </Typography>
+              <PhoneInputFormik
+                formik={formik}
+                formikValue="mobileMoneyPhone"
+                defaultCountry="UG"
               />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, display: 'block' }}
+              >
+                Enter your mobile money registered phone number
+              </Typography>
             </Grid>
           </Grid>
           <Alert severity="info" sx={{ mt: 2 }}>

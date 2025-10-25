@@ -97,8 +97,9 @@ function SignupPage() {
   }
 
   const formik = useFormik({
-    validateOnChange: true,
-    validateOnMount: true,
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: {
       fullName: '',
       email: '',
@@ -138,7 +139,7 @@ function SignupPage() {
             helperText={formik.errors.fullName}
             error={formik.errors.fullName}
           />
-          <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} />
+          <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} size="small" />
           <TextField
             margin="normal"
             size="small"

@@ -23,6 +23,7 @@ function HomePage() {
   const { data: spacesData, isLoading: loading } = useSpaces()
   const { isLoading: authLoading } = useAuth()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Rotate background images every 8 seconds
   useEffect(() => {
@@ -41,6 +42,20 @@ function HomePage() {
 
     // Navigate to new space page - PrivateRoute will handle auth and redirects
     navigate('/dashboard/spaces/new')
+  }
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/spaces?search=${encodeURIComponent(searchTerm.trim())}`)
+    } else {
+      navigate('/spaces')
+    }
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
   }
   return (
     <Box>
@@ -95,6 +110,9 @@ function HomePage() {
                 placeholder="Search by location or venue type"
                 variant="outlined"
                 fullWidth
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -109,6 +127,7 @@ function HomePage() {
               <Button
                 variant="contained"
                 color="primary"
+                onClick={handleSearch}
                 sx={{
                   px: 4,
                   height: { xs: 40, sm: 'auto' },

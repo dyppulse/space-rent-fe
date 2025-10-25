@@ -138,6 +138,7 @@ function Header({ onToggleTheme, mode }) {
                 width: 32,
                 height: 32,
                 bgcolor: 'primary.main',
+                color: 'white',
                 fontSize: '0.875rem',
                 fontWeight: 700,
               }}
@@ -405,6 +406,7 @@ function Header({ onToggleTheme, mode }) {
                         width: 36,
                         height: 36,
                         bgcolor: 'primary.main',
+                        color: 'white',
                         fontWeight: 700,
                         boxShadow: 2,
                       }}

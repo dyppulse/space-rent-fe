@@ -10,6 +10,9 @@ export const useAuth = () => {
   const [loginError, setLoginError] = useState(null)
 
   const formik = useFormik({
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: {
       email: '',
       password: '',

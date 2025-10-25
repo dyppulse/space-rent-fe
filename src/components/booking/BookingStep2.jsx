@@ -1,8 +1,7 @@
 import { Box, Grid, TextField, Typography, InputAdornment } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import EmailIcon from '@mui/icons-material/Email'
-import PhoneIcon from '@mui/icons-material/Phone'
-// Updated to make each field take its own row
+import PhoneInputFormik from '../PhoneInput'
 
 function BookingStep2({ formik }) {
   return (
@@ -48,21 +47,12 @@ function BookingStep2({ formik }) {
           }}
         />
 
-        <TextField
-          fullWidth
-          label="Phone Number"
-          value={formik.values.clientPhone}
-          onChange={(e) => formik.setFieldValue('clientPhone', e.target.value)}
-          error={!!formik.errors.clientPhone}
-          helperText={formik.errors.clientPhone}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <PhoneIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box>
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+            Phone Number
+          </Typography>
+          <PhoneInputFormik formik={formik} formikValue="clientPhone" defaultCountry="UG" />
+        </Box>
       </Box>
     </Box>
   )

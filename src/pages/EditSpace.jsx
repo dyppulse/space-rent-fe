@@ -89,8 +89,8 @@ function EditSpace() {
     initialValues: { ...space, imagesToremove: [] },
     validationSchema,
     validateOnBlur: true,
-    validateOnChange: true,
-    validateOnMount: true,
+    validateOnChange: false,
+    validateOnMount: false,
     enableReinitialize: true,
     onSubmit: (values) => {
       console.log(values, 'sjdkjdkdjkdjk')

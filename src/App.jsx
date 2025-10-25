@@ -39,10 +39,31 @@ const getDesignTokens = (mode) => ({
   palette: {
     mode,
     primary: {
-      main: mode === 'light' ? '#10b981' : '#6ee7b7',
+      main: mode === 'light' ? '#238636' : '#4caf50',
+      light: '#51c765',
+      dark: '#1a5f28',
+      contrastText: '#ffffff',
     },
     secondary: {
       main: '#dc004e',
+    },
+    success: {
+      main: '#238636',
+      light: '#51c765',
+      dark: '#1a5f28',
+      contrastText: '#ffffff',
+    },
+    info: {
+      main: '#2196f3',
+      contrastText: '#ffffff',
+    },
+    warning: {
+      main: '#ff9800',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#f44336',
+      contrastText: '#ffffff',
     },
     background: {
       default: mode === 'light' ? '#fafafa' : '#121212',
@@ -96,6 +117,30 @@ const getDesignTokens = (mode) => ({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          color: '#ffffff !important',
+          '&:hover': {
+            backgroundColor: '#1a5f28 !important',
+          },
+        },
+        containedPrimary: {
+          backgroundColor: mode === 'light' ? '#238636' : '#4caf50',
+          color: '#ffffff !important',
+          '&:hover': {
+            backgroundColor: '#1a5f28 !important',
+          },
+        },
+        containedSuccess: {
+          backgroundColor: '#238636',
+          color: '#ffffff !important',
+          '&:hover': {
+            backgroundColor: '#1a5f28 !important',
+          },
         },
       },
     },
