@@ -109,6 +109,9 @@ function BookingWizard() {
   )
 
   const formik = useFormik({
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: {
       // Event details
       bookingType: 'single', // Default to single day

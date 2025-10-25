@@ -42,6 +42,9 @@ import axiosInstance from '../../api/axiosInstance'
 
 const UserForm = ({ open, onClose, onSubmit, initialValues, isEditing }) => {
   const formik = useFormik({
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: initialValues || {
       name: '',
       email: '',

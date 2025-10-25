@@ -97,8 +97,9 @@ function SignupPage() {
   }
 
   const formik = useFormik({
-    validateOnChange: true,
-    validateOnMount: true,
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: {
       fullName: '',
       email: '',

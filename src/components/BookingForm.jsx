@@ -28,6 +28,9 @@ function BookingForm({ spaceId, price, priceUnit, capacity }) {
   const { mutate: createBooking, isPending: isBookingLoading } = useCreateBooking()
 
   const formik = useFormik({
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: {
       clientName: '',
       clientEmail: '',

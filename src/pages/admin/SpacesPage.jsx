@@ -46,6 +46,9 @@ import axiosInstance from '../../api/axiosInstance'
 
 const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }) => {
   const formik = useFormik({
+    validateOnChange: false,
+    validateOnBlur: true,
+    validateOnMount: false,
     initialValues: initialValues || {
       name: '',
       description: '',
@@ -569,8 +572,8 @@ const SpacesPage = () => {
                   </TableCell>
                   <TableCell>
                     {typeof space.price === 'object'
-                      ? `${space.price.amount || 'N/A'} ${space.price.unit || ''}/hr`
-                      : `$${space.price}/hr`}
+                      ? `UGX ${space.price.amount?.toLocaleString() || 'N/A'}/${space.price.unit || 'hr'}`
+                      : `UGX ${space.price?.toLocaleString() || 'N/A'}/hr`}
                   </TableCell>
                   <TableCell>
                     <Chip

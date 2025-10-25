@@ -238,8 +238,8 @@ function NewSpacePage() {
     },
     validationSchema,
     validateOnBlur: true,
-    validateOnChange: true,
-    validateOnMount: true,
+    validateOnChange: false,
+    validateOnMount: false,
     onSubmit: (values) => {
       if (!formik.isValid) {
         setToast({
