@@ -24,13 +24,17 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import SpaceGrid from '../components/SpaceGrid'
 import SpacesList from '../components/SpacesList'
 import { useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useSpaces } from '../api/queries/spaceQueries'
 import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 
 function SpacesPage() {
+  const [searchParams] = useSearchParams()
+  const urlSearchTerm = searchParams.get('search') || ''
+
   const [viewMode, setViewMode] = useState('grid')
   const [priceRange, setPriceRange] = useState([0, 10000000])
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(urlSearchTerm)
   const [spaceType, setSpaceType] = useState('all')
   const [sort, setSort] = useState('recommended')
   const [capacity, setCapacity] = useState('any')
@@ -41,6 +45,11 @@ function SpacesPage() {
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showLocationPicker, setShowLocationPicker] = useState(false)
   const [showDetailedFilters, setShowDetailedFilters] = useState(true)
+
+  // Update search term when URL parameter changes
+  useEffect(() => {
+    setSearchTerm(urlSearchTerm)
+  }, [urlSearchTerm])
 
   const { data: spacesData, isLoading: loading } = useSpaces({
     search: searchTerm,
