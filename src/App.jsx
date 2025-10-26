@@ -14,6 +14,7 @@ import BookingWizard from './pages/BookingWizard'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
+import DashboardWrapper from './components/DashboardWrapper'
 import NewSpacePage from './pages/NewSpacePage'
 import EditSpace from './pages/EditSpace'
 import BookingsManagementPage from './pages/BookingsManagementPage'
@@ -209,7 +210,7 @@ function AppContent({ toggleTheme, mode }) {
             path="/dashboard"
             element={
               <PrivateRoute redirectTo="/auth/login">
-                <DashboardPage />
+                <DashboardWrapper />
               </PrivateRoute>
             }
           />

@@ -1,10 +1,16 @@
-import axiosInstance, { unProtectedAxiosInstance } from '../axiosInstance'
+import axiosInstance from '../axiosInstance'
 
 export const bookingService = {
-  // Create new booking
+  // Create new booking (now requires authentication)
   createBooking: async (bookingData) => {
-    const response = await unProtectedAxiosInstance.post('/bookings', bookingData)
+    const response = await axiosInstance.post('/bookings', bookingData)
     return response.data
+  },
+
+  // Get user bookings (for regular clients)
+  getUserBookings: async () => {
+    const response = await axiosInstance.get('/bookings/user')
+    return response.data.bookings
   },
 
   // Get owner bookings

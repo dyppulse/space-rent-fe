@@ -78,8 +78,14 @@ function SignupPage() {
         phone: e164,
       })
 
-      // Success case
-      navigate('/dashboard')
+      // Success case - check if there's an intended space to book
+      const intendedSpaceId = localStorage.getItem('intendedSpaceId')
+      if (intendedSpaceId) {
+        localStorage.removeItem('intendedSpaceId')
+        navigate(`/spaces/${intendedSpaceId}/book`)
+      } else {
+        navigate('/dashboard')
+      }
       setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
     } catch (error) {
       // Extract error message from backend response
