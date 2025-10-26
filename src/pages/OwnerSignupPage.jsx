@@ -6,34 +6,27 @@ import {
   TextField,
   Button,
   Paper,
-  Divider,
-  Grid,
-  Checkbox,
-  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
 } from '@mui/material'
-import { IconButton, InputAdornment } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
-import CircularProgress from '@mui/material/CircularProgress'
-import GoogleIcon from '@mui/icons-material/Google'
-import FacebookIcon from '@mui/icons-material/Facebook'
 import AutorenewIcon from '@mui/icons-material/Autorenew'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import PhoneInputFormik from '../components/PhoneInput'
 import { useAuth } from '../contexts/AuthContext'
-
-import { Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from '@mui/material'
+import { Snackbar, Alert, FormControlLabel, Checkbox } from '@mui/material'
 import { useState } from 'react'
 
-function SignupPage() {
-  const [open, setOpen] = useState(false)
+function OwnerSignupPage() {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const navigate = useNavigate()
-  const { signup, isSignupLoading } = useAuth()
+  const { signupOwner, isSignupOwnerLoading } = useAuth()
 
   const validationSchema = yup.object({
     fullName: yup.string().required('Required').min(5, 'At least 5 characters'),
@@ -50,45 +43,27 @@ function SignupPage() {
       .string()
       .required('required')
       .oneOf([yup.ref('password'), null], 'Passwords must match'),
-    country: yup.object().nullable().required('Select your country'),
     phoneNumber: yup
       .string()
       .required('Required')
-      .matches(/^\d+$/, 'Phone number must be digits only')
-      .test('e164-length', 'Invalid phone number', function (value) {
-        const { country } = this.parent || {}
-        const dial = (country?.phone || '').replace(/\D/g, '')
-        const local = (value || '').replace(/\D/g, '')
-        const total = `${dial}${local}`
-        return total.length >= 8 && total.length <= 15
+      .test('is-valid-phone', 'Please enter a valid phone number', (value) => {
+        if (!value) return false
+        return value.startsWith('+') && value.length > 10
       }),
   })
 
   const handleSignup = async (values) => {
     try {
-      const dial = values?.country?.phone || ''
-      const local = (values?.phoneNumber || '').replace(/\D/g, '')
-      const combined = `${dial}${local}`
-      const e164 = combined.startsWith('+') ? combined : `+${dial}${local}`
-
-      await signup({
+      await signupOwner({
         name: values?.fullName,
         email: values?.email,
         password: values?.password,
-        phone: e164,
+        phone: values.phoneNumber,
       })
 
-      // Success case - check if there's an intended space to book
-      const intendedSpaceId = localStorage.getItem('intendedSpaceId')
-      if (intendedSpaceId) {
-        localStorage.removeItem('intendedSpaceId')
-        navigate(`/spaces/${intendedSpaceId}/book`)
-      } else {
-        navigate('/dashboard')
-      }
-      setToast({ open: true, message: 'Account created successfully!', severity: 'success' })
+      // Show success message and redirect to a pending verification page
+      navigate('/signup/pending-verification')
     } catch (error) {
-      // Extract error message from backend response
       const errorMessage =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
@@ -112,7 +87,6 @@ function SignupPage() {
       password: '',
       confirmPassword: '',
       phoneNumber: '',
-      country: null,
     },
     validationSchema,
     onSubmit: handleSignup,
@@ -123,10 +97,10 @@ function SignupPage() {
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Create an account
+            Become a Space Owner
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Create an account to book and manage spaces
+            Sign up to list and manage your spaces on our platform
           </Typography>
         </Box>
 
@@ -135,43 +109,59 @@ function SignupPage() {
             margin="normal"
             fullWidth
             size="small"
-            id="name"
             label="Full Name"
-            name="name"
+            name="fullName"
             autoComplete="name"
             autoFocus
             value={formik.values.fullName}
             onChange={(e) => formik.setFieldValue('fullName', e.target.value)}
+            onBlur={formik.handleBlur}
             helperText={formik.errors.fullName}
-            error={formik.errors.fullName}
+            error={formik.touched.fullName && Boolean(formik.errors.fullName)}
           />
-          <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} size="small" />
+
+          <Box sx={{ mt: 2, mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{ mb: 1, color: 'text.secondary', fontSize: '0.875rem' }}
+            >
+              Phone Number
+            </Typography>
+            <PhoneInputFormik
+              formik={formik}
+              formikValue="phoneNumber"
+              defaultCountry="UG"
+              size="small"
+            />
+          </Box>
+
           <TextField
             margin="normal"
             size="small"
             fullWidth
-            id="email"
             label="Email Address"
             name="email"
             autoComplete="email"
             value={formik.values.email}
             onChange={(e) => formik.setFieldValue('email', e.target.value)}
+            onBlur={formik.handleBlur}
             helperText={formik.errors.email}
-            error={formik.errors.email}
+            error={formik.touched.email && Boolean(formik.errors.email)}
           />
+
           <TextField
             margin="normal"
             size="small"
             fullWidth
-            name="password"
             label="Password"
+            name="password"
             type={showPassword ? 'text' : 'password'}
-            id="password"
             autoComplete="new-password"
-            helperText={formik.errors.password}
-            error={formik.errors.password}
             value={formik.values.password}
             onChange={(e) => formik.setFieldValue('password', e.target.value)}
+            onBlur={formik.handleBlur}
+            helperText={formik.errors.password}
+            error={formik.touched.password && Boolean(formik.errors.password)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -186,19 +176,20 @@ function SignupPage() {
               ),
             }}
           />
+
           <TextField
             margin="normal"
             size="small"
             fullWidth
-            name="confirmPassword"
             label="Confirm Password"
+            name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
-            id="confirmPassword"
             autoComplete="new-password"
-            helperText={formik.errors.confirmPassword}
-            error={formik.errors.confirmPassword}
             value={formik.values.confirmPassword}
             onChange={(e) => formik.setFieldValue('confirmPassword', e.target.value)}
+            onBlur={formik.handleBlur}
+            helperText={formik.errors.confirmPassword}
+            error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -242,46 +233,15 @@ function SignupPage() {
             color="primary"
             size="large"
             sx={{ mt: 3, mb: 2 }}
-            disabled={isSignupLoading}
+            disabled={isSignupOwnerLoading}
             startIcon={
-              isSignupLoading ? (
+              isSignupOwnerLoading ? (
                 <AutorenewIcon sx={{ animation: 'spin 1s linear infinite' }} />
               ) : null
             }
           >
-            {isSignupLoading ? 'Creating account...' : 'Create account'}
+            {isSignupOwnerLoading ? 'Creating account...' : 'Sign up as Owner'}
           </Button>
-
-          <Box sx={{ position: 'relative', my: 3 }}>
-            <Divider />
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                position: 'absolute',
-                top: -10,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                bgcolor: 'background.paper',
-                px: 2,
-              }}
-            >
-              Or continue with
-            </Typography>
-          </Box>
-
-          <Grid container spacing={2}>
-            <Grid item size={{ xs: 6 }}>
-              <Button fullWidth variant="outlined" startIcon={<GoogleIcon />}>
-                Google
-              </Button>
-            </Grid>
-            <Grid item size={{ xs: 6 }}>
-              <Button fullWidth variant="outlined" startIcon={<FacebookIcon />}>
-                Facebook
-              </Button>
-            </Grid>
-          </Grid>
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
@@ -293,10 +253,10 @@ function SignupPage() {
               </Link>
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Want to list your spaces?{' '}
-              <Link to="/auth/signup/owner">
+              Want to book spaces instead?{' '}
+              <Link to="/auth/signup">
                 <Typography component="span" variant="body2" color="primary" fontWeight="medium">
-                  Sign up as Owner
+                  Sign up as Client
                 </Typography>
               </Link>
             </Typography>
@@ -316,13 +276,8 @@ function SignupPage() {
           {toast.message}
         </Alert>
       </Snackbar>
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Creating your account…</DialogTitle>
-        <DialogContent>Please wait while we set things up.</DialogContent>
-        <DialogActions></DialogActions>
-      </Dialog>
     </Container>
   )
 }
 
-export default SignupPage
+export default OwnerSignupPage

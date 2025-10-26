@@ -140,12 +140,24 @@ function ClientDashboardPage() {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          My Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Welcome back, {user?.name}! Manage your bookings and track your history.
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {user?.activeRole === 'client' ? 'My Dashboard' : 'Client View'}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {user?.activeRole === 'client'
+                ? `Welcome back, ${user?.name}! Manage your bookings and track your history.`
+                : `Viewing as a client. Switch to owner view to manage your spaces.`}
+            </Typography>
+          </Box>
+          {/* Only show "Become an Owner" button to users who don't have owner role */}
+          {user && !user.roles?.includes('owner') && (
+            <Button variant="contained" component={Link} to="/upgrade-request">
+              Become an Owner
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {/* Statistics Cards */}
