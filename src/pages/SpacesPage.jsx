@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Container,
@@ -23,10 +23,11 @@ import GridViewIcon from '@mui/icons-material/GridView'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import SpaceGrid from '../components/SpaceGrid'
 import SpacesList from '../components/SpacesList'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useSpaces } from '../api/queries/spaceQueries'
+import { useInfiniteSpaces } from '../api/queries/spaceQueries'
 import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
+import { CircularProgress } from '@mui/material'
 
 function SpacesPage() {
   const [searchParams] = useSearchParams()
@@ -51,14 +52,53 @@ function SpacesPage() {
     setSearchTerm(urlSearchTerm)
   }, [urlSearchTerm])
 
-  const { data: spacesData, isLoading: loading } = useSpaces({
+  const filters = {
     search: searchTerm,
-    spaceType,
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
+    spaceType: spaceType !== 'all' ? spaceType : undefined,
+    minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
+    maxPrice: priceRange[1] < 1000000000 ? priceRange[1] : undefined,
     sort,
-    capacity,
-  })
+    capacity: capacity !== 'any' ? capacity : undefined,
+    city: selectedLocation || undefined,
+  }
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteSpaces(
+    filters,
+    12
+  )
+
+  // Flatten pages into single array
+  const spacesData = data?.pages
+    ? {
+        spaces: data.pages.flatMap((page) => page.spaces || []),
+        totalSpaces: data.pages[0]?.totalSpaces || 0,
+      }
+    : { spaces: [], totalSpaces: 0 }
+
+  // Infinite scroll handler
+  const observerTarget = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleViewModeChange = (event, newMode) => {
     if (newMode !== null) {
@@ -85,7 +125,14 @@ function SpacesPage() {
   }
 
   const toggleDetailedFilters = () => {
-    setShowDetailedFilters(!showDetailedFilters)
+    if (showDetailedFilters) {
+      // Hide filters and reset them
+      resetFilters()
+      setShowDetailedFilters(false)
+    } else {
+      // Just show filters
+      setShowDetailedFilters(true)
+    }
   }
 
   const resetFilters = () => {
@@ -102,10 +149,6 @@ function SpacesPage() {
     setSelectedDate(null)
     setSelectedLocation('')
     setShowDetailedFilters(true) // Show filters after reset
-  }
-
-  const handlePriceRangeChange = (event, newValue) => {
-    setPriceRange(newValue)
   }
 
   const handleSpaceTypeChange = (event) => {
@@ -282,36 +325,33 @@ function SpacesPage() {
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography id="price-range-slider" gutterBottom>
-                Price Range
-              </Typography>
-              <Box sx={{ px: 1 }}>
-                <Slider
-                  value={priceRange}
-                  onChange={handlePriceRangeChange}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={1000000000} // we can get the max from all bookings, an additional endpoint can do this
-                  step={50}
-                  aria-labelledby="price-range-slider"
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    UGX {priceRange[0].toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    UGX {priceRange[1].toLocaleString()}
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mt: 1, display: 'block' }}
-                >
-                  Current: UGX {priceRange[0].toLocaleString()} - UGX{' '}
-                  {priceRange[1].toLocaleString()}
-                </Typography>
-              </Box>
+              <TextField
+                label="Min Price"
+                type="number"
+                value={priceRange[0]}
+                onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">UGX</InputAdornment>,
+                }}
+                fullWidth
+                placeholder="0"
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
+              <TextField
+                label="Max Price"
+                type="number"
+                value={priceRange[1] === 1000000000 ? '' : priceRange[1]}
+                onChange={(e) =>
+                  setPriceRange([priceRange[0], Number(e.target.value) || 1000000000])
+                }
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">UGX</InputAdornment>,
+                }}
+                fullWidth
+                placeholder="Any"
+              />
             </Grid>
 
             <Grid item size={{ xs: 12, sm: 6, md: 3 }}>
@@ -398,12 +438,30 @@ function SpacesPage() {
         </Box>
       </Box>
 
-      {loading ? (
+      {isLoading ? (
         <ListSkeleton items={9} />
-      ) : viewMode === 'grid' ? (
-        <SpaceGrid spaces={spacesData?.spaces || []} />
       ) : (
-        <SpacesList spaces={spacesData?.spaces || []} />
+        <>
+          {viewMode === 'grid' ? (
+            <SpaceGrid spaces={spacesData?.spaces || []} />
+          ) : (
+            <SpacesList spaces={spacesData?.spaces || []} />
+          )}
+
+          {/* Infinite scroll trigger */}
+          <Box
+            ref={observerTarget}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              py: 4,
+              minHeight: 100,
+            }}
+          >
+            {isFetchingNextPage && <CircularProgress size={40} />}
+          </Box>
+        </>
       )}
 
       {/* Date Picker Modal */}
@@ -518,7 +576,7 @@ function SpacesPage() {
                 id="location-select"
                 value={selectedLocation}
                 label="Choose Location"
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={(e) => handleLocationChange(e.target.value)}
               >
                 <MenuItem value="">All Locations</MenuItem>
                 <MenuItem value="Kampala">Kampala</MenuItem>

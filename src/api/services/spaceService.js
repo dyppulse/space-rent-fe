@@ -47,6 +47,8 @@ export const spaceService = {
     if (filters.minPrice != null) query.append('minPrice', filters.minPrice)
     if (filters.maxPrice != null) query.append('maxPrice', filters.maxPrice)
     if (filters.sort) query.append('sort', filters.sort)
+    if (filters.page) query.append('page', filters.page)
+    if (filters.limit) query.append('limit', filters.limit)
 
     const response = await unProtectedAxiosInstance.get(`/spaces?${query.toString()}`)
 
