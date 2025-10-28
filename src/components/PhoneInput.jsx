@@ -36,7 +36,19 @@ export default function PhoneInputFormik({
         international
         defaultCountry={defaultCountry}
         value={value}
-        onChange={(value) => formik.setFieldValue(formikValue, value || '')}
+        onChange={(value) => {
+          formik.setFieldValue(formikValue, value || '', false)
+          // Extract country code from the phone number for validation
+          if (value) {
+            // Extract the calling code from E.164 format (+256775681668 -> +256)
+            const match = value.match(/^\+(\d{1,4})/)
+            if (match) {
+              const callingCode = match[1]
+              // Default to UG (Uganda) as we're using defaultCountry='UG'
+              formik.setFieldValue('country', { phone: `+${callingCode}`, code: 'UG' }, false)
+            }
+          }
+        }}
         onBlur={() => formik.setFieldTouched(formikValue, true)}
         error={touched && Boolean(error)}
         className="phone-input"
