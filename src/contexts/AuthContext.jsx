@@ -1,5 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useAuthStatus, useLogin, useSignup, useLogout } from '../api/queries/authQueries'
+import {
+  useAuthStatus,
+  useLogin,
+  useSignup,
+  useSignupOwner,
+  useLogout,
+} from '../api/queries/authQueries'
 
 const AuthContext = createContext()
 
@@ -19,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const { data: authData, isLoading: checkingAuth, isError: authError } = useAuthStatus()
   const loginMutation = useLogin()
   const signupMutation = useSignup()
+  const signupOwnerMutation = useSignupOwner()
   const logoutMutation = useLogout()
 
   // Debug logging
@@ -62,6 +69,12 @@ export const AuthProvider = ({ children }) => {
     return result
   }
 
+  const signupOwner = async (userData) => {
+    const result = await signupOwnerMutation.mutateAsync(userData)
+    setUser(result.user)
+    return result
+  }
+
   const logout = async () => {
     try {
       await logoutMutation.mutateAsync()
@@ -79,11 +92,13 @@ export const AuthProvider = ({ children }) => {
     isLoading: checkingAuth || !initialized,
     login,
     signup,
+    signupOwner,
     logout,
     initialized,
     // Loading states for mutations
     isLoginLoading: loginMutation.isPending,
     isSignupLoading: signupMutation.isPending,
+    isSignupOwnerLoading: signupOwnerMutation.isPending,
     isLogoutLoading: logoutMutation.isPending,
   }
 

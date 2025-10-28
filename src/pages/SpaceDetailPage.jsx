@@ -1,10 +1,28 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Box, Container, Typography, Grid, Chip, Tabs, Tab, Paper, Rating } from '@mui/material'
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Chip,
+  Tabs,
+  Tab,
+  Paper,
+  Rating,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Divider,
+} from '@mui/material'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import PeopleIcon from '@mui/icons-material/People'
 // import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import LoginIcon from '@mui/icons-material/Login'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { Button } from '@mui/material'
 import { useSpace } from '../api/queries/spaceQueries'
 import { useAuth } from '../contexts/AuthContext'
@@ -31,9 +49,32 @@ function SpaceDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [tabValue, setTabValue] = useState(0)
+  const [showAuthDialog, setShowAuthDialog] = useState(false)
 
   const { data: space, isLoading: loading } = useSpace(id)
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
+
+  const handleBookClick = () => {
+    // Store the current space URL for redirect after login/signup
+    localStorage.setItem('intendedSpaceId', id)
+
+    if (isAuthenticated) {
+      navigate(`/spaces/${id}/book`)
+    } else {
+      // Show dialog to choose login or signup
+      setShowAuthDialog(true)
+    }
+  }
+
+  const handleLogin = () => {
+    setShowAuthDialog(false)
+    navigate('/auth/login')
+  }
+
+  const handleSignup = () => {
+    setShowAuthDialog(false)
+    navigate('/auth/signup')
+  }
 
   // Loading skeleton
   if (loading) {
@@ -209,7 +250,7 @@ function SpaceDetailPage() {
                   variant="contained"
                   size="large"
                   fullWidth
-                  onClick={() => navigate(`/spaces/${space?.id}/book`)}
+                  onClick={handleBookClick}
                   sx={{ py: 1.5 }}
                 >
                   Start Booking Process
@@ -219,6 +260,45 @@ function SpaceDetailPage() {
           </Grid>
         )}
       </Grid>
+
+      {/* Authentication Required Dialog */}
+      <Dialog
+        open={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Authentication Required</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You need to be logged in to book this space. Do you already have an account?
+          </DialogContentText>
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<LoginIcon />}
+            onClick={handleLogin}
+            size="large"
+          >
+            Yes, I have an account - Log In
+          </Button>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<PersonAddIcon />}
+            onClick={handleSignup}
+            size="large"
+          >
+            No, I need to create an account - Sign Up
+          </Button>
+          <Button variant="text" onClick={() => setShowAuthDialog(false)} size="small">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   )
 }

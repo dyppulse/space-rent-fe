@@ -13,7 +13,12 @@ import SpaceDetailPage from './pages/SpaceDetailPage'
 import BookingWizard from './pages/BookingWizard'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import OwnerSignupPage from './pages/OwnerSignupPage'
+import PendingVerificationPage from './pages/PendingVerificationPage'
+import UpgradeRequestPage from './pages/UpgradeRequestPage'
+import EmailVerificationPage from './pages/EmailVerificationPage'
 import DashboardPage from './pages/DashboardPage'
+import DashboardWrapper from './components/DashboardWrapper'
 import NewSpacePage from './pages/NewSpacePage'
 import EditSpace from './pages/EditSpace'
 import BookingsManagementPage from './pages/BookingsManagementPage'
@@ -23,6 +28,7 @@ import WorkInProgress from './pages/WorkInProgress'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import SmartRoute from './components/SmartRoute'
+import OwnerOnlyRoute from './components/OwnerOnlyRoute'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import UsersPage from './pages/admin/UsersPage'
@@ -187,6 +193,31 @@ function AppContent({ toggleTheme, mode }) {
               </SmartRoute>
             }
           />
+          <Route
+            path="/auth/signup/owner"
+            element={
+              <SmartRoute redirectTo="/dashboard">
+                <OwnerSignupPage />
+              </SmartRoute>
+            }
+          />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+          <Route
+            path="/signup/pending-verification"
+            element={
+              <PrivateRoute redirectTo="/auth/login">
+                <PendingVerificationPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/upgrade-request"
+            element={
+              <PrivateRoute redirectTo="/auth/login">
+                <UpgradeRequestPage />
+              </PrivateRoute>
+            }
+          />
 
           {/* Protected Owner Routes */}
           <Route
@@ -209,7 +240,7 @@ function AppContent({ toggleTheme, mode }) {
             path="/dashboard"
             element={
               <PrivateRoute redirectTo="/auth/login">
-                <DashboardPage />
+                <DashboardWrapper />
               </PrivateRoute>
             }
           />
@@ -217,7 +248,9 @@ function AppContent({ toggleTheme, mode }) {
             path="/dashboard/bookings"
             element={
               <PrivateRoute redirectTo="/auth/login">
-                <BookingsManagementPage />
+                <OwnerOnlyRoute redirectTo="/dashboard">
+                  <BookingsManagementPage />
+                </OwnerOnlyRoute>
               </PrivateRoute>
             }
           />

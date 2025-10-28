@@ -31,6 +31,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
 import BookOnlineIcon from '@mui/icons-material/BookOnline'
 import ConfirmDialog from './ConfirmDialog'
+import RoleSwitcher from './RoleSwitcher'
 import { useAuth } from '../contexts/AuthContext'
 
 function Header({ onToggleTheme, mode }) {
@@ -91,10 +92,15 @@ function Header({ onToggleTheme, mode }) {
     }
   }
 
-  // Create navLinks dynamically based on auth state
+  // Create navLinks dynamically based on auth state and active role
   const navLinks = [
     { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
-    ...(isLoggedIn && !isAdmin ? [{ name: 'Bookings', path: '/dashboard/bookings' }] : []),
+    ...(isLoggedIn && !isAdmin && user?.activeRole === 'client'
+      ? [{ name: 'My Bookings', path: '/dashboard' }]
+      : []),
+    ...(isLoggedIn && !isAdmin && user?.activeRole === 'owner'
+      ? [{ name: 'Manage Bookings', path: '/dashboard/bookings' }]
+      : []),
     { name: 'Explore', path: '/spaces' },
     { name: 'How It Works', path: '/how-it-works' },
   ]
@@ -212,6 +218,11 @@ function Header({ onToggleTheme, mode }) {
 
       {/* Bottom Actions */}
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+        {isLoggedIn && (
+          <Box sx={{ mb: 2 }}>
+            <RoleSwitcher />
+          </Box>
+        )}
         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
           <IconButton
             onClick={onToggleTheme}
@@ -371,6 +382,7 @@ function Header({ onToggleTheme, mode }) {
 
             {/* Desktop Actions */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1.5 }}>
+              {isLoggedIn && <RoleSwitcher />}
               <IconButton
                 onClick={onToggleTheme}
                 aria-label="Toggle theme"

@@ -24,6 +24,7 @@ export const queryKeys = {
     list: (filters) => [...queryKeys.bookings.lists(), filters],
     details: () => [...queryKeys.bookings.all, 'detail'],
     detail: (id) => [...queryKeys.bookings.details(), id],
+    user: () => [...queryKeys.bookings.all, 'user'],
     owner: () => [...queryKeys.bookings.all, 'owner'],
     stats: () => [...queryKeys.bookings.all, 'stats'],
   },

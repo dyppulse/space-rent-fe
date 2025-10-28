@@ -43,14 +43,23 @@ export const useAuth = () => {
   useEffect(() => {
     // When user is authenticated, handle navigation
     if (user) {
-      const savedPath = localStorage.getItem('postLoginRedirect')
-      if (savedPath) {
-        localStorage.removeItem('postLoginRedirect')
-        navigate(savedPath)
-      } else if (user?.role === 'superadmin') {
-        navigate('/admin')
-      } else {
-        navigate('/dashboard')
+      // Check for intended space to book
+      const intendedSpaceId = localStorage.getItem('intendedSpaceId')
+      if (intendedSpaceId) {
+        localStorage.removeItem('intendedSpaceId')
+        navigate(`/spaces/${intendedSpaceId}/book`)
+      }
+      // Check for saved redirect path
+      else {
+        const savedPath = localStorage.getItem('postLoginRedirect')
+        if (savedPath) {
+          localStorage.removeItem('postLoginRedirect')
+          navigate(savedPath)
+        } else if (user?.role === 'superadmin') {
+          navigate('/admin')
+        } else {
+          navigate('/dashboard')
+        }
       }
     }
   }, [user, navigate])

@@ -61,6 +61,23 @@ export const useSignup = () => {
   })
 }
 
+// Hook for owner signup mutation
+export const useSignupOwner = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: authService.registerOwner,
+    onSuccess: (data) => {
+      // Update auth user cache
+      queryClient.setQueryData(queryKeys.auth.user(), data.user)
+      queryClient.setQueryData(queryKeys.auth.status(), data)
+    },
+    onError: (error) => {
+      console.error('Owner signup failed:', error)
+    },
+  })
+}
+
 // Hook for logout mutation
 export const useLogout = () => {
   const queryClient = useQueryClient()
