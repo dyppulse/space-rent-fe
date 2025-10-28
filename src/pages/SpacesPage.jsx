@@ -12,17 +12,12 @@ import {
   Select,
   MenuItem,
   Slider,
-  ToggleButtonGroup,
-  ToggleButton,
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import GridViewIcon from '@mui/icons-material/GridView'
-import ViewListIcon from '@mui/icons-material/ViewList'
 import SpaceGrid from '../components/SpaceGrid'
-import SpacesList from '../components/SpacesList'
 import { useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useInfiniteSpaces } from '../api/queries/spaceQueries'
@@ -33,7 +28,6 @@ function SpacesPage() {
   const [searchParams] = useSearchParams()
   const urlSearchTerm = searchParams.get('search') || ''
 
-  const [viewMode, setViewMode] = useState('grid')
   const [priceRange, setPriceRange] = useState([0, 10000000])
   const [searchTerm, setSearchTerm] = useState(urlSearchTerm)
   const [spaceType, setSpaceType] = useState('all')
@@ -99,12 +93,6 @@ function SpacesPage() {
       }
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  const handleViewModeChange = (event, newMode) => {
-    if (newMode !== null) {
-      setViewMode(newMode)
-    }
-  }
 
   const handleDateFilter = () => {
     setShowDatePicker(true)
@@ -404,49 +392,13 @@ function SpacesPage() {
             </Typography>
           )}
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-            View:
-          </Typography>
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="view mode"
-            size="small"
-            sx={{
-              '& .MuiToggleButton-root': {
-                border: '1px solid',
-                borderColor: 'divider',
-                '&.Mui-selected': {
-                  backgroundColor: 'primary.main',
-                  color: 'white',
-                  '&:hover': {
-                    backgroundColor: 'primary.dark',
-                  },
-                },
-              },
-            }}
-          >
-            <ToggleButton value="grid" aria-label="grid view">
-              <GridViewIcon />
-            </ToggleButton>
-            <ToggleButton value="list" aria-label="list view">
-              <ViewListIcon />
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
       </Box>
 
       {isLoading ? (
         <ListSkeleton items={9} />
       ) : (
         <>
-          {viewMode === 'grid' ? (
-            <SpaceGrid spaces={spacesData?.spaces || []} />
-          ) : (
-            <SpacesList spaces={spacesData?.spaces || []} />
-          )}
+          <SpaceGrid spaces={spacesData?.spaces || []} />
 
           {/* Infinite scroll trigger */}
           <Box

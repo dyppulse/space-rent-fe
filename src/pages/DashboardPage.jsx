@@ -21,6 +21,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
 import SearchIcon from '@mui/icons-material/Search'
 import SpacesList from '../components/SpacesList'
 import BookingsList from '../components/BookingsList'
+import SpaceGrid from '../components/SpaceGrid'
 
 import { useMySpaces } from '../api/queries/spaceQueries'
 import { useOwnerBookings } from '../api/queries/bookingQueries'
@@ -317,9 +318,9 @@ function DashboardPage() {
                 </Box>
               )}
 
-              {/* Spaces List */}
+              {/* Spaces Grid */}
               {filteredSpaces?.length > 0 ? (
-                <SpacesList spaces={filteredSpaces} />
+                <SpaceGrid spaces={filteredSpaces} />
               ) : (
                 <Paper sx={{ p: 3, textAlign: 'center' }}>
                   <Typography variant="h6" gutterBottom>
