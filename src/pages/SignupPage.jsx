@@ -50,35 +50,28 @@ function SignupPage() {
       .string()
       .required('required')
       .oneOf([yup.ref('password'), null], 'Passwords must match'),
-    country: yup.object().nullable().required('Select your country'),
     phoneNumber: yup
       .string()
-      .required('Required')
-      .test('min-length', 'Phone number is too short', function (value) {
-        const local = (value || '').replace(/\D/g, '')
-        return local.length >= 5
-      })
-      .test('e164-length', 'Invalid phone number', function (value) {
-        const { country } = this.parent || {}
-        const dial = (country?.phone || '').replace(/\D/g, '')
-        const local = (value || '').replace(/\D/g, '')
-        const total = `${dial}${local}`
-        return total.length >= 8 && total.length <= 15
+      .required('Phone number is required')
+      .test('is-valid-phone', 'Please enter a valid phone number', function (value) {
+        if (!value) return false
+        // react-phone-number-input returns value in E.164 format (+256775681668)
+        // Basic check: must start with + and have at least 10 digits total
+        const cleaned = value.replace(/\D/g, '')
+        return value.startsWith('+') && cleaned.length >= 10 && cleaned.length <= 15
       }),
   })
 
   const handleSignup = async (values) => {
     try {
-      const dial = values?.country?.phone || ''
-      const local = (values?.phoneNumber || '').replace(/\D/g, '')
-      const combined = `${dial}${local}`
-      const e164 = combined.startsWith('+') ? combined : `+${dial}${local}`
+      // react-phone-number-input already provides E.164 format (+256775681668)
+      const phone = values?.phoneNumber || ''
 
       await signup({
         name: values?.fullName,
         email: values?.email,
         password: values?.password,
-        phone: e164,
+        phone: phone,
       })
 
       // Success case - check if there's an intended space to book
@@ -115,7 +108,6 @@ function SignupPage() {
       password: '',
       confirmPassword: '',
       phoneNumber: '',
-      country: null,
     },
     validationSchema,
     onSubmit: async (values) => {
