@@ -12,6 +12,7 @@ export const queryKeys = {
     all: ['spaces'],
     lists: () => [...queryKeys.spaces.all, 'list'],
     list: (filters) => [...queryKeys.spaces.lists(), filters],
+    infinite: (filters) => [...queryKeys.spaces.all, 'infinite', filters],
     details: () => [...queryKeys.spaces.all, 'detail'],
     detail: (id) => [...queryKeys.spaces.details(), id],
     mySpaces: () => [...queryKeys.spaces.all, 'my-spaces'],

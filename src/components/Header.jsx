@@ -30,23 +30,57 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
 import BookOnlineIcon from '@mui/icons-material/BookOnline'
+import BusinessIcon from '@mui/icons-material/Business'
+import CheckIcon from '@mui/icons-material/Check'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import Badge from '@mui/material/Badge'
 import ConfirmDialog from './ConfirmDialog'
+import SignupTypeDialog from './SignupTypeDialog'
 import RoleSwitcher from './RoleSwitcher'
 import { useAuth } from '../contexts/AuthContext'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { authService } from '../api/services/authService'
 
 function Header({ onToggleTheme, mode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
+  const [signupDialogOpen, setSignupDialogOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, initialized } = useAuth()
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 50 })
+  const queryClient = useQueryClient()
 
   const [confirm, setConfirm] = useState(false)
 
   // Get authentication state from context
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'superadmin'
+
+  // Role switching mutation
+  const switchRoleMutation = useMutation({
+    mutationFn: (role) => authService.switchRole(role),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['auth', 'user'], data.user)
+      queryClient.setQueryData(['auth', 'status'], data)
+      queryClient.invalidateQueries({ queryKey: ['spaces'] })
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      handleMenuClose()
+    },
+  })
+
+  const handleRoleSwitch = (role) => {
+    if (role !== user?.activeRole) {
+      switchRoleMutation.mutate(role)
+    } else {
+      handleMenuClose()
+    }
+  }
+
+  // Check if user has multiple roles
+  const hasMultipleRoles = user?.roles && user.roles.length > 1
+  const hasClientRole = user?.roles?.includes('client')
+  const hasOwnerRole = user?.roles?.includes('owner')
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
@@ -95,9 +129,6 @@ function Header({ onToggleTheme, mode }) {
   // Create navLinks dynamically based on auth state and active role
   const navLinks = [
     { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
-    ...(isLoggedIn && !isAdmin && user?.activeRole === 'client'
-      ? [{ name: 'My Bookings', path: '/dashboard' }]
-      : []),
     ...(isLoggedIn && !isAdmin && user?.activeRole === 'owner'
       ? [{ name: 'Manage Bookings', path: '/dashboard/bookings' }]
       : []),
@@ -273,9 +304,10 @@ function Header({ onToggleTheme, mode }) {
               fullWidth
               variant="contained"
               color="success"
-              component={Link}
-              to="/auth/signup"
-              onClick={handleDrawerToggle}
+              onClick={() => {
+                handleDrawerToggle()
+                setSignupDialogOpen(true)
+              }}
               sx={{
                 borderRadius: 2,
                 fontWeight: 600,
@@ -297,13 +329,17 @@ function Header({ onToggleTheme, mode }) {
         sx={(theme) => ({
           backdropFilter: 'blur(20px)',
           backgroundColor:
-            theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-          borderBottom: `1px solid ${theme.palette.divider}`,
+            theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          borderBottom: trigger ? `1px solid ${theme.palette.divider}` : 'none',
           transition: 'all 0.3s ease-in-out',
+          boxShadow:
+            theme.palette.mode === 'dark'
+              ? '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2)'
+              : '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
         })}
       >
         <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 70 } }}>
+          <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 72 }, px: { xs: 2, md: 0 } }}>
             {/* Logo with Icon */}
             <Box
               component={Link}
@@ -313,28 +349,53 @@ function Header({ onToggleTheme, mode }) {
                 alignItems: 'center',
                 textDecoration: 'none',
                 flexGrow: { xs: 1, md: 0 },
-                mr: { md: 4 },
+                mr: { md: 5 },
               }}
             >
-              <HomeWorkIcon
+              <Box
                 sx={{
-                  fontSize: 32,
-                  color: 'primary.main',
-                  mr: 1,
-                  transition: 'transform 0.3s ease',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '10px',
+                  bgcolor: 'primary.main',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 1.5,
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(35, 134, 54, 0.3)',
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: -4,
+                    borderRadius: '12px',
+                    bgcolor: 'primary.main',
+                    opacity: 0,
+                    transition: 'opacity 0.3s ease',
+                    filter: 'blur(8px)',
+                  },
                   '&:hover': {
-                    transform: 'rotate(10deg) scale(1.1)',
+                    transform: 'rotate(5deg) scale(1.05)',
+                    boxShadow: '0 4px 16px rgba(35, 134, 54, 0.5)',
+                    '&::before': {
+                      opacity: 0.3,
+                    },
                   },
                 }}
-              />
+              >
+                <HomeWorkIcon
+                  sx={{ fontSize: 24, color: 'white', position: 'relative', zIndex: 1 }}
+                />
+              </Box>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 800,
                   background: (theme) =>
                     theme.palette.mode === 'dark'
-                      ? 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
-                      : 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                      ? 'linear-gradient(135deg, #51c765 0%, #238636 100%)'
+                      : 'linear-gradient(135deg, #238636 0%, #51c765 100%)',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -359,21 +420,50 @@ function Header({ onToggleTheme, mode }) {
                   key={item.name}
                   component={Link}
                   to={item.path}
-                  sx={{
+                  sx={(theme) => ({
                     mx: 0.5,
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
+                    px: 3,
+                    py: 1.25,
+                    borderRadius: 2.5,
                     fontWeight: 600,
-                    color: location.pathname === item.path ? 'primary.main' : 'text.primary',
+                    fontSize: '0.9375rem',
+                    position: 'relative',
+                    color:
+                      location.pathname === item.path
+                        ? 'primary.main'
+                        : theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.9)'
+                          : 'rgba(0, 0, 0, 0.8)',
                     backgroundColor:
-                      location.pathname === item.path ? 'action.selected' : 'transparent',
+                      location.pathname === item.path
+                        ? theme.palette.mode === 'dark'
+                          ? 'rgba(35, 134, 54, 0.15)'
+                          : 'rgba(35, 134, 54, 0.1)'
+                        : 'transparent',
                     transition: 'all 0.2s ease',
+                    '&::before':
+                      location.pathname === item.path
+                        ? {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: 0,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '60%',
+                            height: 3,
+                            borderRadius: '2px 2px 0 0',
+                            bgcolor: 'primary.main',
+                            animation: 'slideIn 0.3s ease-out',
+                          }
+                        : {},
                     '&:hover': {
-                      backgroundColor: 'action.hover',
-                      transform: 'translateY(-2px)',
+                      backgroundColor:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'rgba(0, 0, 0, 0.04)',
+                      transform: 'translateY(-1px)',
                     },
-                  }}
+                  })}
                 >
                   {item.name}
                 </Button>
@@ -381,22 +471,61 @@ function Header({ onToggleTheme, mode }) {
             </Box>
 
             {/* Desktop Actions */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1.5 }}>
-              {isLoggedIn && <RoleSwitcher />}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
               <IconButton
                 onClick={onToggleTheme}
                 aria-label="Toggle theme"
-                sx={{
+                sx={(theme) => ({
+                  width: 40,
+                  height: 40,
                   borderRadius: 2,
                   transition: 'all 0.3s ease',
+                  bgcolor:
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.1)'
+                      : 'rgba(0, 0, 0, 0.04)',
                   '&:hover': {
                     transform: 'rotate(180deg)',
-                    backgroundColor: 'action.hover',
+                    bgcolor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.15)'
+                        : 'rgba(0, 0, 0, 0.08)',
                   },
-                }}
+                })}
               >
                 {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
+
+              {isLoggedIn && (
+                <IconButton
+                  sx={(theme) => ({
+                    width: 40,
+                    height: 40,
+                    borderRadius: 2,
+                    transition: 'all 0.2s ease',
+                    bgcolor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.1)'
+                        : 'rgba(0, 0, 0, 0.04)',
+                    position: 'relative',
+                    '&:hover': {
+                      bgcolor:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.15)'
+                          : 'rgba(0, 0, 0, 0.08)',
+                      transform: 'scale(1.05)',
+                    },
+                  })}
+                >
+                  <Badge
+                    badgeContent={0}
+                    color="error"
+                    sx={{ '& .MuiBadge-badge': { fontSize: '0.6rem', minWidth: 16, height: 16 } }}
+                  >
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              )}
 
               {isLoggedIn ? (
                 <>
@@ -407,20 +536,23 @@ function Header({ onToggleTheme, mode }) {
                     onClick={handleMenuOpen}
                     sx={{
                       ml: 1,
-                      transition: 'transform 0.2s ease',
+                      p: 0.5,
+                      transition: 'all 0.2s ease',
                       '&:hover': {
-                        transform: 'scale(1.1)',
+                        transform: 'scale(1.05)',
                       },
                     }}
                   >
                     <Avatar
                       sx={{
-                        width: 36,
-                        height: 36,
+                        width: 40,
+                        height: 40,
                         bgcolor: 'primary.main',
                         color: 'white',
                         fontWeight: 700,
-                        boxShadow: 2,
+                        boxShadow: '0 2px 8px rgba(35, 134, 54, 0.3)',
+                        border: '2px solid',
+                        borderColor: 'primary.light',
                       }}
                     >
                       {user?.name?.charAt(0).toUpperCase() || <PersonIcon />}
@@ -432,32 +564,41 @@ function Header({ onToggleTheme, mode }) {
                   <Button
                     component={Link}
                     to="/auth/login"
-                    sx={{
+                    sx={(theme) => ({
                       fontWeight: 600,
-                      borderRadius: 2,
+                      borderRadius: 2.5,
                       px: 3,
+                      py: 1,
                       transition: 'all 0.2s ease',
+                      color:
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.9)'
+                          : 'rgba(0, 0, 0, 0.8)',
                       '&:hover': {
                         transform: 'translateY(-2px)',
+                        bgcolor:
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(255, 255, 255, 0.1)'
+                            : 'rgba(0, 0, 0, 0.04)',
                       },
-                    }}
+                    })}
                   >
                     Log in
                   </Button>
                   <Button
-                    component={Link}
-                    to="/auth/signup"
+                    onClick={() => setSignupDialogOpen(true)}
                     variant="contained"
                     color="success"
                     sx={{
                       fontWeight: 600,
-                      borderRadius: 2,
+                      borderRadius: 2.5,
                       px: 3,
-                      boxShadow: 2,
+                      py: 1,
+                      boxShadow: '0 2px 8px rgba(35, 134, 54, 0.3)',
                       transition: 'all 0.2s ease',
                       '&:hover': {
                         transform: 'translateY(-2px)',
-                        boxShadow: 4,
+                        boxShadow: '0 4px 12px rgba(35, 134, 54, 0.4)',
                       },
                     }}
                   >
@@ -522,28 +663,6 @@ function Header({ onToggleTheme, mode }) {
           </Typography>
         </Box>
 
-        <MenuItem
-          onClick={() => {
-            handleMenuClose()
-            navigate(isAdmin ? '/admin' : '/dashboard')
-          }}
-          sx={{ py: 1.5, gap: 1.5 }}
-        >
-          <DashboardIcon fontSize="small" />
-          Dashboard
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            handleMenuClose()
-            navigate('/dashboard/bookings')
-          }}
-          sx={{ py: 1.5, gap: 1.5 }}
-        >
-          <BookOnlineIcon fontSize="small" />
-          Bookings
-        </MenuItem>
-
         {isAdmin && (
           <MenuItem
             onClick={() => {
@@ -555,6 +674,53 @@ function Header({ onToggleTheme, mode }) {
             <AdminPanelSettingsIcon fontSize="small" />
             Admin Panel
           </MenuItem>
+        )}
+
+        {hasMultipleRoles && (
+          <>
+            <Divider />
+            <Box sx={{ px: 2, py: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 600 }}
+              >
+                View As
+              </Typography>
+            </Box>
+            {hasClientRole && (
+              <MenuItem
+                onClick={() => handleRoleSwitch('client')}
+                disabled={switchRoleMutation.isPending}
+                sx={{ py: 1.5, gap: 1.5 }}
+              >
+                <PersonIcon fontSize="small" />
+                <Box sx={{ flexGrow: 1 }}>Client</Box>
+                {user?.activeRole === 'client' && <CheckIcon fontSize="small" color="primary" />}
+              </MenuItem>
+            )}
+            {hasOwnerRole && (
+              <MenuItem
+                onClick={() => handleRoleSwitch('owner')}
+                disabled={switchRoleMutation.isPending}
+                sx={{ py: 1.5, gap: 1.5 }}
+              >
+                <BusinessIcon fontSize="small" />
+                <Box sx={{ flexGrow: 1 }}>
+                  Owner
+                  {user?.activeRole === 'owner' && !user?.isVerified && (
+                    <Chip
+                      label="Pending"
+                      size="small"
+                      color="warning"
+                      sx={{ ml: 1, height: 18, fontSize: '0.6rem' }}
+                    />
+                  )}
+                </Box>
+                {user?.activeRole === 'owner' && <CheckIcon fontSize="small" color="primary" />}
+              </MenuItem>
+            )}
+          </>
         )}
 
         <Divider />
@@ -598,6 +764,8 @@ function Header({ onToggleTheme, mode }) {
         onClose={() => setConfirm(false)}
         onConfirm={confirmLogout}
       />
+
+      <SignupTypeDialog open={signupDialogOpen} onClose={() => setSignupDialogOpen(false)} />
     </>
   )
 }

@@ -8,11 +8,14 @@ import {
   Chip,
   Rating,
   IconButton,
+  useTheme,
 } from '@mui/material'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 
 function SpaceCard({ space }) {
+  const theme = useTheme()
+
   return (
     <Card
       component={Link}
@@ -41,8 +44,12 @@ function SpaceCard({ space }) {
             position: 'absolute',
             top: 8,
             right: 8,
-            bgcolor: 'rgba(255,255,255,0.9)',
-            '&:hover': { bgcolor: 'white' },
+            bgcolor:
+              theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+            color: theme.palette.text.primary,
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.9)' : 'white',
+            },
           }}
         >
           <FavoriteBorderIcon fontSize="small" />

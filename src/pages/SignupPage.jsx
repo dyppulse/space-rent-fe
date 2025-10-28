@@ -54,7 +54,10 @@ function SignupPage() {
     phoneNumber: yup
       .string()
       .required('Required')
-      .matches(/^\d+$/, 'Phone number must be digits only')
+      .test('min-length', 'Phone number is too short', function (value) {
+        const local = (value || '').replace(/\D/g, '')
+        return local.length >= 5
+      })
       .test('e164-length', 'Invalid phone number', function (value) {
         const { country } = this.parent || {}
         const dial = (country?.phone || '').replace(/\D/g, '')
@@ -115,7 +118,12 @@ function SignupPage() {
       country: null,
     },
     validationSchema,
-    onSubmit: handleSignup,
+    onSubmit: async (values) => {
+      console.log('Form submitted with values:', values)
+      console.log('Form errors:', formik.errors)
+      console.log('Form touched:', formik.touched)
+      await handleSignup(values)
+    },
   })
 
   return (
@@ -135,15 +143,16 @@ function SignupPage() {
             margin="normal"
             fullWidth
             size="small"
-            id="name"
+            id="fullName"
             label="Full Name"
-            name="name"
+            name="fullName"
             autoComplete="name"
             autoFocus
             value={formik.values.fullName}
-            onChange={(e) => formik.setFieldValue('fullName', e.target.value)}
-            helperText={formik.errors.fullName}
-            error={formik.errors.fullName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            helperText={formik.touched.fullName && formik.errors.fullName}
+            error={formik.touched.fullName && Boolean(formik.errors.fullName)}
           />
           <PhoneInputFormik formik={formik} formikValue={'phoneNumber'} size="small" />
           <TextField
@@ -155,9 +164,10 @@ function SignupPage() {
             name="email"
             autoComplete="email"
             value={formik.values.email}
-            onChange={(e) => formik.setFieldValue('email', e.target.value)}
-            helperText={formik.errors.email}
-            error={formik.errors.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            helperText={formik.touched.email && formik.errors.email}
+            error={formik.touched.email && Boolean(formik.errors.email)}
           />
           <TextField
             margin="normal"
@@ -168,10 +178,11 @@ function SignupPage() {
             type={showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="new-password"
-            helperText={formik.errors.password}
-            error={formik.errors.password}
             value={formik.values.password}
-            onChange={(e) => formik.setFieldValue('password', e.target.value)}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            helperText={formik.touched.password && formik.errors.password}
+            error={formik.touched.password && Boolean(formik.errors.password)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -195,10 +206,11 @@ function SignupPage() {
             type={showConfirmPassword ? 'text' : 'password'}
             id="confirmPassword"
             autoComplete="new-password"
-            helperText={formik.errors.confirmPassword}
-            error={formik.errors.confirmPassword}
             value={formik.values.confirmPassword}
-            onChange={(e) => formik.setFieldValue('confirmPassword', e.target.value)}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+            error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -243,6 +255,18 @@ function SignupPage() {
             size="large"
             sx={{ mt: 3, mb: 2 }}
             disabled={isSignupLoading}
+            onClick={async (e) => {
+              // Validate and show errors if any
+              const errors = await formik.validateForm()
+              console.log('Validation errors:', errors)
+              if (Object.keys(errors).length > 0) {
+                // Mark all fields as touched to show errors
+                Object.keys(formik.values).forEach((field) => {
+                  formik.setFieldTouched(field, true)
+                })
+                e.preventDefault()
+              }
+            }}
             startIcon={
               isSignupLoading ? (
                 <AutorenewIcon sx={{ animation: 'spin 1s linear infinite' }} />
@@ -289,14 +313,6 @@ function SignupPage() {
               <Link to="/auth/login">
                 <Typography component="span" variant="body2" color="primary" fontWeight="medium">
                   Log in
-                </Typography>
-              </Link>
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Want to list your spaces?{' '}
-              <Link to="/auth/signup/owner">
-                <Typography component="span" variant="body2" color="primary" fontWeight="medium">
-                  Sign up as Owner
                 </Typography>
               </Link>
             </Typography>

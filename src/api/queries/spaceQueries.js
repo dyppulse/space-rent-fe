@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import { spaceService } from '../services/spaceService'
 import { queryKeys } from '../../utils/queryKeys'
 
@@ -9,6 +9,21 @@ export const useSpaces = (filters = {}) => {
     queryFn: () => spaceService.getSpaces(filters),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+// Hook for infinite scroll spaces
+export const useInfiniteSpaces = (filters = {}, limit = 12) => {
+  return useInfiniteQuery({
+    queryKey: queryKeys.spaces.infinite(filters),
+    queryFn: ({ pageParam = 1 }) => spaceService.getSpaces({ ...filters, page: pageParam, limit }),
+    getNextPageParam: (lastPage) => {
+      const { currentPage, numOfPages } = lastPage
+      return currentPage < numOfPages ? currentPage + 1 : undefined
+    },
+    initialPageParam: 1,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   })
 }
 

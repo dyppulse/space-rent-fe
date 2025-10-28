@@ -25,6 +25,10 @@ import BookingsManagementPage from './pages/BookingsManagementPage'
 import HowItWorksPage from './pages/HowItWorksPage'
 import NotFound from './pages/NotFound'
 import WorkInProgress from './pages/WorkInProgress'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import ContactPage from './pages/ContactPage'
+import TermsOfServicePage from './pages/TermsOfServicePage'
+import AboutPage from './pages/AboutPage'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import SmartRoute from './components/SmartRoute'
@@ -72,12 +76,24 @@ const getDesignTokens = (mode) => ({
       contrastText: '#ffffff',
     },
     background: {
-      default: mode === 'light' ? '#fafafa' : '#121212',
-      paper: mode === 'light' ? '#fff' : '#1e1e1e',
+      default: mode === 'light' ? '#fafbfc' : '#121212',
+      paper: mode === 'light' ? '#ffffff' : '#1e1e1e',
     },
     text: {
       primary: mode === 'light' ? 'rgba(0, 0, 0, 0.87)' : '#fff',
       secondary: mode === 'light' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+    },
+    grey: {
+      50: '#f9fafb',
+      100: '#f3f4f6',
+      200: '#e5e7eb',
+      300: '#d1d5db',
+      400: '#9ca3af',
+      500: '#6b7280',
+      600: '#4b5563',
+      700: '#374151',
+      800: '#1f2937',
+      900: '#111827',
     },
   },
   typography: {
@@ -123,6 +139,10 @@ const getDesignTokens = (mode) => ({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+          ...(mode === 'light' && {
+            backgroundColor: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+          }),
         },
       },
     },
@@ -174,6 +194,10 @@ function AppContent({ toggleTheme, mode }) {
           <Route path="/spaces/:id" element={<SpaceDetailPage />} />
           <Route path="/spaces/:id/book" element={<BookingWizard />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/work-in-progress" element={<WorkInProgress />} />
 
           {/* Auth Routes - Redirect logged-in users to dashboard */}
