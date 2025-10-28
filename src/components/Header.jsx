@@ -329,23 +329,10 @@ function Header({ onToggleTheme, mode }) {
             theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.9)' : 'rgba(255, 255, 255, 0.95)',
           borderBottom: trigger ? `1px solid ${theme.palette.divider}` : 'none',
           transition: 'all 0.3s ease-in-out',
-          boxShadow: trigger
-            ? theme.palette.mode === 'dark'
-              ? '0 4px 20px rgba(0, 0, 0, 0.5)'
-              : '0 4px 20px rgba(0, 0, 0, 0.08)'
-            : 'none',
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(90deg, transparent, rgba(35, 134, 54, 0.1), transparent)',
-            animation: 'shimmer 3s ease-in-out infinite',
-          },
+          boxShadow:
+            theme.palette.mode === 'dark'
+              ? '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2)'
+              : '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
         })}
       >
         <Container maxWidth="lg">
@@ -410,8 +397,6 @@ function Header({ onToggleTheme, mode }) {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   letterSpacing: '-0.5px',
-                  backgroundSize: '200% 200%',
-                  animation: 'gradientFlow 3s ease infinite',
                 }}
               >
                 SpaceHire
