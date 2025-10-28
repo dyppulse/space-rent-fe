@@ -78,7 +78,11 @@ function SignupTypeDialog({ open, onClose }) {
           How would you like to use SpaceHire?
         </DialogContentText>
 
-        <Grid container spacing={2}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        >
           {/* Client Option */}
           <Grid item xs={12} sm={6}>
             <Card
@@ -90,6 +94,9 @@ function SignupTypeDialog({ open, onClose }) {
                 borderColor: selectedType === 'client' ? 'primary.main' : 'divider',
                 bgcolor: selectedType === 'client' ? 'rgba(35, 134, 54, 0.05)' : 'background.paper',
                 position: 'relative',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
                   borderColor: 'primary.main',
                   transform: 'translateY(-4px)',
@@ -97,7 +104,15 @@ function SignupTypeDialog({ open, onClose }) {
                 },
               }}
             >
-              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <CardContent
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 <Box
                   sx={{
                     width: 64,
@@ -110,18 +125,32 @@ function SignupTypeDialog({ open, onClose }) {
                     mx: 'auto',
                     mb: 2,
                     transition: 'all 0.3s ease',
+                    flexShrink: 0,
                   }}
                 >
                   <PersonIcon sx={{ fontSize: 36, color: 'white' }} />
                 </Box>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ flexShrink: 0 }}>
                   I'm a Client
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 2,
+                    minHeight: 48,
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   I want to book spaces for events and meetings
                 </Typography>
                 {selectedType === 'client' && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'center', mt: 'auto', flexShrink: 0 }}
+                  >
                     <CheckCircleIcon sx={{ color: 'primary.main' }} />
                   </Box>
                 )}
@@ -140,6 +169,9 @@ function SignupTypeDialog({ open, onClose }) {
                 borderColor: selectedType === 'owner' ? 'primary.main' : 'divider',
                 bgcolor: selectedType === 'owner' ? 'rgba(35, 134, 54, 0.05)' : 'background.paper',
                 position: 'relative',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
                   borderColor: 'primary.main',
                   transform: 'translateY(-4px)',
@@ -147,7 +179,15 @@ function SignupTypeDialog({ open, onClose }) {
                 },
               }}
             >
-              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <CardContent
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 <Box
                   sx={{
                     width: 64,
@@ -160,18 +200,32 @@ function SignupTypeDialog({ open, onClose }) {
                     mx: 'auto',
                     mb: 2,
                     transition: 'all 0.3s ease',
+                    flexShrink: 0,
                   }}
                 >
                   <BusinessIcon sx={{ fontSize: 36, color: 'white' }} />
                 </Box>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ flexShrink: 0 }}>
                   I'm an Owner
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 2,
+                    minHeight: 48,
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   I want to list my spaces and earn money
                 </Typography>
                 {selectedType === 'owner' && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'center', mt: 'auto', flexShrink: 0 }}
+                  >
                     <CheckCircleIcon sx={{ color: 'primary.main' }} />
                   </Box>
                 )}

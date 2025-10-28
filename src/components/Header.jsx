@@ -35,6 +35,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import Badge from '@mui/material/Badge'
 import ConfirmDialog from './ConfirmDialog'
+import SignupTypeDialog from './SignupTypeDialog'
 import RoleSwitcher from './RoleSwitcher'
 import { useAuth } from '../contexts/AuthContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -43,6 +44,7 @@ import { authService } from '../api/services/authService'
 function Header({ onToggleTheme, mode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
+  const [signupDialogOpen, setSignupDialogOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, initialized } = useAuth()
@@ -302,9 +304,10 @@ function Header({ onToggleTheme, mode }) {
               fullWidth
               variant="contained"
               color="success"
-              component={Link}
-              to="/auth/signup"
-              onClick={handleDrawerToggle}
+              onClick={() => {
+                handleDrawerToggle()
+                setSignupDialogOpen(true)
+              }}
               sx={{
                 borderRadius: 2,
                 fontWeight: 600,
@@ -583,8 +586,7 @@ function Header({ onToggleTheme, mode }) {
                     Log in
                   </Button>
                   <Button
-                    component={Link}
-                    to="/auth/signup"
+                    onClick={() => setSignupDialogOpen(true)}
                     variant="contained"
                     color="success"
                     sx={{
@@ -762,6 +764,8 @@ function Header({ onToggleTheme, mode }) {
         onClose={() => setConfirm(false)}
         onConfirm={confirmLogout}
       />
+
+      <SignupTypeDialog open={signupDialogOpen} onClose={() => setSignupDialogOpen(false)} />
     </>
   )
 }
