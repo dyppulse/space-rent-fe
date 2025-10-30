@@ -33,6 +33,7 @@ import {
   Logout as LogoutIcon,
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
+  HowToReg as HowToRegIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -47,6 +48,7 @@ const menuItems = [
   { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
+  { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
   { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
 ]
 

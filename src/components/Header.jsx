@@ -610,14 +610,21 @@ function Header({ onToggleTheme, mode }) {
 
             {/* Mobile Menu Button */}
             <IconButton
-              color="inherit"
               aria-label="open drawer"
               edge="end"
               onClick={handleDrawerToggle}
-              sx={{
+              sx={(theme) => ({
                 display: { md: 'none' },
                 ml: 1,
-              }}
+                color:
+                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)',
+                '&:hover': {
+                  bgcolor:
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.1)'
+                      : 'rgba(0, 0, 0, 0.04)',
+                },
+              })}
             >
               <MenuIcon />
             </IconButton>

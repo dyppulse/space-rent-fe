@@ -42,6 +42,7 @@ import LocationsPage from './pages/admin/LocationsPage'
 import AmenitiesPage from './pages/admin/AmenitiesPage'
 import BookingsPage from './pages/admin/BookingsPage'
 import FeatureFlagsPage from './pages/admin/FeatureFlagsPage'
+import UpgradeRequestsPage from './pages/admin/UpgradeRequestsPage'
 import './App.css'
 
 // Create theme with system preference detection
@@ -296,6 +297,7 @@ function AppContent({ toggleTheme, mode }) {
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="locations" element={<LocationsPage />} />
             <Route path="feature-flags" element={<FeatureFlagsPage />} />
+            <Route path="upgrade-requests" element={<UpgradeRequestsPage />} />
           </Route>
 
           {/* 404 Route */}
