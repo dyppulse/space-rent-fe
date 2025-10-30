@@ -153,8 +153,20 @@ function ClientDashboardPage() {
           </Box>
           {/* Only show "Become an Owner" button to users who don't have owner role */}
           {user && !user.roles?.includes('owner') && (
-            <Button variant="contained" component={Link} to="/upgrade-request">
-              Become an Owner
+            <Button
+              variant="contained"
+              component={user.upgradeRequest?.status === 'pending' ? 'div' : Link}
+              to={user.upgradeRequest?.status === 'pending' ? undefined : '/upgrade-request'}
+              disabled={user.upgradeRequest?.status === 'pending'}
+              title={
+                user.upgradeRequest?.status === 'pending'
+                  ? 'Your upgrade request is pending review'
+                  : undefined
+              }
+            >
+              {user.upgradeRequest?.status === 'pending'
+                ? 'Upgrade Request Pending'
+                : 'Become an Owner'}
             </Button>
           )}
         </Box>

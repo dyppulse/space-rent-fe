@@ -26,7 +26,8 @@ function UpgradeRequestPage() {
   const upgradeMutation = useMutation({
     mutationFn: () => authService.submitUpgradeRequest({}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth', 'user'] })
+      // Invalidate both user and status queries to update the user object everywhere
+      queryClient.invalidateQueries({ queryKey: ['auth'] })
       setSnackbar({
         open: true,
         message: 'Upgrade request submitted successfully!',
