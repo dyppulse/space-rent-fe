@@ -35,12 +35,14 @@ export const AuthProvider = ({ children }) => {
     authError,
     initialized,
     user: user ? 'exists' : 'null',
+    userRoles: user?.roles,
+    userActiveRole: user?.activeRole,
     isAuthenticated: !!user,
   })
 
-  // Check auth status on mount
+  // Check auth status on mount and sync with query data
   useEffect(() => {
-    // If we have auth data, set the user
+    // If we have auth data, set the user (always update to ensure fresh data)
     if (authData?.user) {
       setUser(authData.user)
       setInitialized(true)
@@ -51,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       setInitialized(true)
     }
     // If we're not loading anymore and no data/error, user is not authenticated
-    else if (!checkingAuth) {
+    else if (!checkingAuth && !authData) {
       setUser(null)
       setInitialized(true)
     }

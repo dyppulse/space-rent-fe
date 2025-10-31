@@ -78,9 +78,18 @@ function Header({ onToggleTheme, mode }) {
   }
 
   // Check if user has multiple roles
-  const hasMultipleRoles = user?.roles && user.roles.length > 1
+  const hasMultipleRoles = user?.roles && Array.isArray(user.roles) && user.roles.length > 1
   const hasClientRole = user?.roles?.includes('client')
   const hasOwnerRole = user?.roles?.includes('owner')
+
+  // Debug log for role switcher
+  console.log('Header - Role Switcher Debug:', {
+    hasMultipleRoles,
+    userRoles: user?.roles,
+    hasClientRole,
+    hasOwnerRole,
+    activeRole: user?.activeRole,
+  })
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
@@ -472,6 +481,12 @@ function Header({ onToggleTheme, mode }) {
 
             {/* Desktop Actions */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+              {isLoggedIn && hasMultipleRoles && (
+                <Box sx={{ mr: 1 }}>
+                  <RoleSwitcher />
+                </Box>
+              )}
+
               <IconButton
                 onClick={onToggleTheme}
                 aria-label="Toggle theme"
