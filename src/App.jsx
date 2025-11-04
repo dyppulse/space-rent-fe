@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { useState, useEffect } from 'react'
@@ -7,32 +7,12 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ThemeContext } from './contexts/ThemeContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import HomePage from './pages/HomePage'
 import SpacesPage from './pages/SpacesPage'
 import SpaceDetailPage from './pages/SpaceDetailPage'
-import BookingWizard from './pages/BookingWizard'
 import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import OwnerSignupPage from './pages/OwnerSignupPage'
-import PendingVerificationPage from './pages/PendingVerificationPage'
-import UpgradeRequestPage from './pages/UpgradeRequestPage'
-import EmailVerificationPage from './pages/EmailVerificationPage'
-import DashboardPage from './pages/DashboardPage'
-import DashboardWrapper from './components/DashboardWrapper'
-import NewSpacePage from './pages/NewSpacePage'
-import EditSpace from './pages/EditSpace'
-import BookingsManagementPage from './pages/BookingsManagementPage'
-import HowItWorksPage from './pages/HowItWorksPage'
 import NotFound from './pages/NotFound'
-import WorkInProgress from './pages/WorkInProgress'
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
-import ContactPage from './pages/ContactPage'
-import TermsOfServicePage from './pages/TermsOfServicePage'
-import AboutPage from './pages/AboutPage'
-import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import SmartRoute from './components/SmartRoute'
-import OwnerOnlyRoute from './components/OwnerOnlyRoute'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import UsersPage from './pages/admin/UsersPage'
@@ -181,102 +161,27 @@ const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matche
 function AppContent({ toggleTheme, mode }) {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isSpacesRoute = location.pathname === '/spaces' || location.pathname.startsWith('/spaces/')
 
   return (
     <div className="App">
-      {!isAdminRoute && <Header onToggleTheme={toggleTheme} mode={mode} />}
+      {!isAdminRoute && !isSpacesRoute && <Header onToggleTheme={toggleTheme} mode={mode} />}
       <main style={{ marginTop: isAdminRoute ? 0 : 'auto' }}>
         <Routes>
-          {/* Public Routes - Available to all users */}
-          <Route path="/" element={<HomePage />} />
+          {/* Root redirect to spaces */}
+          <Route path="/" element={<Navigate to="/spaces" replace />} />
 
-          {/* Public Routes - Available to all users */}
-          <Route path="/spaces" element={<SpacesPage />} />
+          {/* Public Routes */}
+          <Route path="/spaces" element={<SpacesPage onToggleTheme={toggleTheme} mode={mode} />} />
           <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-          <Route path="/spaces/:id/book" element={<BookingWizard />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsOfServicePage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/work-in-progress" element={<WorkInProgress />} />
 
-          {/* Auth Routes - Redirect logged-in users to dashboard */}
+          {/* Auth Routes - Admin login only */}
           <Route
             path="/auth/login"
             element={
-              <SmartRoute redirectTo="/dashboard">
+              <SmartRoute redirectTo="/spaces">
                 <LoginPage />
               </SmartRoute>
-            }
-          />
-          <Route
-            path="/auth/signup"
-            element={
-              <SmartRoute redirectTo="/dashboard">
-                <SignupPage />
-              </SmartRoute>
-            }
-          />
-          <Route
-            path="/auth/signup/owner"
-            element={
-              <SmartRoute redirectTo="/dashboard">
-                <OwnerSignupPage />
-              </SmartRoute>
-            }
-          />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route
-            path="/signup/pending-verification"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <PendingVerificationPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/upgrade-request"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <UpgradeRequestPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Protected Owner Routes */}
-          <Route
-            path="/dashboard/spaces/new"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <NewSpacePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard/spaces/:id/edit"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <EditSpace />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <DashboardWrapper />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard/bookings"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <OwnerOnlyRoute redirectTo="/dashboard">
-                  <BookingsManagementPage />
-                </OwnerOnlyRoute>
-              </PrivateRoute>
             }
           />
 

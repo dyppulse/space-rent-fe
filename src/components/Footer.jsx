@@ -1,13 +1,4 @@
-import { Link } from 'react-router-dom'
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  Link as MuiLink,
-  IconButton,
-  Divider,
-} from '@mui/material'
+import { Box, Container, Grid, Typography, Link as MuiLink, Divider } from '@mui/material'
 import EmailIcon from '@mui/icons-material/Email'
 import PhoneIcon from '@mui/icons-material/Phone'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
@@ -21,8 +12,8 @@ function Footer() {
       <Container maxWidth="lg">
         <Grid container spacing={5}>
           {/* Brand Section */}
-          <Grid item size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Grid item size={{ xs: 12, md: 12 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'center' }}>
               <HomeWorkIcon sx={{ fontSize: 32, color: 'primary.main', mr: 1 }} />
               <Typography
                 variant="h5"
@@ -34,19 +25,34 @@ function Footer() {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                SpaceHire
+                Spaces
               </Typography>
             </Box>
             <Typography
               variant="body2"
-              sx={{ color: 'grey.400', mb: 3, lineHeight: 1.7, maxWidth: 280 }}
+              sx={{
+                color: 'grey.400',
+                mb: 3,
+                lineHeight: 1.7,
+                textAlign: 'center',
+                maxWidth: 600,
+                mx: 'auto',
+              }}
             >
               Connect with unique event spaces across Uganda. Book your perfect venue for any
               occasion.
             </Typography>
 
             {/* Contact Info */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1.5,
+                alignItems: 'center',
+                mb: 4,
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                   sx={{
@@ -121,139 +127,6 @@ function Footer() {
               </Box>
             </Box>
           </Grid>
-
-          {/* Quick Links */}
-          <Grid item size={{ xs: 6, sm: 4, md: 2 }}>
-            <Typography
-              variant="subtitle2"
-              gutterBottom
-              fontWeight="bold"
-              sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 3, fontSize: '0.75rem' }}
-            >
-              Quick Links
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <MuiLink
-                component={Link}
-                to="/spaces"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                Explore Spaces
-              </MuiLink>
-              <MuiLink
-                component={Link}
-                to="/how-it-works"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                How It Works
-              </MuiLink>
-              <MuiLink
-                component={Link}
-                to="/about"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                About Us
-              </MuiLink>
-              <MuiLink
-                component={Link}
-                to="/contact"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                Contact
-              </MuiLink>
-            </Box>
-          </Grid>
-
-          {/* For Hosts */}
-          <Grid item size={{ xs: 6, sm: 4, md: 3 }}>
-            <Typography
-              variant="subtitle2"
-              gutterBottom
-              fontWeight="bold"
-              sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 3, fontSize: '0.75rem' }}
-            >
-              For Hosts
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <MuiLink
-                component={Link}
-                to="/host"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                List Your Space
-              </MuiLink>
-            </Box>
-          </Grid>
-
-          {/* Legal */}
-          <Grid item size={{ xs: 12, sm: 4, md: 3 }}>
-            <Typography
-              variant="subtitle2"
-              gutterBottom
-              fontWeight="bold"
-              sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 3, fontSize: '0.75rem' }}
-            >
-              Legal
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <MuiLink
-                component={Link}
-                to="/privacy"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                Privacy Policy
-              </MuiLink>
-              <MuiLink
-                component={Link}
-                to="/terms"
-                sx={{
-                  color: 'grey.400',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s',
-                  '&:hover': { color: 'primary.light', transform: 'translateX(4px)' },
-                }}
-              >
-                Terms of Service
-              </MuiLink>
-            </Box>
-          </Grid>
         </Grid>
 
         <Divider sx={{ my: 5, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
@@ -269,7 +142,7 @@ function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'grey.400', fontSize: '0.875rem' }}>
-            &copy; {currentYear} SpaceHire. All rights reserved.
+            &copy; {currentYear} Spaces. All rights reserved.
           </Typography>
           <Typography variant="body2" sx={{ color: 'grey.500', fontSize: '0.875rem' }}>
             Made with ❤️ in Uganda

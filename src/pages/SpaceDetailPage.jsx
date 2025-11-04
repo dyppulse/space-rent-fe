@@ -8,24 +8,14 @@ import {
   Chip,
   Tabs,
   Tab,
-  Paper,
   Rating,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Divider,
+  IconButton,
 } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import PeopleIcon from '@mui/icons-material/People'
-// import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import LoginIcon from '@mui/icons-material/Login'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { Button } from '@mui/material'
 import { useSpace } from '../api/queries/spaceQueries'
-import { useAuth } from '../contexts/AuthContext'
 import DetailSkeleton from '../components/ui/skeletons/DetailSkeleton'
 import ImageGallery from '../components/ImageGallery'
 
@@ -49,32 +39,8 @@ function SpaceDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [tabValue, setTabValue] = useState(0)
-  const [showAuthDialog, setShowAuthDialog] = useState(false)
 
   const { data: space, isLoading: loading } = useSpace(id)
-  const { user, isAuthenticated } = useAuth()
-
-  const handleBookClick = () => {
-    // Store the current space URL for redirect after login/signup
-    localStorage.setItem('intendedSpaceId', id)
-
-    if (isAuthenticated) {
-      navigate(`/spaces/${id}/book`)
-    } else {
-      // Show dialog to choose login or signup
-      setShowAuthDialog(true)
-    }
-  }
-
-  const handleLogin = () => {
-    setShowAuthDialog(false)
-    navigate('/auth/login')
-  }
-
-  const handleSignup = () => {
-    setShowAuthDialog(false)
-    navigate('/auth/signup')
-  }
 
   // Loading skeleton
   if (loading) {
@@ -99,7 +65,26 @@ function SpaceDetailPage() {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Grid container spacing={4}>
         {/* Left column - Space details */}
-        <Grid item size={{ xs: 12, md: 8 }}>
+        <Grid item size={{ xs: 12, md: 12 }}>
+          {/* Back Button */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              onClick={() => navigate('/spaces')}
+              sx={{
+                border: 1,
+                borderColor: 'divider',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="body2" color="text.secondary">
+              Back to spaces
+            </Typography>
+          </Box>
+
           <Typography variant="h4" component="h1" gutterBottom>
             {space?.name}
           </Typography>
@@ -139,12 +124,6 @@ function SpaceDetailPage() {
                     <PeopleIcon color="action" sx={{ mr: 1 }} />
                     <Typography>Capacity: {space?.capacity} people</Typography>
                   </Box>
-                  {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
-                    <Typography>
-                      ${space.price}/{space?.price?.unit}
-                    </Typography>
-                  </Box> */}
                   <Chip
                     label={
                       space?.spaceTypes?.length > 0
@@ -234,71 +213,7 @@ function SpaceDetailPage() {
             </TabPanel>
           </Box>
         </Grid>
-
-        {/* Right column - Booking form */}
-        {space?.owner !== user?.userId && (
-          <Grid item size={{ xs: 12, md: 4 }}>
-            <Box sx={{ position: { md: 'sticky' }, top: 88 }}>
-              <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h5" gutterBottom>
-                  Book this space
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Ready to book this amazing space? Click below to start the booking process.
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  onClick={handleBookClick}
-                  sx={{ py: 1.5 }}
-                >
-                  Start Booking Process
-                </Button>
-              </Paper>
-            </Box>
-          </Grid>
-        )}
       </Grid>
-
-      {/* Authentication Required Dialog */}
-      <Dialog
-        open={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Authentication Required</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            You need to be logged in to book this space. Do you already have an account?
-          </DialogContentText>
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<LoginIcon />}
-            onClick={handleLogin}
-            size="large"
-          >
-            Yes, I have an account - Log In
-          </Button>
-          <Button
-            variant="outlined"
-            fullWidth
-            startIcon={<PersonAddIcon />}
-            onClick={handleSignup}
-            size="large"
-          >
-            No, I need to create an account - Sign Up
-          </Button>
-          <Button variant="text" onClick={() => setShowAuthDialog(false)} size="small">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   )
 }

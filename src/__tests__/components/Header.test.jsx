@@ -46,7 +46,7 @@ describe('Header', () => {
   it('shows loading app bar when auth not initialized', () => {
     authState.initialized = false
     renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
-    expect(screen.getByText('SpaceHire')).toBeInTheDocument()
+    expect(screen.getByText('Spaces')).toBeInTheDocument()
   })
 
   it('renders admin link for admin user', () => {
