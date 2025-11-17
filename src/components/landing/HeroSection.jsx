@@ -17,10 +17,10 @@ function HeroSection({ onCTAClick }) {
               Find My Venue
               <ArrowRight size={18} />
             </button>
-            <button type="button" className={styles.secondaryButton}>
-              Talk to an Expert
-              <PhoneCall size={18} />
-            </button>
+            {/* <button type="button" className={styles.secondaryButton}>
+                            Talk to an Expert
+                            <PhoneCall size={18} />
+                        </button> */}
           </div>
           <div className={styles.statsGrid}>
             <div className={styles.stat}>
@@ -38,7 +38,9 @@ function HeroSection({ onCTAClick }) {
           </div>
         </div>
         <div className={styles.heroInsightCard}>
-          <p className={styles.pill}>Real requests this week</p>
+          <button type="button" className={styles.primaryButton} onClick={onCTAClick}>
+            Click here to tell us what space you’re looking for ↓
+          </button>
           <ul>
             <li>✨ Rooftop for 80 guests — Kampala CBD</li>
             <li>🤝 Corporate offsite — Entebbe Lakefront</li>

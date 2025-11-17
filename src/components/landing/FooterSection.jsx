@@ -15,18 +15,15 @@ function FooterSection() {
           <p>
             Email:{' '}
             <a
-              href="mailto:hello@spacehire.africa"
+              href="mailto:dyppulse@gmail.com"
               style={{ color: 'inherit', textDecoration: 'underline' }}
             >
-              hello@spacehire.africa
+              dyppulse@gmail.com
             </a>
           </p>
           <p>
             Have a venue to list?{' '}
-            <a
-              href="mailto:partners@spacehire.africa"
-              style={{ color: 'inherit', textDecoration: 'underline' }}
-            >
+            <a href="dyppulse@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>
               Submit your venue
             </a>
           </p>

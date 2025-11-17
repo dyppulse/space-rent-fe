@@ -1,11 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 import styles from './LandingPage.module.css'
 
 const steps = ['Contact', 'Event Details', 'Preferences']
 
 const initialFormState = {
   name: '',
-  contact: '',
+  email: '',
+  phone: '',
   eventType: '',
   eventDate: '',
   city: '',
@@ -14,14 +17,8 @@ const initialFormState = {
   notes: '',
 }
 
-const eventTypes = [
-  'Corporate Workshop',
-  'Wedding',
-  'Product Launch',
-  'Birthday / Celebration',
-  'Conference',
-  'Other',
-]
+const eventTypes = ['Wedding', 'Birthday celebration', 'Graduation party']
+const UG_E164_LENGTH = 13
 const budgetRanges = [
   '<$1,000',
   '$1,000 - $3,000',
@@ -47,7 +44,11 @@ function LeadForm({ formRef }) {
     const nextErrors = {}
     if (currentStep === 0) {
       if (!formData.name) nextErrors.name = 'Name is required'
-      if (!formData.contact) nextErrors.contact = 'Email or phone is required'
+      if (!formData.email) nextErrors.email = 'Email is required'
+      if (!formData.phone) nextErrors.phone = 'Phone number is required'
+      else if (!isValidPhoneNumber(formData.phone)) nextErrors.phone = 'Enter a valid phone number'
+      else if (formData.phone.startsWith('+256') && formData.phone.length !== UG_E164_LENGTH)
+        nextErrors.phone = 'Uganda numbers should be 9 digits after +256'
     }
     if (currentStep === 1) {
       if (!formData.eventType) nextErrors.eventType = 'Select an event type'
@@ -87,19 +88,13 @@ function LeadForm({ formRef }) {
     setIsSuccess(false)
   }
 
-  const stepDescription = useMemo(() => {
-    if (currentStep === 0) return 'How can we reach you?'
-    if (currentStep === 1) return 'Tell us about your event'
-    return 'Budget & special requests'
-  }, [currentStep])
-
   return (
     <section className={styles.section} id="lead-form" ref={formRef}>
       <div className={styles.sectionInner}>
         <div className={styles.formSection}>
           <div className={styles.eyebrow}>Priority intake</div>
           <h2>Tell us about your event and we’ll send curated venues within 24 hours</h2>
-          <p>{stepDescription}</p>
+          <p>How can we reach you?</p>
 
           <div className={styles.formCard}>
             <div className={styles.steps}>
@@ -144,16 +139,46 @@ function LeadForm({ formRef }) {
                       {errors.name && <span className={styles.error}>{errors.name}</span>}
                     </div>
                     <div className={styles.formGroup}>
-                      <label htmlFor="contact">Email or Phone*</label>
+                      <label htmlFor="email">Email*</label>
                       <input
-                        id="contact"
-                        name="contact"
-                        type="text"
-                        placeholder="you@example.com / +256..."
-                        value={formData.contact}
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={formData.email}
                         onChange={handleChange}
                       />
-                      {errors.contact && <span className={styles.error}>{errors.contact}</span>}
+                      {errors.email && <span className={styles.error}>{errors.email}</span>}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="phone">Phone Number*</label>
+                      <div className={styles.phoneField}>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          international
+                          defaultCountry="UG"
+                          value={formData.phone}
+                          onChange={(value) => {
+                            let nextValue = value || ''
+                            if (nextValue.startsWith('+256') && nextValue.length > UG_E164_LENGTH) {
+                              nextValue = nextValue.slice(0, UG_E164_LENGTH)
+                            }
+                            setFormData((prev) => ({ ...prev, phone: nextValue }))
+                            setErrors((prev) => ({ ...prev, phone: undefined }))
+                          }}
+                          onBlur={() => {
+                            if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+                              setErrors((prev) => ({
+                                ...prev,
+                                phone: 'Enter a valid phone number',
+                              }))
+                            }
+                          }}
+                          placeholder="+256 700 000000"
+                        />
+                      </div>
+                      {errors.phone && <span className={styles.error}>{errors.phone}</span>}
                     </div>
                   </div>
                 )}

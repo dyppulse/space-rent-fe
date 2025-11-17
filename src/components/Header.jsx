@@ -42,9 +42,9 @@ function Header() {
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'superadmin'
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
+  // const handleMenuOpen = (event) => {
+  //   setAnchorEl(event.currentTarget)
+  // }
 
   const handleMenuClose = () => {
     setAnchorEl(null)
@@ -86,8 +86,8 @@ function Header() {
     }
   }
 
-  // Simplified navLinks - only Spaces for MVP
-  const navLinks = [{ name: 'Spaces', path: '/spaces' }]
+  // Marketing focus: hide Spaces link for now
+  const navLinks = [] // [{ name: 'Spaces', path: '/spaces' }]
 
   const drawer = (
     <Box sx={{ width: 280, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -388,7 +388,7 @@ function Header() {
             </Box>
 
             {/* Desktop Actions */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+            {/* <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
               {isLoggedIn ? (
                 <>
                   {isAdmin && (
@@ -447,7 +447,7 @@ function Header() {
                   Log in
                 </Button>
               )}
-            </Box>
+            </Box> */}
 
             {/* Mobile Menu Button */}
             <IconButton
