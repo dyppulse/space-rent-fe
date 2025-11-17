@@ -31,8 +31,6 @@ import {
   Settings as SettingsIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
-  LightMode as LightModeIcon,
-  DarkMode as DarkModeIcon,
   HowToReg as HowToRegIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
@@ -52,7 +50,7 @@ const menuItems = [
   { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
 ]
 
-const AdminLayout = ({ onToggleTheme, mode }) => {
+const AdminLayout = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -152,9 +150,6 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={onToggleTheme} aria-label="Toggle theme" color="inherit">
-              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-            </IconButton>
             <Button color="inherit" onClick={handleMenuOpen} startIcon={<AccountIcon />}>
               Admin
             </Button>

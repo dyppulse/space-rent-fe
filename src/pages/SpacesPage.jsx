@@ -6,11 +6,14 @@ import ListSkeleton from '../components/ui/skeletons/ListSkeleton'
 import SpaceGrid from '../components/SpaceGrid'
 import FilterHeader from '../components/FilterHeader'
 
-function SpacesPage({ onToggleTheme, mode }) {
+const SEARCH_DEBOUNCE_MS = 500
+
+function SpacesPage() {
   const [searchParams] = useSearchParams()
   const urlSearchTerm = searchParams.get('search') || ''
 
   // Filter states
+  const [searchInput, setSearchInput] = useState(urlSearchTerm)
   const [searchTerm, setSearchTerm] = useState(urlSearchTerm)
   const [location, setLocation] = useState('')
   const [spaceType, setSpaceType] = useState('all')
@@ -24,8 +27,16 @@ function SpacesPage({ onToggleTheme, mode }) {
 
   // Update search term when URL parameter changes
   useEffect(() => {
+    setSearchInput(urlSearchTerm)
     setSearchTerm(urlSearchTerm)
   }, [urlSearchTerm])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchTerm(searchInput)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(handler)
+  }, [searchInput])
 
   // Build filters object
   const filters = useMemo(
@@ -80,7 +91,7 @@ function SpacesPage({ onToggleTheme, mode }) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value)
+    setSearchInput(event.target.value)
   }
 
   // Location options
@@ -115,9 +126,7 @@ function SpacesPage({ onToggleTheme, mode }) {
     <Box sx={{ pb: 6 }}>
       {/* Integrated Filter Header */}
       <FilterHeader
-        onToggleTheme={onToggleTheme}
-        mode={mode}
-        searchTerm={searchTerm}
+        searchTerm={searchInput}
         onSearchChange={handleSearchChange}
         spaceType={spaceType}
         onSpaceTypeChange={setSpaceType}

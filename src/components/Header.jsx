@@ -21,8 +21,6 @@ import {
   useScrollTrigger,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
-import LightModeIcon from '@mui/icons-material/LightMode'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import PersonIcon from '@mui/icons-material/Person'
 import LogoutIcon from '@mui/icons-material/Logout'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
@@ -30,7 +28,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork'
 import ConfirmDialog from './ConfirmDialog'
 import { useAuth } from '../contexts/AuthContext'
 
-function Header({ onToggleTheme, mode }) {
+function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
   const location = useLocation()
@@ -204,20 +202,6 @@ function Header({ onToggleTheme, mode }) {
 
       {/* Bottom Actions */}
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <IconButton
-            onClick={onToggleTheme}
-            sx={{
-              flexGrow: 1,
-              borderRadius: 2,
-              border: 1,
-              borderColor: 'divider',
-            }}
-          >
-            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-          </IconButton>
-        </Box>
-
         {isLoggedIn ? (
           <Button
             fullWidth
@@ -405,30 +389,6 @@ function Header({ onToggleTheme, mode }) {
 
             {/* Desktop Actions */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-              <IconButton
-                onClick={onToggleTheme}
-                aria-label="Toggle theme"
-                sx={(theme) => ({
-                  width: 40,
-                  height: 40,
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  bgcolor:
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.1)'
-                      : 'rgba(0, 0, 0, 0.04)',
-                  '&:hover': {
-                    transform: 'rotate(180deg)',
-                    bgcolor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.15)'
-                        : 'rgba(0, 0, 0, 0.08)',
-                  },
-                })}
-              >
-                {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
-
               {isLoggedIn ? (
                 <>
                   {isAdmin && (

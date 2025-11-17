@@ -7,7 +7,6 @@ import {
   Typography,
   TextField,
   Button,
-  IconButton,
   InputAdornment,
   Divider,
   Container,
@@ -21,8 +20,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import LightModeIcon from '@mui/icons-material/LightMode'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
 
 // Format price for display
@@ -37,8 +34,6 @@ const formatPrice = (price) => {
 }
 
 function FilterHeader({
-  onToggleTheme,
-  mode,
   // Filter props
   searchTerm,
   onSearchChange,
@@ -131,13 +126,25 @@ function FilterHeader({
                 flex: 1,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 0.5,
+                gap: 1,
                 minWidth: 0,
                 order: { xs: 2, md: 2 },
                 width: { xs: '100%', md: 'auto' },
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 3,
+                px: { xs: 1.25, md: 1.75 },
+                py: { xs: 0.75, md: 0.5 },
+                boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
+                transition: 'all 0.2s ease',
+                '&:focus-within': {
+                  borderColor: 'primary.main',
+                  boxShadow: '0 0 0 3px rgba(35, 134, 54, 0.15)',
+                },
               }}
             >
-              <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+              <SearchIcon sx={{ color: 'primary.main', fontSize: 22 }} />
               <TextField
                 placeholder="Search spaces..."
                 variant="standard"
@@ -147,7 +154,8 @@ function FilterHeader({
                 InputProps={{
                   disableUnderline: true,
                   sx: {
-                    fontSize: '0.875rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
                   },
                 }}
                 sx={{ flex: 1 }}
@@ -388,24 +396,6 @@ function FilterHeader({
                 </Popper>
               </Box>
             </ClickAwayListener>
-
-            {/* Theme Toggle */}
-            <IconButton
-              onClick={onToggleTheme}
-              size="small"
-              sx={{
-                width: 36,
-                height: 36,
-                ml: { xs: 0.5, md: 1 },
-                order: { xs: 7, md: 7 },
-              }}
-            >
-              {mode === 'dark' ? (
-                <LightModeIcon fontSize="small" />
-              ) : (
-                <DarkModeIcon fontSize="small" />
-              )}
-            </IconButton>
           </Toolbar>
         </Container>
       </AppBar>

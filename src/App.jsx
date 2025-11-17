@@ -1,12 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { useState, useEffect } from 'react'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './contexts/AuthContext'
-import { ThemeContext } from './contexts/ThemeContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import LandingPage from './pages/LandingPage'
 import SpacesPage from './pages/SpacesPage'
 import SpaceDetailPage from './pages/SpaceDetailPage'
 import LoginPage from './pages/LoginPage'
@@ -25,7 +24,7 @@ import FeatureFlagsPage from './pages/admin/FeatureFlagsPage'
 import UpgradeRequestsPage from './pages/admin/UpgradeRequestsPage'
 import './App.css'
 
-// Create theme with system preference detection
+// Create a light-only theme
 const getDesignTokens = (mode) => ({
   palette: {
     mode,
@@ -154,25 +153,24 @@ const getDesignTokens = (mode) => ({
   },
 })
 
-// Detect system preference
-const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-
 // Component to conditionally render footer
-function AppContent({ toggleTheme, mode }) {
+function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isSpacesRoute = location.pathname === '/spaces' || location.pathname.startsWith('/spaces/')
+  const isLandingRoute = location.pathname === '/' || location.pathname === '/landing'
 
   return (
     <div className="App">
-      {!isAdminRoute && !isSpacesRoute && <Header onToggleTheme={toggleTheme} mode={mode} />}
+      {!isAdminRoute && !isSpacesRoute && <Header />}
       <main style={{ marginTop: isAdminRoute ? 0 : 'auto' }}>
         <Routes>
-          {/* Root redirect to spaces */}
-          <Route path="/" element={<Navigate to="/spaces" replace />} />
+          {/* Marketing Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/landing" element={<LandingPage />} />
 
           {/* Public Routes */}
-          <Route path="/spaces" element={<SpacesPage onToggleTheme={toggleTheme} mode={mode} />} />
+          <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/spaces/:id" element={<SpaceDetailPage />} />
 
           {/* Auth Routes - Admin login only */}
@@ -190,7 +188,7 @@ function AppContent({ toggleTheme, mode }) {
             path="/admin"
             element={
               <AdminRoute>
-                <AdminLayout onToggleTheme={toggleTheme} mode={mode} />
+                <AdminLayout />
               </AdminRoute>
             }
           >
@@ -209,39 +207,20 @@ function AppContent({ toggleTheme, mode }) {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isLandingRoute && <Footer />}
     </div>
   )
 }
 
 function App() {
-  const [mode, setMode] = useState(prefersDarkMode ? 'dark' : 'light')
-
-  const theme = createTheme(getDesignTokens(mode))
-
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
-  }
-
-  // Save theme preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('theme-mode', mode)
-  }, [mode])
-
-  // Load theme preference from localStorage on mount
-  useEffect(() => {
-    const savedMode = localStorage.getItem('theme-mode')
-    if (savedMode) {
-      setMode(savedMode)
-    }
-  }, [])
+  const theme = createTheme(getDesignTokens('light'))
   return (
     <QueryProvider>
       <AuthProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
-            <AppContent toggleTheme={toggleTheme} mode={mode} />
+            <AppContent />
           </Router>
         </ThemeProvider>
       </AuthProvider>
