@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
+import { leadService } from '../../api/services/leadService'
 import styles from './LandingPage.module.css'
 
 const steps = ['Contact', 'Event Details', 'Preferences']
@@ -33,6 +34,7 @@ function LeadForm({ formRef }) {
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -40,11 +42,19 @@ function LeadForm({ formRef }) {
     setErrors((prev) => ({ ...prev, [name]: undefined }))
   }
 
+  const validateEmail = (email) => {
+    const emailRegex =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return emailRegex.test(email)
+  }
+
   const validateStep = () => {
     const nextErrors = {}
     if (currentStep === 0) {
       if (!formData.name) nextErrors.name = 'Name is required'
       if (!formData.email) nextErrors.email = 'Email is required'
+      else if (!validateEmail(formData.email))
+        nextErrors.email = 'Please enter a valid email address'
       if (!formData.phone) nextErrors.phone = 'Phone number is required'
       else if (!isValidPhoneNumber(formData.phone)) nextErrors.phone = 'Enter a valid phone number'
       else if (formData.phone.startsWith('+256') && formData.phone.length !== UG_E164_LENGTH)
@@ -55,6 +65,8 @@ function LeadForm({ formRef }) {
       if (!formData.eventDate) nextErrors.eventDate = 'Event date is required'
       if (!formData.city) nextErrors.city = 'City or location is required'
       if (!formData.guestCount) nextErrors.guestCount = 'Provide an approximate guest count'
+      else if (parseInt(formData.guestCount, 10) < 1)
+        nextErrors.guestCount = 'Guest count must be at least 1'
     }
     if (currentStep === 2) {
       if (!formData.budgetRange) nextErrors.budgetRange = 'Select a budget range'
@@ -75,10 +87,33 @@ function LeadForm({ formRef }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!validateStep()) return
+
     setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    setIsSubmitting(false)
-    setIsSuccess(true)
+    setSubmitError(null)
+
+    try {
+      await leadService.submitLead({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        eventType: formData.eventType,
+        eventDate: formData.eventDate,
+        city: formData.city.trim(),
+        guestCount: parseInt(formData.guestCount, 10),
+        budgetRange: formData.budgetRange,
+        notes: formData.notes?.trim() || '',
+      })
+
+      setIsSuccess(true)
+      setSubmitError(null)
+    } catch (error) {
+      console.error('Error submitting lead:', error)
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to submit form. Please try again.'
+      setSubmitError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const resetForm = () => {
@@ -86,6 +121,7 @@ function LeadForm({ formRef }) {
     setErrors({})
     setCurrentStep(0)
     setIsSuccess(false)
+    setSubmitError(null)
   }
 
   return (
@@ -124,6 +160,20 @@ function LeadForm({ formRef }) {
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
+                {submitError && (
+                  <div
+                    className={styles.error}
+                    style={{
+                      marginBottom: '1rem',
+                      padding: '0.75rem',
+                      backgroundColor: '#fee',
+                      border: '1px solid #fcc',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {submitError}
+                  </div>
+                )}
                 {currentStep === 0 && (
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>

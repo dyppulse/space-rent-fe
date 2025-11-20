@@ -32,6 +32,7 @@ import {
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
   HowToReg as HowToRegIcon,
+  Assignment as AssignmentIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -45,6 +46,7 @@ const menuItems = [
   { text: 'Space Types', icon: <EventNoteIcon />, path: '/admin/space-types' },
   { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
+  { text: 'Property Requests', icon: <AssignmentIcon />, path: '/admin/leads' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
   { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
   { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },

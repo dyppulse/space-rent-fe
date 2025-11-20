@@ -22,6 +22,7 @@ import AmenitiesPage from './pages/admin/AmenitiesPage'
 import BookingsPage from './pages/admin/BookingsPage'
 import FeatureFlagsPage from './pages/admin/FeatureFlagsPage'
 import UpgradeRequestsPage from './pages/admin/UpgradeRequestsPage'
+import LeadsPage from './pages/admin/LeadsPage'
 import './App.css'
 
 // Create a light-only theme
@@ -198,6 +199,7 @@ function AppContent() {
             <Route path="space-types" element={<SpaceTypesPage />} />
             <Route path="amenities" element={<AmenitiesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
+            <Route path="leads" element={<LeadsPage />} />
             <Route path="locations" element={<LocationsPage />} />
             <Route path="feature-flags" element={<FeatureFlagsPage />} />
             <Route path="upgrade-requests" element={<UpgradeRequestsPage />} />
