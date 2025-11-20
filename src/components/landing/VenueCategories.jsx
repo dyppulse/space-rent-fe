@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { Pagination, Box } from '@mui/material'
 import { useSpaces } from '../../api/queries/spaceQueries'
 import styles from './LandingPage.module.css'
@@ -14,8 +13,7 @@ import styles from './LandingPage.module.css'
 //   { name: 'Lakefront Retreats', image: '/images/outdoor-party-space-4.jpg' },
 // ]
 
-function VenueCategories() {
-  const navigate = useNavigate()
+function VenueCategories({ onSpaceSelect }) {
   const [page, setPage] = useState(1)
   const spacesPerPage = 6
 
@@ -49,8 +47,10 @@ function VenueCategories() {
     }
   }
 
-  const handleSpaceClick = (spaceId) => {
-    navigate(`/spaces/${spaceId}`)
+  const handleSpaceClick = (space) => {
+    if (onSpaceSelect) {
+      onSpaceSelect(space)
+    }
   }
 
   const getSpaceImage = (space) => {
@@ -136,7 +136,7 @@ function VenueCategories() {
                 <button
                   type="button"
                   className={styles.categoryButton}
-                  onClick={() => handleSpaceClick(space.id)}
+                  onClick={() => handleSpaceClick(space)}
                 >
                   View Space
                   <ArrowUpRight size={18} />

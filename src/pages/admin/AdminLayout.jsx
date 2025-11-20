@@ -41,15 +41,15 @@ const drawerWidth = 240
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin' },
+  { text: 'Property Requests', icon: <AssignmentIcon />, path: '/admin/leads' },
   { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
   { text: 'Spaces', icon: <BusinessIcon />, path: '/admin/spaces' },
   { text: 'Space Types', icon: <EventNoteIcon />, path: '/admin/space-types' },
   { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
-  { text: 'Property Requests', icon: <AssignmentIcon />, path: '/admin/leads' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
-  { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
-  { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
+  // { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
+  // { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
 ]
 
 const AdminLayout = () => {

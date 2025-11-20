@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { leadService } from '../../api/services/leadService'
@@ -28,13 +28,42 @@ const budgetRanges = [
   '>$15,000',
 ]
 
-function LeadForm({ formRef }) {
+function LeadForm({ formRef, selectedSpace: selectedSpaceProp = null, onClearSelectedSpace }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState(initialFormState)
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  const [selectedSpace, setSelectedSpace] = useState(selectedSpaceProp)
+
+  useEffect(() => {
+    if (selectedSpaceProp) {
+      setSelectedSpace(selectedSpaceProp)
+      return
+    }
+
+    if (selectedSpaceProp === null) {
+      setSelectedSpace(null)
+    }
+  }, [selectedSpaceProp])
+
+  useEffect(() => {
+    if (selectedSpaceProp) return
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const id = params.get('spaceId')
+      const name = params.get('spaceName')
+      if (id) {
+        setSelectedSpace({
+          id,
+          name: name || 'Selected space',
+        })
+      }
+    } catch (error) {
+      console.error('Error parsing space selection from URL', error)
+    }
+  }, [selectedSpaceProp])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -102,6 +131,7 @@ function LeadForm({ formRef }) {
         guestCount: parseInt(formData.guestCount, 10),
         budgetRange: formData.budgetRange,
         notes: formData.notes?.trim() || '',
+        spaceId: selectedSpace?.id || null,
       })
 
       setIsSuccess(true)
@@ -133,6 +163,50 @@ function LeadForm({ formRef }) {
           <p>How can we reach you?</p>
 
           <div className={styles.formCard}>
+            {selectedSpace && (
+              <div
+                style={{
+                  backgroundColor: '#f0f7ff',
+                  border: '1px solid #cfe0ff',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                }}
+              >
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '0.85rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#1b4ddb',
+                    }}
+                  >
+                    Booking request for
+                  </p>
+                  <strong style={{ fontSize: '1rem' }}>
+                    {selectedSpace.name || 'Selected space'}
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={() => {
+                    setSelectedSpace(null)
+                    onClearSelectedSpace?.()
+                  }}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Change selection
+                </button>
+              </div>
+            )}
             <div className={styles.steps}>
               {steps.map((label, index) => (
                 <div

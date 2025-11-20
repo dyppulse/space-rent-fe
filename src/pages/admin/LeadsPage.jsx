@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Box,
   Paper,
@@ -23,176 +23,15 @@ import {
   Grid,
   Card,
   CardContent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
 } from '@mui/material'
 import {
   Search as SearchIcon,
   Assignment as AssignmentIcon,
   Visibility as ViewIcon,
-  Edit as EditIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  LocationOn as LocationIcon,
-  Event as EventIcon,
-  People as PeopleIcon,
-  AttachMoney as MoneyIcon,
 } from '@mui/icons-material'
 import { format } from 'date-fns'
+import { useNavigate } from 'react-router-dom'
 import { leadService } from '../../api/services/leadService'
-
-const LeadDetailDialog = ({ open, onClose, lead, onStatusUpdate }) => {
-  const [status, setStatus] = useState(lead?.status || 'new')
-  const [updating, setUpdating] = useState(false)
-
-  useEffect(() => {
-    if (lead) {
-      setStatus(lead.status)
-    }
-  }, [lead])
-
-  const handleStatusUpdate = async () => {
-    if (!lead || status === lead.status) {
-      onClose()
-      return
-    }
-
-    try {
-      setUpdating(true)
-      await leadService.updateLeadStatus(lead.id, status)
-      onStatusUpdate()
-      onClose()
-    } catch (error) {
-      console.error('Error updating lead status:', error)
-      alert(error.response?.data?.message || 'Error updating lead status')
-    } finally {
-      setUpdating(false)
-    }
-  }
-
-  if (!lead) return null
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Lead Details</DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <PhoneIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Name
-              </Typography>
-            </Box>
-            <Typography variant="body1" fontWeight="medium">
-              {lead.name}
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <EmailIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Email
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.email}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <PhoneIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Phone
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.phone}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <EventIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Event Type
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.eventType}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <EventIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Event Date
-              </Typography>
-            </Box>
-            <Typography variant="body1">
-              {format(new Date(lead.eventDate), 'MMM dd, yyyy')}
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <LocationIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                City / Location
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.city}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <PeopleIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Guest Count
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.guestCount} guests</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <MoneyIcon fontSize="small" color="action" />
-              <Typography variant="body2" color="textSecondary">
-                Budget Range
-              </Typography>
-            </Box>
-            <Typography variant="body1">{lead.budgetRange}</Typography>
-          </Grid>
-          {lead.notes && (
-            <Grid item xs={12}>
-              <Typography variant="body2" color="textSecondary" mb={1}>
-                Special Notes
-              </Typography>
-              <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-                <Typography variant="body2">{lead.notes}</Typography>
-              </Paper>
-            </Grid>
-          )}
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
-                <MenuItem value="new">New</MenuItem>
-                <MenuItem value="contacted">Contacted</MenuItem>
-                <MenuItem value="converted">Converted</MenuItem>
-                <MenuItem value="closed">Closed</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="caption" color="textSecondary">
-              Submitted: {format(new Date(lead.createdAt), 'MMM dd, yyyy HH:mm')}
-            </Typography>
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-        <Button onClick={handleStatusUpdate} variant="contained" disabled={updating}>
-          {updating ? 'Updating...' : 'Update Status'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  )
-}
 
 const LeadsPage = () => {
   const [leads, setLeads] = useState([])
@@ -202,14 +41,10 @@ const LeadsPage = () => {
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [detailDialog, setDetailDialog] = useState({ open: false, lead: null })
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    fetchLeads()
-  }, [page, rowsPerPage, statusFilter])
-
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true)
       const params = {
@@ -227,23 +62,18 @@ const LeadsPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, rowsPerPage, statusFilter])
 
-  const handleViewLead = (lead) => {
-    setDetailDialog({ open: true, lead })
-  }
-
-  const handleCloseDialog = () => {
-    setDetailDialog({ open: false, lead: null })
-  }
-
-  const handleStatusUpdate = () => {
+  useEffect(() => {
     fetchLeads()
-    showSnackbar('Lead status updated successfully', 'success')
-  }
+  }, [fetchLeads])
 
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity })
+  }
+
+  const handleNavigateToLead = (leadId) => {
+    navigate(`/admin/leads/${leadId}`)
   }
 
   const handleChangePage = (event, newPage) => {
@@ -403,6 +233,7 @@ const LeadsPage = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
+                <TableCell>Request Type</TableCell>
                 <TableCell>Contact</TableCell>
                 <TableCell>Event Details</TableCell>
                 <TableCell>Location</TableCell>
@@ -416,7 +247,7 @@ const LeadsPage = () => {
             <TableBody>
               {filteredLeads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
+                  <TableCell colSpan={10} align="center">
                     <Typography variant="body2" color="textSecondary" sx={{ py: 3 }}>
                       {loading ? 'Loading...' : 'No leads found'}
                     </Typography>
@@ -424,9 +255,28 @@ const LeadsPage = () => {
                 </TableRow>
               ) : (
                 filteredLeads.map((lead) => (
-                  <TableRow key={lead.id} hover>
+                  <TableRow
+                    key={lead.id}
+                    hover
+                    onClick={() => handleNavigateToLead(lead.id)}
+                    sx={{ cursor: 'pointer' }}
+                  >
                     <TableCell>
                       <Typography variant="subtitle2">{lead.name}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      {lead.space ? (
+                        <Box>
+                          <Chip label="Space interest" color="secondary" size="small" />
+                          {lead.space?.name && (
+                            <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                              {lead.space.name}
+                            </Typography>
+                          )}
+                        </Box>
+                      ) : (
+                        <Chip label="General request" variant="outlined" size="small" />
+                      )}
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">{lead.email}</Typography>
@@ -448,7 +298,14 @@ const LeadsPage = () => {
                     </TableCell>
                     <TableCell>{format(new Date(lead.createdAt), 'MMM dd, yyyy')}</TableCell>
                     <TableCell align="right">
-                      <IconButton size="small" onClick={() => handleViewLead(lead)} color="primary">
+                      <IconButton
+                        size="small"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleNavigateToLead(lead.id)
+                        }}
+                        color="primary"
+                      >
                         <ViewIcon />
                       </IconButton>
                     </TableCell>
@@ -468,14 +325,6 @@ const LeadsPage = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-
-      {/* Lead Detail Dialog */}
-      <LeadDetailDialog
-        open={detailDialog.open}
-        onClose={handleCloseDialog}
-        lead={detailDialog.lead}
-        onStatusUpdate={handleStatusUpdate}
-      />
 
       {/* Snackbar */}
       <Snackbar
