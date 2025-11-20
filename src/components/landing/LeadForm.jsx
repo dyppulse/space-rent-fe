@@ -178,22 +178,6 @@ function LeadForm({ formRef, selectedSpace: selectedSpaceProp = null, onClearSel
                   gap: '0.75rem',
                 }}
               >
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: '0.85rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#1b4ddb',
-                    }}
-                  >
-                    Booking request for
-                  </p>
-                  <strong style={{ fontSize: '1rem' }}>
-                    {selectedSpace.name || 'Selected space'}
-                  </strong>
-                </div>
                 <button
                   type="button"
                   className={styles.secondaryButton}
