@@ -31,9 +31,8 @@ import {
   Settings as SettingsIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
-  LightMode as LightModeIcon,
-  DarkMode as DarkModeIcon,
   HowToReg as HowToRegIcon,
+  Assignment as AssignmentIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -42,17 +41,18 @@ const drawerWidth = 240
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin' },
+  { text: 'Property Requests', icon: <AssignmentIcon />, path: '/admin/leads' },
   { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
   { text: 'Spaces', icon: <BusinessIcon />, path: '/admin/spaces' },
   { text: 'Space Types', icon: <EventNoteIcon />, path: '/admin/space-types' },
   { text: 'Amenities', icon: <StarIcon />, path: '/admin/amenities' },
   { text: 'Bookings', icon: <EventIcon />, path: '/admin/bookings' },
   { text: 'Locations', icon: <LocationIcon />, path: '/admin/locations' },
-  { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
-  { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
+  // { text: 'Upgrade Requests', icon: <HowToRegIcon />, path: '/admin/upgrade-requests' },
+  // { text: 'Feature Flags', icon: <SettingsIcon />, path: '/admin/feature-flags' },
 ]
 
-const AdminLayout = ({ onToggleTheme, mode }) => {
+const AdminLayout = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -152,9 +152,6 @@ const AdminLayout = ({ onToggleTheme, mode }) => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={onToggleTheme} aria-label="Toggle theme" color="inherit">
-              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-            </IconButton>
             <Button color="inherit" onClick={handleMenuOpen} startIcon={<AccountIcon />}>
               Admin
             </Button>

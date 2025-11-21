@@ -19,37 +19,22 @@ import {
   MenuItem,
   Chip,
   useScrollTrigger,
-  Fade,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
-import LightModeIcon from '@mui/icons-material/LightMode'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import PersonIcon from '@mui/icons-material/Person'
 import LogoutIcon from '@mui/icons-material/Logout'
-import DashboardIcon from '@mui/icons-material/Dashboard'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import HomeWorkIcon from '@mui/icons-material/HomeWork'
-import BookOnlineIcon from '@mui/icons-material/BookOnline'
-import BusinessIcon from '@mui/icons-material/Business'
-import CheckIcon from '@mui/icons-material/Check'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import Badge from '@mui/material/Badge'
 import ConfirmDialog from './ConfirmDialog'
-import SignupTypeDialog from './SignupTypeDialog'
-import RoleSwitcher from './RoleSwitcher'
 import { useAuth } from '../contexts/AuthContext'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { authService } from '../api/services/authService'
 
-function Header({ onToggleTheme, mode }) {
+function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
-  const [signupDialogOpen, setSignupDialogOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, initialized } = useAuth()
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 50 })
-  const queryClient = useQueryClient()
 
   const [confirm, setConfirm] = useState(false)
 
@@ -57,43 +42,9 @@ function Header({ onToggleTheme, mode }) {
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'superadmin'
 
-  // Role switching mutation
-  const switchRoleMutation = useMutation({
-    mutationFn: (role) => authService.switchRole(role),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['auth', 'user'], data.user)
-      queryClient.setQueryData(['auth', 'status'], data)
-      queryClient.invalidateQueries({ queryKey: ['spaces'] })
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      handleMenuClose()
-    },
-  })
-
-  const handleRoleSwitch = (role) => {
-    if (role !== user?.activeRole) {
-      switchRoleMutation.mutate(role)
-    } else {
-      handleMenuClose()
-    }
-  }
-
-  // Check if user has multiple roles
-  const hasMultipleRoles = user?.roles && Array.isArray(user.roles) && user.roles.length > 1
-  const hasClientRole = user?.roles?.includes('client')
-  const hasOwnerRole = user?.roles?.includes('owner')
-
-  // Debug log for role switcher
-  console.log('Header - Role Switcher Debug:', {
-    hasMultipleRoles,
-    userRoles: user?.roles,
-    hasClientRole,
-    hasOwnerRole,
-    activeRole: user?.activeRole,
-  })
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
+  // const handleMenuOpen = (event) => {
+  //   setAnchorEl(event.currentTarget)
+  // }
 
   const handleMenuClose = () => {
     setAnchorEl(null)
@@ -106,7 +57,7 @@ function Header({ onToggleTheme, mode }) {
         <Container maxWidth="lg">
           <Toolbar disableGutters>
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              SpaceHire
+              Spaces
             </Typography>
           </Toolbar>
         </Container>
@@ -126,24 +77,17 @@ function Header({ onToggleTheme, mode }) {
     try {
       await logout()
       setConfirm(false)
-      navigate('/auth/login')
+      navigate('/spaces')
     } catch (error) {
       console.error('Logout failed:', error)
-      // Even if logout fails, redirect to login page
+      // Even if logout fails, redirect to spaces
       setConfirm(false)
-      navigate('/auth/login')
+      navigate('/spaces')
     }
   }
 
-  // Create navLinks dynamically based on auth state and active role
-  const navLinks = [
-    { name: 'Home', path: isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/' },
-    ...(isLoggedIn && !isAdmin && user?.activeRole === 'owner'
-      ? [{ name: 'Manage Bookings', path: '/dashboard/bookings' }]
-      : []),
-    { name: 'Explore', path: '/spaces' },
-    { name: 'How It Works', path: '/how-it-works' },
-  ]
+  // Marketing focus: hide Spaces link for now
+  const navLinks = [] // [{ name: 'Spaces', path: '/spaces' }]
 
   const drawer = (
     <Box sx={{ width: 280, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -164,7 +108,7 @@ function Header({ onToggleTheme, mode }) {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            SpaceHire
+            Spaces
           </Typography>
         </Box>
 
@@ -258,25 +202,6 @@ function Header({ onToggleTheme, mode }) {
 
       {/* Bottom Actions */}
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-        {isLoggedIn && (
-          <Box sx={{ mb: 2 }}>
-            <RoleSwitcher />
-          </Box>
-        )}
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <IconButton
-            onClick={onToggleTheme}
-            sx={{
-              flexGrow: 1,
-              borderRadius: 2,
-              border: 1,
-              borderColor: 'divider',
-            }}
-          >
-            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-          </IconButton>
-        </Box>
-
         {isLoggedIn ? (
           <Button
             fullWidth
@@ -295,36 +220,19 @@ function Header({ onToggleTheme, mode }) {
             Logout
           </Button>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              component={Link}
-              to="/auth/login"
-              onClick={handleDrawerToggle}
-              sx={{
-                borderRadius: 2,
-                fontWeight: 600,
-              }}
-            >
-              Log in
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              color="success"
-              onClick={() => {
-                handleDrawerToggle()
-                setSignupDialogOpen(true)
-              }}
-              sx={{
-                borderRadius: 2,
-                fontWeight: 600,
-              }}
-            >
-              Sign up
-            </Button>
-          </Box>
+          <Button
+            fullWidth
+            variant="outlined"
+            component={Link}
+            to="/auth/login"
+            onClick={handleDrawerToggle}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+            }}
+          >
+            Log in
+          </Button>
         )}
       </Box>
     </Box>
@@ -352,7 +260,7 @@ function Header({ onToggleTheme, mode }) {
             {/* Logo with Icon */}
             <Box
               component={Link}
-              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/'}
+              to="/spaces"
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -411,7 +319,7 @@ function Header({ onToggleTheme, mode }) {
                   letterSpacing: '-0.5px',
                 }}
               >
-                SpaceHire
+                Spaces
               </Typography>
             </Box>
 
@@ -480,68 +388,7 @@ function Header({ onToggleTheme, mode }) {
             </Box>
 
             {/* Desktop Actions */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-              {isLoggedIn && hasMultipleRoles && (
-                <Box sx={{ mr: 1 }}>
-                  <RoleSwitcher />
-                </Box>
-              )}
-
-              <IconButton
-                onClick={onToggleTheme}
-                aria-label="Toggle theme"
-                sx={(theme) => ({
-                  width: 40,
-                  height: 40,
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  bgcolor:
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.1)'
-                      : 'rgba(0, 0, 0, 0.04)',
-                  '&:hover': {
-                    transform: 'rotate(180deg)',
-                    bgcolor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.15)'
-                        : 'rgba(0, 0, 0, 0.08)',
-                  },
-                })}
-              >
-                {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
-
-              {isLoggedIn && (
-                <IconButton
-                  sx={(theme) => ({
-                    width: 40,
-                    height: 40,
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease',
-                    bgcolor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.1)'
-                        : 'rgba(0, 0, 0, 0.04)',
-                    position: 'relative',
-                    '&:hover': {
-                      bgcolor:
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.15)'
-                          : 'rgba(0, 0, 0, 0.08)',
-                      transform: 'scale(1.05)',
-                    },
-                  })}
-                >
-                  <Badge
-                    badgeContent={0}
-                    color="error"
-                    sx={{ '& .MuiBadge-badge': { fontSize: '0.6rem', minWidth: 16, height: 16 } }}
-                  >
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
-              )}
-
+            {/* <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
               {isLoggedIn ? (
                 <>
                   {isAdmin && (
@@ -575,53 +422,32 @@ function Header({ onToggleTheme, mode }) {
                   </IconButton>
                 </>
               ) : (
-                <>
-                  <Button
-                    component={Link}
-                    to="/auth/login"
-                    sx={(theme) => ({
-                      fontWeight: 600,
-                      borderRadius: 2.5,
-                      px: 3,
-                      py: 1,
-                      transition: 'all 0.2s ease',
-                      color:
+                <Button
+                  component={Link}
+                  to="/auth/login"
+                  sx={(theme) => ({
+                    fontWeight: 600,
+                    borderRadius: 2.5,
+                    px: 3,
+                    py: 1,
+                    transition: 'all 0.2s ease',
+                    color:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.9)'
+                        : 'rgba(0, 0, 0, 0.8)',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      bgcolor:
                         theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.9)'
-                          : 'rgba(0, 0, 0, 0.8)',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        bgcolor:
-                          theme.palette.mode === 'dark'
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(0, 0, 0, 0.04)',
-                      },
-                    })}
-                  >
-                    Log in
-                  </Button>
-                  <Button
-                    onClick={() => setSignupDialogOpen(true)}
-                    variant="contained"
-                    color="success"
-                    sx={{
-                      fontWeight: 600,
-                      borderRadius: 2.5,
-                      px: 3,
-                      py: 1,
-                      boxShadow: '0 2px 8px rgba(35, 134, 54, 0.3)',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(35, 134, 54, 0.4)',
-                      },
-                    }}
-                  >
-                    Sign up
-                  </Button>
-                </>
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'rgba(0, 0, 0, 0.04)',
+                    },
+                  })}
+                >
+                  Log in
+                </Button>
               )}
-            </Box>
+            </Box> */}
 
             {/* Mobile Menu Button */}
             <IconButton
@@ -698,53 +524,6 @@ function Header({ onToggleTheme, mode }) {
           </MenuItem>
         )}
 
-        {hasMultipleRoles && (
-          <>
-            <Divider />
-            <Box sx={{ px: 2, py: 1 }}>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 600 }}
-              >
-                View As
-              </Typography>
-            </Box>
-            {hasClientRole && (
-              <MenuItem
-                onClick={() => handleRoleSwitch('client')}
-                disabled={switchRoleMutation.isPending}
-                sx={{ py: 1.5, gap: 1.5 }}
-              >
-                <PersonIcon fontSize="small" />
-                <Box sx={{ flexGrow: 1 }}>Client</Box>
-                {user?.activeRole === 'client' && <CheckIcon fontSize="small" color="primary" />}
-              </MenuItem>
-            )}
-            {hasOwnerRole && (
-              <MenuItem
-                onClick={() => handleRoleSwitch('owner')}
-                disabled={switchRoleMutation.isPending}
-                sx={{ py: 1.5, gap: 1.5 }}
-              >
-                <BusinessIcon fontSize="small" />
-                <Box sx={{ flexGrow: 1 }}>
-                  Owner
-                  {user?.activeRole === 'owner' && !user?.isVerified && (
-                    <Chip
-                      label="Pending"
-                      size="small"
-                      color="warning"
-                      sx={{ ml: 1, height: 18, fontSize: '0.6rem' }}
-                    />
-                  )}
-                </Box>
-                {user?.activeRole === 'owner' && <CheckIcon fontSize="small" color="primary" />}
-              </MenuItem>
-            )}
-          </>
-        )}
-
         <Divider />
 
         <MenuItem
@@ -786,8 +565,6 @@ function Header({ onToggleTheme, mode }) {
         onClose={() => setConfirm(false)}
         onConfirm={confirmLogout}
       />
-
-      <SignupTypeDialog open={signupDialogOpen} onClose={() => setSignupDialogOpen(false)} />
     </>
   )
 }

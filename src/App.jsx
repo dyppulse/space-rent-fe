@@ -1,38 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { useState, useEffect } from 'react'
 import { QueryProvider } from './providers/QueryProvider'
 import { AuthProvider } from './contexts/AuthContext'
-import { ThemeContext } from './contexts/ThemeContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import HomePage from './pages/HomePage'
+import LandingPage from './pages/LandingPage'
 import SpacesPage from './pages/SpacesPage'
 import SpaceDetailPage from './pages/SpaceDetailPage'
-import BookingWizard from './pages/BookingWizard'
 import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import OwnerSignupPage from './pages/OwnerSignupPage'
-import PendingVerificationPage from './pages/PendingVerificationPage'
-import UpgradeRequestPage from './pages/UpgradeRequestPage'
-import EmailVerificationPage from './pages/EmailVerificationPage'
-import DashboardPage from './pages/DashboardPage'
-import DashboardWrapper from './components/DashboardWrapper'
-import NewSpacePage from './pages/NewSpacePage'
-import EditSpace from './pages/EditSpace'
-import BookingsManagementPage from './pages/BookingsManagementPage'
-import HowItWorksPage from './pages/HowItWorksPage'
 import NotFound from './pages/NotFound'
-import WorkInProgress from './pages/WorkInProgress'
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
-import ContactPage from './pages/ContactPage'
-import TermsOfServicePage from './pages/TermsOfServicePage'
-import AboutPage from './pages/AboutPage'
-import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import SmartRoute from './components/SmartRoute'
-import OwnerOnlyRoute from './components/OwnerOnlyRoute'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import UsersPage from './pages/admin/UsersPage'
@@ -43,9 +22,11 @@ import AmenitiesPage from './pages/admin/AmenitiesPage'
 import BookingsPage from './pages/admin/BookingsPage'
 import FeatureFlagsPage from './pages/admin/FeatureFlagsPage'
 import UpgradeRequestsPage from './pages/admin/UpgradeRequestsPage'
+import LeadsPage from './pages/admin/LeadsPage'
+import LeadDetailPage from './pages/admin/LeadDetailPage'
 import './App.css'
 
-// Create theme with system preference detection
+// Create a light-only theme
 const getDesignTokens = (mode) => ({
   palette: {
     mode,
@@ -174,109 +155,33 @@ const getDesignTokens = (mode) => ({
   },
 })
 
-// Detect system preference
-const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-
 // Component to conditionally render footer
-function AppContent({ toggleTheme, mode }) {
+function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isSpacesRoute = location.pathname === '/spaces' || location.pathname.startsWith('/spaces/')
+  const isLandingRoute = location.pathname === '/' || location.pathname === '/landing'
 
   return (
     <div className="App">
-      {!isAdminRoute && <Header onToggleTheme={toggleTheme} mode={mode} />}
+      {!isAdminRoute && !isSpacesRoute && <Header />}
       <main style={{ marginTop: isAdminRoute ? 0 : 'auto' }}>
         <Routes>
-          {/* Public Routes - Available to all users */}
-          <Route path="/" element={<HomePage />} />
+          {/* Marketing Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/landing" element={<LandingPage />} />
 
-          {/* Public Routes - Available to all users */}
+          {/* Public Routes */}
           <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/spaces/:id" element={<SpaceDetailPage />} />
-          <Route path="/spaces/:id/book" element={<BookingWizard />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsOfServicePage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/work-in-progress" element={<WorkInProgress />} />
 
-          {/* Auth Routes - Redirect logged-in users to dashboard */}
+          {/* Auth Routes - Admin login only */}
           <Route
             path="/auth/login"
             element={
-              <SmartRoute redirectTo="/dashboard">
+              <SmartRoute redirectTo="/spaces">
                 <LoginPage />
               </SmartRoute>
-            }
-          />
-          <Route
-            path="/auth/signup"
-            element={
-              <SmartRoute redirectTo="/dashboard">
-                <SignupPage />
-              </SmartRoute>
-            }
-          />
-          <Route
-            path="/auth/signup/owner"
-            element={
-              <SmartRoute redirectTo="/dashboard">
-                <OwnerSignupPage />
-              </SmartRoute>
-            }
-          />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route
-            path="/signup/pending-verification"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <PendingVerificationPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/upgrade-request"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <UpgradeRequestPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Protected Owner Routes */}
-          <Route
-            path="/dashboard/spaces/new"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <NewSpacePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard/spaces/:id/edit"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <EditSpace />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <DashboardWrapper />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard/bookings"
-            element={
-              <PrivateRoute redirectTo="/auth/login">
-                <OwnerOnlyRoute redirectTo="/dashboard">
-                  <BookingsManagementPage />
-                </OwnerOnlyRoute>
-              </PrivateRoute>
             }
           />
 
@@ -285,7 +190,7 @@ function AppContent({ toggleTheme, mode }) {
             path="/admin"
             element={
               <AdminRoute>
-                <AdminLayout onToggleTheme={toggleTheme} mode={mode} />
+                <AdminLayout />
               </AdminRoute>
             }
           >
@@ -295,6 +200,8 @@ function AppContent({ toggleTheme, mode }) {
             <Route path="space-types" element={<SpaceTypesPage />} />
             <Route path="amenities" element={<AmenitiesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
+            <Route path="leads" element={<LeadsPage />} />
+            <Route path="leads/:id" element={<LeadDetailPage />} />
             <Route path="locations" element={<LocationsPage />} />
             <Route path="feature-flags" element={<FeatureFlagsPage />} />
             <Route path="upgrade-requests" element={<UpgradeRequestsPage />} />
@@ -304,39 +211,20 @@ function AppContent({ toggleTheme, mode }) {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isLandingRoute && <Footer />}
     </div>
   )
 }
 
 function App() {
-  const [mode, setMode] = useState(prefersDarkMode ? 'dark' : 'light')
-
-  const theme = createTheme(getDesignTokens(mode))
-
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
-  }
-
-  // Save theme preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('theme-mode', mode)
-  }, [mode])
-
-  // Load theme preference from localStorage on mount
-  useEffect(() => {
-    const savedMode = localStorage.getItem('theme-mode')
-    if (savedMode) {
-      setMode(savedMode)
-    }
-  }, [])
+  const theme = createTheme(getDesignTokens('light'))
   return (
     <QueryProvider>
       <AuthProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
-            <AppContent toggleTheme={toggleTheme} mode={mode} />
+            <AppContent />
           </Router>
         </ThemeProvider>
       </AuthProvider>

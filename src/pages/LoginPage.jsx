@@ -66,7 +66,7 @@ function LoginPage() {
 
         <Box sx={{ p: 3 }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-            Welcome to SpaceHire
+            Welcome to Spaces
           </Typography>
 
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>

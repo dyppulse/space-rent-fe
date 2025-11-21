@@ -30,7 +30,7 @@ import {
   CardContent,
   Switch,
   FormControlLabel,
-  TextareaAutosize,
+  // TextareaAutosize,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -39,16 +39,26 @@ import {
   Search as SearchIcon,
   Business as BusinessIcon,
   Visibility as ViewIcon,
+  CloudUpload as CloudUploadIcon,
+  Close as CloseIcon,
+  Image as ImageIcon,
 } from '@mui/icons-material'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import axiosInstance from '../../api/axiosInstance'
 
+// eslint-disable-next-line no-unused-vars
 const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }) => {
+  const [selectedImages, setSelectedImages] = useState([])
+  const [existingImages, setExistingImages] = useState([])
+  const [imagesToRemove, setImagesToRemove] = useState([])
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([])
+
   const formik = useFormik({
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: true,
     validateOnMount: false,
+    enableReinitialize: false,
     initialValues: initialValues || {
       name: '',
       description: '',
@@ -56,7 +66,6 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
       capacity: '',
       price: '',
       isActive: true,
-      owner: '',
       location: {
         address: '',
         city: '',
@@ -80,26 +89,180 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
       spaceType: Yup.string().required('Space type is required'),
       capacity: Yup.number().positive('Capacity must be positive').required('Capacity is required'),
       price: Yup.number().positive('Price must be positive').required('Price is required'),
-      owner: Yup.string().required('Owner is required'),
+      // owner: Yup.string().required('Owner is required'),
       'location.address': Yup.string().required('Address is required'),
       'location.city': Yup.string().required('City is required'),
       'location.state': Yup.string().required('State is required'),
     }),
-    onSubmit: (values) => {
-      onSubmit(values)
+    onSubmit: async (values, { setSubmitting }) => {
+      console.log('SpaceForm onSubmit called with values:', values)
+      console.log('Form validation errors:', formik.errors)
+
+      try {
+        // Create FormData for file upload
+        const formData = new FormData()
+
+        // Add all form fields
+        Object.keys(values).forEach((key) => {
+          if (key === 'images') return // Skip images, handled separately
+          if (key === 'owner') return // Skip owner field (commented out)
+          if (key === 'location') {
+            formData.append('location', JSON.stringify(values.location))
+          } else if (key === 'amenities') {
+            formData.append('amenities', JSON.stringify(values.amenities))
+          } else if (key === 'capacity') {
+            formData.append('capacity', JSON.stringify(values.capacity))
+          } else if (key === 'price') {
+            formData.append('price', JSON.stringify(values.price))
+          } else {
+            formData.append(key, values[key])
+          }
+        })
+
+        // Add new image files
+        selectedImages.forEach((file) => {
+          formData.append('images', file)
+        })
+
+        // Add images to remove (for editing)
+        if (isEditing && imagesToRemove.length > 0) {
+          formData.append('imagesToRemove', JSON.stringify(imagesToRemove))
+        }
+
+        console.log('Calling onSubmit with formData')
+        await onSubmit(formData)
+        setSubmitting(false)
+      } catch (error) {
+        console.error('Error in form submission:', error)
+        setSubmitting(false)
+      }
     },
   })
 
   useEffect(() => {
     if (open && initialValues) {
-      formik.setValues(initialValues)
+      // Remove owner field if present
+      // eslint-disable-next-line no-unused-vars
+      const { owner, ...valuesWithoutOwner } = initialValues
+      // Ensure location object exists
+      if (!valuesWithoutOwner.location) {
+        valuesWithoutOwner.location = {
+          address: '',
+          city: '',
+          state: '',
+          district: '',
+          county: '',
+          subCounty: '',
+          parish: '',
+          village: '',
+          coordinates: { lat: '', lng: '' },
+        }
+      }
+      formik.setValues(valuesWithoutOwner)
+      // Set existing images
+      const existing = initialValues.images || []
+      setExistingImages(existing)
+      setImagesToRemove([])
+      setSelectedImages([])
+      setImagePreviewUrls([])
+    } else if (open && !initialValues) {
+      // Reset for new space - ensure location is properly initialized
+      formik.resetForm({
+        values: {
+          name: '',
+          description: '',
+          spaceType: '',
+          capacity: '',
+          price: '',
+          isActive: true,
+          location: {
+            address: '',
+            city: '',
+            state: '',
+            district: '',
+            county: '',
+            subCounty: '',
+            parish: '',
+            village: '',
+            coordinates: {
+              lat: '',
+              lng: '',
+            },
+          },
+          amenities: [],
+          images: [],
+        },
+      })
+      setExistingImages([])
+      setImagesToRemove([])
+      setSelectedImages([])
+      setImagePreviewUrls([])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialValues])
+
+  const handleImageSelect = (event) => {
+    const files = Array.from(event.target.files)
+    if (files.length + selectedImages.length + existingImages.length - imagesToRemove.length > 10) {
+      alert('Maximum 10 images allowed')
+      return
+    }
+
+    setSelectedImages((prev) => [...prev, ...files])
+
+    // Create preview URLs
+    const newPreviews = files.map((file) => URL.createObjectURL(file))
+    setImagePreviewUrls((prev) => [...prev, ...newPreviews])
+  }
+
+  const handleRemoveNewImage = (index) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index))
+    // Revoke preview URL
+    URL.revokeObjectURL(imagePreviewUrls[index])
+    setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleRemoveExistingImage = (imageUrl) => {
+    setImagesToRemove((prev) => [...prev, imageUrl])
+    setExistingImages((prev) => prev.filter((img) => img.url !== imageUrl))
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  const handleRestoreImage = (imageUrl) => {
+    setImagesToRemove((prev) => prev.filter((url) => url !== imageUrl))
+    // Find the original image from initialValues
+    const originalImage = initialValues?.images?.find((img) => img.url === imageUrl)
+    if (originalImage) {
+      setExistingImages((prev) => [...prev, originalImage])
+    }
+  }
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [imagePreviewUrls])
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{isEditing ? 'Edit Space' : 'Create New Space'}</DialogTitle>
       <DialogContent>
+        {/* Display validation errors */}
+        {Object.keys(formik.errors).length > 0 && (
+          <Box sx={{ mb: 2, p: 2, bgcolor: '#fee', borderRadius: 1 }}>
+            <Typography variant="body2" color="error">
+              Please fix the following errors:
+            </Typography>
+            <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              {Object.entries(formik.errors).map(([key, error]) => (
+                <li key={key} style={{ fontSize: '0.875rem', color: '#d32f2f' }}>
+                  {key}: {error}
+                </li>
+              ))}
+            </ul>
+          </Box>
+        )}
         <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -114,7 +277,8 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                 helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Owner field commented out for now */}
+            {/* <Grid size={{ xs: 12, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Owner</InputLabel>
                 <Select
@@ -132,7 +296,7 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
             <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
@@ -209,7 +373,7 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                 fullWidth
                 name="location.address"
                 label="Address"
-                value={formik.values.location.address}
+                value={formik.values.location?.address || ''}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 error={
@@ -223,7 +387,7 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                 fullWidth
                 name="location.city"
                 label="City"
-                value={formik.values.location.city}
+                value={formik.values.location?.city || ''}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched['location.city'] && Boolean(formik.errors['location.city'])}
@@ -235,7 +399,7 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                 fullWidth
                 name="location.state"
                 label="State"
-                value={formik.values.location.state}
+                value={formik.values.location?.state || ''}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched['location.state'] && Boolean(formik.errors['location.state'])}
@@ -287,12 +451,176 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
                 onChange={formik.handleChange}
               />
             </Grid>
+
+            {/* Image Upload Section */}
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                Images
+              </Typography>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Upload up to 10 images. Maximum file size: 5MB per image.
+              </Typography>
+
+              {/* Image Upload Button */}
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <input
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  id="image-upload"
+                  type="file"
+                  multiple
+                  onChange={handleImageSelect}
+                />
+                <label htmlFor="image-upload">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={<CloudUploadIcon />}
+                    sx={{ mb: 2 }}
+                  >
+                    Upload Images
+                  </Button>
+                </label>
+              </Box>
+
+              {/* Image Preview Gallery */}
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+                {/* Existing Images */}
+                {existingImages.map((image, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      position: 'relative',
+                      width: 150,
+                      height: 150,
+                      border: '1px solid #ddd',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <img
+                      src={image.url || image}
+                      alt={`Space ${index + 1}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveExistingImage(image.url || image)}
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ))}
+
+                {/* New Selected Images */}
+                {imagePreviewUrls.map((previewUrl, index) => (
+                  <Box
+                    key={`new-${index}`}
+                    sx={{
+                      position: 'relative',
+                      width: 150,
+                      height: 150,
+                      border: '1px solid #ddd',
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <img
+                      src={previewUrl}
+                      alt={`New ${index + 1}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveNewImage(index)}
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ))}
+
+                {/* Placeholder for empty state */}
+                {existingImages.length === 0 && imagePreviewUrls.length === 0 && (
+                  <Box
+                    sx={{
+                      width: 150,
+                      height: 150,
+                      border: '2px dashed #ddd',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    <ImageIcon sx={{ fontSize: 40, mb: 1 }} />
+                    <Typography variant="caption">No images</Typography>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Show removed images count */}
+              {imagesToRemove.length > 0 && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  {imagesToRemove.length} image(s) will be removed. Click on removed images to
+                  restore them.
+                </Alert>
+              )}
+            </Grid>
           </Grid>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={formik.submitForm} variant="contained" disabled={formik.isSubmitting}>
+        <Button
+          onClick={() => {
+            console.log('Submit button clicked')
+            console.log('Form values:', formik.values)
+            console.log('Form errors:', formik.errors)
+            console.log('Form touched:', formik.touched)
+            console.log('Form isValid:', formik.isValid)
+            // Manually trigger validation and submission
+            formik.validateForm().then((errors) => {
+              if (Object.keys(errors).length === 0) {
+                console.log('No validation errors, submitting form')
+                formik.submitForm()
+              } else {
+                console.error('Validation errors:', errors)
+                // Mark all error fields as touched to show errors
+                const touched = {}
+                Object.keys(errors).forEach((key) => {
+                  touched[key] = true
+                })
+                formik.setTouched(touched)
+              }
+            })
+          }}
+          variant="contained"
+          disabled={formik.isSubmitting}
+        >
           {formik.isSubmitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
         </Button>
       </DialogActions>
@@ -302,7 +630,7 @@ const SpaceForm = ({ open, onClose, onSubmit, initialValues, isEditing, owners }
 
 const SpacesPage = () => {
   const [spaces, setSpaces] = useState([])
-  const [owners, setOwners] = useState([])
+  // const [owners, setOwners] = useState([]) // Commented out - owner field removed for now
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(20)
@@ -316,7 +644,7 @@ const SpacesPage = () => {
 
   useEffect(() => {
     fetchSpaces()
-    fetchOwners()
+    // fetchOwners() // Commented out - owner field removed for now
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, rowsPerPage, search, districtFilter, statusFilter])
 
@@ -342,30 +670,43 @@ const SpacesPage = () => {
     }
   }
 
-  const fetchOwners = async () => {
-    try {
-      const response = await axiosInstance.get('/admin/users?role=owner&limit=100')
-      setOwners(response.data.users)
-    } catch (error) {
-      console.error('Error fetching owners:', error)
-    }
-  }
+  // fetchOwners commented out - owner field removed for now
+  // const fetchOwners = async () => {
+  //   try {
+  //     const response = await axiosInstance.get('/admin/users?role=owner&limit=100')
+  //     setOwners(response.data.users)
+  //   } catch (error) {
+  //     console.error('Error fetching owners:', error)
+  //   }
+  // }
 
-  const handleCreateSpace = async (spaceData) => {
+  const handleCreateSpace = async (formData) => {
+    console.log('handleCreateSpace called with formData')
     try {
-      await axiosInstance.post('/admin/spaces', spaceData)
+      console.log('Making POST request to /admin/spaces')
+      const response = await axiosInstance.post('/admin/spaces', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      console.log('Space created successfully:', response.data)
       setFormOpen(false)
       showSnackbar('Space created successfully', 'success')
       fetchSpaces()
     } catch (error) {
       console.error('Error creating space:', error)
+      console.error('Error response:', error.response)
       showSnackbar(error.response?.data?.message || 'Error creating space', 'error')
     }
   }
 
-  const handleUpdateSpace = async (spaceData) => {
+  const handleUpdateSpace = async (formData) => {
     try {
-      await axiosInstance.patch(`/admin/spaces/${editingSpace.id}`, spaceData)
+      await axiosInstance.patch(`/admin/spaces/${editingSpace.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       setFormOpen(false)
       setEditingSpace(null)
       showSnackbar('Space updated successfully', 'success')
@@ -618,7 +959,7 @@ const SpacesPage = () => {
         onSubmit={editingSpace ? handleUpdateSpace : handleCreateSpace}
         initialValues={editingSpace}
         isEditing={!!editingSpace}
-        owners={owners}
+        owners={[]} // owners={owners} - commented out since owner field is removed
       />
 
       {/* Snackbar */}

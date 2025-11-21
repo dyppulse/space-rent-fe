@@ -6,9 +6,15 @@ import { queryKeys } from '../../utils/queryKeys'
 export const useSpaces = (filters = {}) => {
   return useQuery({
     queryKey: queryKeys.spaces.list(filters),
-    queryFn: () => spaceService.getSpaces(filters),
+    queryFn: () => {
+      console.log('useSpaces: Fetching spaces with filters:', filters)
+      return spaceService.getSpaces(filters)
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+    enabled: true, // Explicitly enable the query
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   })
 }
 

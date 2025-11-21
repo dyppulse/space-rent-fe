@@ -36,6 +36,7 @@ const appendFormData = (formData, data, parentKey = '') => {
 export const spaceService = {
   // Get all spaces with filters
   getSpaces: async (filters = {}) => {
+    console.log('spaceService.getSpaces called with filters:', filters)
     const query = new URLSearchParams()
 
     if (filters.search) query.append('search', filters.search)
@@ -50,7 +51,12 @@ export const spaceService = {
     if (filters.page) query.append('page', filters.page)
     if (filters.limit) query.append('limit', filters.limit)
 
-    const response = await unProtectedAxiosInstance.get(`/spaces?${query.toString()}`)
+    const url = `/spaces?${query.toString()}`
+    console.log('spaceService.getSpaces making request to:', url)
+
+    const response = await unProtectedAxiosInstance.get(url)
+
+    console.log('spaceService.getSpaces response:', response.data)
 
     // Ensure default values for optional fields
     const spacesWithDefaults = response.data.spaces.map(ensureDefaults)

@@ -38,34 +38,27 @@ describe('Header', () => {
   })
 
   it('shows auth links when logged out', () => {
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
+    renderWithProviders(<Header />)
     expect(screen.getAllByText('Log in').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Sign up').length).toBeGreaterThan(0)
   })
 
   it('shows loading app bar when auth not initialized', () => {
     authState.initialized = false
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
-    expect(screen.getByText('SpaceHire')).toBeInTheDocument()
+    renderWithProviders(<Header />)
+    expect(screen.getByText('Spaces')).toBeInTheDocument()
   })
 
   it('renders admin link for admin user', () => {
     authState.user = { role: 'superadmin' }
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="dark" />)
+    renderWithProviders(<Header />)
     expect(screen.getAllByText('Admin').length).toBeGreaterThan(0)
-  })
-
-  it('handles theme toggle click', () => {
-    const onToggleTheme = vi.fn()
-    renderWithProviders(<Header onToggleTheme={onToggleTheme} mode="light" />)
-    fireEvent.click(screen.getByLabelText('Toggle theme'))
-    expect(onToggleTheme).toHaveBeenCalled()
   })
 
   it('confirms logout and navigates to login page', async () => {
     authState.user = { role: 'user' }
     authState.logout = vi.fn().mockResolvedValueOnce()
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
+    renderWithProviders(<Header />)
     // Click power icon
     const powerIcon = screen.getByTestId('PowerSettingsNewIcon')
     fireEvent.click(powerIcon)
@@ -79,7 +72,7 @@ describe('Header', () => {
   it('handles logout failure and still navigates to login page', async () => {
     authState.user = { role: 'user' }
     authState.logout = vi.fn().mockRejectedValueOnce(new Error('fail'))
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
+    renderWithProviders(<Header />)
     fireEvent.click(screen.getByTestId('PowerSettingsNewIcon'))
     const confirmBtn = await screen.findByText('Confirm')
     fireEvent.click(confirmBtn)
@@ -88,7 +81,7 @@ describe('Header', () => {
   })
 
   it('toggles mobile drawer', () => {
-    renderWithProviders(<Header onToggleTheme={() => {}} mode="light" />)
+    renderWithProviders(<Header />)
     const openDrawerBtn = screen.getByLabelText('open drawer')
     fireEvent.click(openDrawerBtn)
     // No strict assertion needed; click executes handler for coverage
